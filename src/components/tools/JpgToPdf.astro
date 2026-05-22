@@ -1,0 +1,350 @@
+---
+// JPG to PDF — embeds images into a PDF entirely in browser via pdf-lib
+---
+
+<div
+  id="jpg-to-pdf-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" multiple accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="hidden" />
+
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop images here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose files from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP supported. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- File list -->
+  <div id="file-list-wrap" class="hidden px-4 pb-2">
+    <div class="flex items-center justify-between mb-3 px-1">
+      <h3 class="text-sm font-medium text-[var(--color-ink-soft)]">
+        <span id="file-count">0</span> images queued
+      </h3>
+      <button type="button" id="clear-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)]">
+        Clear all
+      </button>
+    </div>
+    <ul id="file-list" class="space-y-2"></ul>
+    <button type="button" id="add-more-btn" class="mt-3 w-full py-2.5 border border-dashed border-[var(--color-rule)] rounded-md text-sm text-[var(--color-ink-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+      + Add more images
+    </button>
+  </div>
+
+  <!-- Page size picker -->
+  <div id="page-size-wrap" class="hidden px-4 pb-4">
+    <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2 mt-3">Page size</p>
+    <div class="flex gap-2">
+      <button type="button" data-size="a4" class="size-btn flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors">
+        A4
+      </button>
+      <button type="button" data-size="letter" class="size-btn flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors">
+        Letter
+      </button>
+      <button type="button" data-size="original" class="size-btn flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors">
+        Original
+      </button>
+    </div>
+    <p class="text-xs text-[var(--color-ink-muted)] mt-2">
+      A4 / Letter centre the image on a standard page. Original sizes the page to the image.
+    </p>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Add one or more images to get started.
+    </div>
+    <button type="button" id="convert-btn" class="btn-primary" disabled>
+      <span id="convert-label">Create PDF</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
+
+  /** @type {Array<{id:string, name:string, size:number, bytes:ArrayBuffer, mimeType:string}>} */
+  let files = [];
+  let pageSize = 'a4';
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  const dropZone     = $('drop-zone');
+  const fileInput    = $('file-input');
+  const browseBtn    = $('browse-btn');
+  const addMoreBtn   = $('add-more-btn');
+  const clearBtn     = $('clear-btn');
+  const convertBtn   = $('convert-btn');
+  const convertLabel = $('convert-label');
+  const spinner      = $('spinner');
+  const statusMsg    = $('status-msg');
+  const fileListWrap = $('file-list-wrap');
+  const pageSizeWrap = $('page-size-wrap');
+  const fileList     = $('file-list');
+  const fileCount    = $('file-count');
+  const emptyState   = $('empty-state');
+
+  const fmtSize = (b) =>
+    b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Page size buttons
+  const sizeBtns = document.querySelectorAll('.size-btn');
+  const setPageSize = (s) => {
+    pageSize = s;
+    sizeBtns.forEach((btn) => {
+      const active = btn.dataset.size === s;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  sizeBtns.forEach((btn) => btn.addEventListener('click', () => setPageSize(btn.dataset.size)));
+  setPageSize('a4');
+
+  const ACCEPTED = ['image/jpeg', 'image/png', 'image/webp'];
+  const isImage = (f) =>
+    ACCEPTED.includes(f.type) ||
+    /\.(jpe?g|png|webp)$/i.test(f.name);
+
+  const render = () => {
+    fileCount.textContent = String(files.length);
+    const hasFiles = files.length > 0;
+
+    emptyState.classList.toggle('hidden', hasFiles);
+    fileListWrap.classList.toggle('hidden', !hasFiles);
+    pageSizeWrap.classList.toggle('hidden', !hasFiles);
+    convertBtn.disabled = !hasFiles || processing;
+
+    fileList.innerHTML = '';
+    files.forEach((f, idx) => {
+      const li = document.createElement('li');
+      li.draggable = true;
+      li.dataset.id = f.id;
+      li.className =
+        'flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md border border-transparent hover:border-[var(--color-rule)] cursor-grab active:cursor-grabbing transition-colors';
+      li.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-ink-muted)] shrink-0">
+          <path d="M8 9h.01M16 9h.01M8 15h.01M16 15h.01M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        <span class="text-xs text-[var(--color-ink-muted)] tabular-nums w-5">${idx + 1}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-accent)] shrink-0">
+          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-[var(--color-ink)] truncate">${f.name}</div>
+          <div class="text-xs text-[var(--color-ink-muted)]">${fmtSize(f.size)}</div>
+        </div>
+        <button type="button" data-remove="${f.id}" class="p-1.5 rounded hover:bg-[var(--color-paper)] text-[var(--color-ink-muted)] hover:text-[var(--color-warn)]" aria-label="Remove">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" />
+          </svg>
+        </button>`;
+      fileList.appendChild(li);
+    });
+
+    setStatus(
+      hasFiles
+        ? `Ready — ${files.length} image${files.length !== 1 ? 's' : ''} will become ${files.length} page${files.length !== 1 ? 's' : ''}.`
+        : 'Add one or more images to get started.'
+    );
+  };
+
+  const addFiles = async (incoming) => {
+    const images = Array.from(incoming).filter(isImage);
+    if (images.length === 0) {
+      setStatus('Only JPG, PNG, and WebP images are accepted.', true);
+      return;
+    }
+    for (const file of images) {
+      const bytes = await file.arrayBuffer();
+      files.push({ id: crypto.randomUUID(), name: file.name, size: file.size, bytes, mimeType: file.type });
+    }
+    render();
+  };
+
+  // Events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  addMoreBtn?.addEventListener('click', () => fileInput.click());
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files) addFiles(e.target.files);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer?.files) addFiles(e.dataTransfer.files);
+  });
+  fileList.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-remove]');
+    if (!btn) return;
+    files = files.filter((f) => f.id !== btn.dataset.remove);
+    render();
+  });
+  clearBtn?.addEventListener('click', () => { files = []; render(); });
+
+  // Drag-to-reorder
+  let draggedId = null;
+  fileList.addEventListener('dragstart', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    draggedId = li.dataset.id;
+    li.style.opacity = '0.4';
+  });
+  fileList.addEventListener('dragend', (e) => {
+    const li = e.target.closest('li');
+    if (li) li.style.opacity = '';
+  });
+  fileList.addEventListener('dragover', (e) => e.preventDefault());
+  fileList.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const targetLi = e.target.closest('li');
+    if (!targetLi || !draggedId) return;
+    const targetId = targetLi.dataset.id;
+    if (targetId === draggedId) return;
+    const fromIdx = files.findIndex((f) => f.id === draggedId);
+    const toIdx   = files.findIndex((f) => f.id === targetId);
+    const [moved] = files.splice(fromIdx, 1);
+    files.splice(toIdx, 0, moved);
+    draggedId = null;
+    render();
+  });
+
+  // Convert non-JPG/PNG to PNG bytes via Canvas
+  const toPngBytes = (bytes, mimeType) =>
+    new Promise((resolve, reject) => {
+      const blob = new Blob([bytes], { type: mimeType || 'image/webp' });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        canvas.toBlob((pngBlob) => {
+          pngBlob.arrayBuffer().then((buf) => {
+            URL.revokeObjectURL(url);
+            resolve(new Uint8Array(buf));
+          });
+        }, 'image/png');
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not load image')); };
+      img.src = url;
+    });
+
+  // Page dimensions (points)
+  const PAGE_SIZES = { a4: [595, 842], letter: [612, 792] };
+  const MARGIN = 20;
+
+  convertBtn.addEventListener('click', async () => {
+    if (!files.length || processing) return;
+    processing = true;
+    convertBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    convertLabel.textContent = 'Creating…';
+
+    try {
+      const pdfDoc = await PDFDocument.create();
+
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        setStatus(`Embedding image ${i + 1} of ${files.length}: ${f.name}`);
+
+        const isJpeg = f.mimeType === 'image/jpeg' || /\.jpe?g$/i.test(f.name);
+        const isPng  = f.mimeType === 'image/png'  || /\.png$/i.test(f.name);
+
+        let embed;
+        if (isJpeg) {
+          embed = await pdfDoc.embedJpg(f.bytes);
+        } else if (isPng) {
+          embed = await pdfDoc.embedPng(f.bytes);
+        } else {
+          // WebP → PNG via Canvas
+          const pngBytes = await toPngBytes(f.bytes, f.mimeType);
+          embed = await pdfDoc.embedPng(pngBytes);
+        }
+
+        const { width: imgW, height: imgH } = embed;
+
+        let pageW, pageH;
+        if (pageSize === 'original') {
+          pageW = imgW; pageH = imgH;
+        } else {
+          // Auto-rotate standard page to match image orientation
+          const [pw, ph] = PAGE_SIZES[pageSize];
+          const imgLandscape = imgW > imgH;
+          const pageLandscape = pw > ph;
+          pageW = imgLandscape !== pageLandscape ? ph : pw;
+          pageH = imgLandscape !== pageLandscape ? pw : ph;
+        }
+
+        const page = pdfDoc.addPage([pageW, pageH]);
+
+        if (pageSize === 'original') {
+          page.drawImage(embed, { x: 0, y: 0, width: pageW, height: pageH });
+        } else {
+          const availW = pageW - MARGIN * 2;
+          const availH = pageH - MARGIN * 2;
+          const scale  = Math.min(availW / imgW, availH / imgH);
+          const drawW  = imgW * scale;
+          const drawH  = imgH * scale;
+          page.drawImage(embed, {
+            x: (pageW - drawW) / 2,
+            y: (pageH - drawH) / 2,
+            width: drawW,
+            height: drawH,
+          });
+        }
+      }
+
+      setStatus('Saving PDF…');
+      const out = await pdfDoc.save();
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `images-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(`✓ Downloaded PDF with ${files.length} page${files.length !== 1 ? 's' : ''}.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || 'could not create PDF — check all files are valid images.'}`, true);
+    } finally {
+      processing = false;
+      spinner.classList.add('hidden');
+      convertLabel.textContent = 'Create PDF';
+      convertBtn.disabled = false;
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

@@ -125,7 +125,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "jpg-to-pdf", name: "JPG to PDF", shortName: "JPG → PDF", description: "Combine images into a single PDF document.", longDescription: "", category: "PDF", icon: "M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "jpg-to-pdf",
+    name: "JPG to PDF",
+    shortName: "JPG → PDF",
+    description: "Combine images into a single PDF document — entirely in your browser.",
+    longDescription: "Add JPG, PNG, or WebP images, arrange the order, choose a page size, and download a PDF instantly. Files never leave your device.",
+    category: "PDF",
+    icon: "M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12",
+    status: "live",
+    keywords: ["jpg to pdf", "images to pdf", "convert jpg to pdf free", "jpg to pdf without uploading", "png to pdf browser"],
+    faq: [
+      {
+        q: "Are my images uploaded to a server?",
+        a: "No. keptlocal converts images to PDF entirely in your browser using pdf-lib. Your files never leave your device — open DevTools → Network while converting to confirm there are no upload requests.",
+      },
+      {
+        q: "Which image formats are supported?",
+        a: "JPG, JPEG, PNG, and WebP. For WebP, the tool converts via the Canvas API before embedding, so the output quality matches the source. HEIC files (iPhone photos) need to be converted to JPG first.",
+      },
+      {
+        q: "What page size should I choose?",
+        a: "A4 and Letter centre and scale your image to fill a standard page with a small margin — good for documents you plan to print or share formally. Original sizes each page exactly to the image dimensions, ideal for photo archives or portfolios.",
+      },
+      {
+        q: "Can I reorder images before converting?",
+        a: "Yes — drag rows in the list to reorder them. The images appear in the PDF in the order shown.",
+      },
+      {
+        q: "Is there a limit on number of images or file size?",
+        a: "No hard limit. The practical ceiling is your device's RAM. Hundreds of images work fine on most modern laptops.",
+      },
+      {
+        q: "Will image quality be preserved?",
+        a: "Yes. pdf-lib embeds JPG and PNG bytes directly into the PDF without re-encoding. WebP images are converted to PNG losslessly before embedding.",
+      },
+    ],
+  },
   { slug: "rotate-pdf", name: "Rotate PDF", shortName: "Rotate PDF", description: "Rotate pages 90°, 180°, or 270°.", longDescription: "", category: "PDF", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", status: "soon", keywords: [], faq: [] },
   { slug: "reorder-pdf", name: "Reorder PDF Pages", shortName: "Reorder Pages", description: "Drag pages into the order you need.", longDescription: "", category: "PDF", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", status: "soon", keywords: [], faq: [] },
   { slug: "watermark-pdf", name: "Watermark PDF", shortName: "Watermark PDF", description: "Add a text or image watermark to PDF pages.", longDescription: "", category: "PDF", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", status: "soon", keywords: [], faq: [] },

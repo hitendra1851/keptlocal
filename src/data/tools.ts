@@ -199,7 +199,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "reorder-pdf", name: "Reorder PDF Pages", shortName: "Reorder Pages", description: "Drag pages into the order you need.", longDescription: "", category: "PDF", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "reorder-pdf",
+    name: "Reorder PDF Pages",
+    shortName: "Reorder Pages",
+    description: "Drag page thumbnails into the order you need — entirely in your browser.",
+    longDescription: "Upload a PDF, see every page as a thumbnail, drag them into the right order, and download the rearranged PDF instantly. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M4 6h16M4 10h16M4 14h16M4 18h16",
+    status: "live",
+    keywords: ["reorder pdf pages", "rearrange pdf pages", "move pdf pages", "reorder pdf without uploading", "pdf page organizer free"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Page thumbnails are rendered by pdf.js in your browser, and the reordering is done by pdf-lib — also in your browser. Your PDF never leaves your device.",
+      },
+      {
+        q: "Can I delete pages while reordering?",
+        a: "Yes — click the × on any thumbnail to remove that page from the output. The remaining pages stay in their current order.",
+      },
+      {
+        q: "Can I duplicate a page?",
+        a: "Not with this tool — reordering only rearranges existing pages. To duplicate pages, use a dedicated PDF editor.",
+      },
+      {
+        q: "How many pages can I reorder?",
+        a: "There is no hard limit. Thumbnails for large documents take a few seconds to render — you will see them appear progressively as each page is processed.",
+      },
+      {
+        q: "Will quality be preserved?",
+        a: "Yes. pdf-lib copies page content byte-for-byte without re-rendering. Text stays selectable, images stay sharp.",
+      },
+      {
+        q: "Does drag and drop work on mobile?",
+        a: "Yes, on modern iOS (Safari 15+) and Android (Chrome) browsers. Touch-drag the thumbnail to move it.",
+      },
+    ],
+  },
   { slug: "watermark-pdf", name: "Watermark PDF", shortName: "Watermark PDF", description: "Add a text or image watermark to PDF pages.", longDescription: "", category: "PDF", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", status: "soon", keywords: [], faq: [] },
   { slug: "pdf-page-count", name: "PDF Info Viewer", shortName: "PDF Info", description: "View page count, size, and metadata.", longDescription: "", category: "PDF", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z", status: "soon", keywords: [], faq: [] },
   { slug: "compress-image", name: "Compress Image", shortName: "Compress Image", description: "Shrink JPG, PNG, and WebP files without quality loss.", longDescription: "", category: "Image", icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4", status: "soon", keywords: [], faq: [] },

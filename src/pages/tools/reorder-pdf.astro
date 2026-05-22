@@ -1,0 +1,62 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ReorderPdf from "../../components/tools/ReorderPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "reorder-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <ReorderPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to reorder PDF pages</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse. The tool renders a thumbnail of every page — you will see them appear progressively as each one loads.</li>
+      <li>Drag thumbnails into the order you want. The number below each thumbnail shows its new position in the output.</li>
+      <li>To remove a page entirely, hover the thumbnail and click the <strong>×</strong> that appears in the top-right corner.</li>
+      <li>Click <strong>Save reordered PDF</strong>. The file downloads instantly with pages in the order shown.</li>
+    </ol>
+    <p>
+      Thumbnails are rendered by <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> in your browser. The reordered PDF is assembled by <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>, also in-browser. Your file never leaves your device — open DevTools (<code>F12</code>) → Network while working to confirm zero uploads.
+    </p>
+
+    <h2>When to reorder PDF pages</h2>
+    <ul>
+      <li><strong>Fixing a mis-scanned document</strong> — pages came out of the scanner in the wrong order. Drag them into the correct sequence and download a corrected PDF without rescanning.</li>
+      <li><strong>Moving an appendix to the front</strong> — a reviewer asks for the summary on page 1 instead of page 12. Drag it there in seconds.</li>
+      <li><strong>Interleaving two separately scanned halves</strong> — some duplex-scanning workflows produce odd pages and even pages as separate files. Merge them first, then interleave with reorder.</li>
+      <li><strong>Removing blank or duplicate pages</strong> — click × on any page you want excluded. No need for a dedicated delete tool.</li>
+      <li><strong>Rearranging a presentation for a different audience</strong> — move the technical deep-dive slides to the end for an executive audience without editing the source file.</li>
+      <li><strong>Reorganising a multi-section report</strong> — swap the order of sections to match a new structure agreed in review.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      Loading the PDF triggers pdf.js to parse the document and render each page to an off-screen <code>&lt;canvas&gt;</code> at 25% scale — producing a thumbnail roughly 150 × 210 pixels for a standard A4 page. The thumbnails appear progressively as each page finishes rendering, so you can start reordering before the full document loads.
+    </p>
+    <p>
+      Internally, the tool keeps an ordered array of page references. Each time you drag a thumbnail to a new position, the array is updated and the grid re-renders. No PDF processing happens during reordering — it is all array manipulation and DOM updates, which is why it feels instant.
+    </p>
+    <p>
+      When you click Save, pdf-lib loads the original PDF bytes, creates a blank new PDF document, and calls <code>copyPages(sourceDoc, orderedIndices)</code> to copy pages in the order you defined. Each page's content — text, fonts, images, vector graphics, annotations — is copied byte-for-byte without re-rendering. The result is written to a <code>Uint8Array</code> in memory, converted to a Blob, and downloaded.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Thumbnail load time:</strong> rendering thumbnails is CPU-bound. A 100-page PDF takes roughly 5–15 seconds to fully preview on a modern laptop, depending on page complexity. Simple text pages load faster than image-heavy pages.</li>
+      <li><strong>Page deletion:</strong> pages removed with × are not included in the output. This is equivalent to extracting a subset of pages — the tool doubles as a basic page-deletion utility.</li>
+      <li><strong>Password-protected PDFs:</strong> the tool attempts to load encrypted PDFs using the <code>ignoreEncryption</code> flag. PDFs that require a password to view their content will fail — unlock them in your PDF reader first.</li>
+      <li><strong>Very large PDFs:</strong> documents over 200 pages may take 30–60 seconds to fully thumbnail. The progress bar tracks rendering. You can start dragging pages before all thumbnails are loaded.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your PDF is read into browser memory using the <code>File</code> API. Thumbnails are rendered locally by pdf.js. The reordered PDF is assembled locally by pdf-lib. At no point is any data sent to a server.
+    </p>
+    <p>
+      This matters particularly for PDFs containing confidential content — financial data, legal documents, medical records, internal strategy documents. With upload-based PDF organizers you are trusting a third-party server with that content. With keptlocal the data stays on your machine, and you can verify it by watching the Network tab in DevTools.
+    </p>
+  </Fragment>
+</ToolLayout>

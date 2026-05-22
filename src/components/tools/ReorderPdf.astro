@@ -1,0 +1,291 @@
+---
+// Reorder PDF Pages — renders thumbnails via pdf.js, reorders via pdf-lib
+---
+
+<div
+  id="reorder-pdf-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">One PDF at a time. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Loading thumbnails state -->
+  <div id="loading-state" class="hidden px-4 pb-4">
+    <div class="flex items-center gap-3 text-sm text-[var(--color-ink-soft)]">
+      <svg class="animate-spin shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+      <span id="loading-msg">Loading thumbnails…</span>
+    </div>
+    <div class="mt-3 h-1.5 rounded-full bg-[var(--color-paper-dark)] overflow-hidden">
+      <div id="progress-bar" class="h-full bg-[var(--color-accent)] transition-all duration-200" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- Thumbnail grid -->
+  <div id="grid-wrap" class="hidden px-4 pb-2">
+    <div class="flex items-center justify-between mb-3 px-1">
+      <div class="text-sm text-[var(--color-ink-soft)]">
+        <span id="page-count-label"></span>
+        <span class="text-[var(--color-ink-muted)] ml-1">· drag to reorder · × to remove</span>
+      </div>
+      <button type="button" id="change-file-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]">
+        Change file
+      </button>
+    </div>
+    <ul id="thumb-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></ul>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Upload a PDF to get started.
+    </div>
+    <button type="button" id="save-btn" class="btn-primary" disabled>
+      <span id="save-label">Save reordered PDF</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import * as pdfjs from 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs';
+  import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
+
+  pdfjs.GlobalWorkerOptions.workerSrc =
+    'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
+
+  let pdfBytes   = null;
+  let fileName   = '';
+  // Each entry: { origIdx: number, dataUrl: string }
+  let pages      = [];
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  const dropZone      = $('drop-zone');
+  const fileInput     = $('file-input');
+  const browseBtn     = $('browse-btn');
+  const emptyState    = $('empty-state');
+  const loadingState  = $('loading-state');
+  const loadingMsg    = $('loading-msg');
+  const progressBar   = $('progress-bar');
+  const gridWrap      = $('grid-wrap');
+  const thumbGrid     = $('thumb-grid');
+  const pageCountLabel= $('page-count-label');
+  const changeFileBtn = $('change-file-btn');
+  const saveBtn       = $('save-btn');
+  const saveLabel     = $('save-label');
+  const spinner       = $('spinner');
+  const statusMsg     = $('status-msg');
+
+  const fmtSize = (b) =>
+    b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Render one page thumbnail → dataURL
+  const renderThumb = async (pdfDoc, pageNum) => {
+    const page = await pdfDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: 0.25 });
+    const canvas = document.createElement('canvas');
+    canvas.width  = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    page.cleanup();
+    return canvas.toDataURL('image/jpeg', 0.75);
+  };
+
+  // Render the full thumbnail grid
+  const renderGrid = () => {
+    thumbGrid.innerHTML = '';
+    pageCountLabel.textContent = `${pages.length} page${pages.length !== 1 ? 's' : ''}`;
+    saveBtn.disabled = pages.length < 1 || processing;
+
+    pages.forEach((p, idx) => {
+      const li = document.createElement('li');
+      li.draggable = true;
+      li.dataset.idx = String(idx);
+      li.className = 'relative group select-none cursor-grab active:cursor-grabbing rounded-md overflow-hidden border border-[var(--color-rule)] bg-[var(--color-paper-dark)] hover:border-[var(--color-accent)] transition-colors';
+      li.innerHTML = `
+        <img src="${p.dataUrl}" alt="Page ${idx + 1}" class="w-full block" draggable="false" />
+        <div class="absolute bottom-0 inset-x-0 bg-[var(--color-paper)]/90 text-center text-xs py-1 text-[var(--color-ink-soft)] font-medium">
+          ${idx + 1}
+        </div>
+        <button type="button" data-remove="${idx}"
+          class="absolute top-1 right-1 w-5 h-5 rounded-full bg-[var(--color-paper)]/80 text-[var(--color-ink-muted)] hover:bg-[var(--color-warn)] hover:text-white opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center text-xs font-bold leading-none"
+          aria-label="Remove page ${idx + 1}">×</button>`;
+      thumbGrid.appendChild(li);
+    });
+
+    setStatus(
+      pages.length > 0
+        ? `${pages.length} page${pages.length !== 1 ? 's' : ''} — drag to reorder, × to remove.`
+        : 'All pages removed — upload a new PDF.'
+    );
+  };
+
+  // Load file and generate thumbnails
+  const loadFile = async (file) => {
+    if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+      setStatus('Only PDF files are accepted.', true);
+      return;
+    }
+
+    pdfBytes = await file.arrayBuffer();
+    fileName = file.name.replace(/\.pdf$/i, '');
+    pages = [];
+
+    emptyState.classList.add('hidden');
+    gridWrap.classList.add('hidden');
+    loadingState.classList.remove('hidden');
+    saveBtn.disabled = true;
+    progressBar.style.width = '0%';
+
+    let pdfDoc;
+    try {
+      pdfDoc = await pdfjs.getDocument({ data: pdfBytes.slice(0) }).promise;
+    } catch {
+      setStatus('Could not read the PDF — check that the file is valid.', true);
+      reset();
+      return;
+    }
+
+    const total = pdfDoc.numPages;
+    for (let i = 1; i <= total; i++) {
+      loadingMsg.textContent = `Loading page ${i} of ${total}…`;
+      progressBar.style.width = `${Math.round((i / total) * 100)}%`;
+      const dataUrl = await renderThumb(pdfDoc, i);
+      pages.push({ origIdx: i - 1, dataUrl });
+    }
+    pdfDoc.destroy();
+
+    loadingState.classList.add('hidden');
+    gridWrap.classList.remove('hidden');
+    renderGrid();
+    setStatus(`${total} page${total !== 1 ? 's' : ''} loaded — drag to reorder.`);
+  };
+
+  const reset = () => {
+    pdfBytes = null; fileName = ''; pages = [];
+    emptyState.classList.remove('hidden');
+    loadingState.classList.add('hidden');
+    gridWrap.classList.add('hidden');
+    saveBtn.disabled = true;
+    setStatus('Upload a PDF to get started.');
+  };
+
+  // Drop zone events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  changeFileBtn?.addEventListener('click', () => { reset(); fileInput.click(); });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.[0]) loadFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer?.files?.[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  // Remove page
+  thumbGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-remove]');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.remove, 10);
+    pages.splice(idx, 1);
+    renderGrid();
+  });
+
+  // Drag-to-reorder
+  let dragFromIdx = null;
+  thumbGrid.addEventListener('dragstart', (e) => {
+    const li = e.target.closest('[data-idx]');
+    if (!li) return;
+    dragFromIdx = parseInt(li.dataset.idx, 10);
+    li.style.opacity = '0.35';
+  });
+  thumbGrid.addEventListener('dragend', (e) => {
+    const li = e.target.closest('[data-idx]');
+    if (li) li.style.opacity = '';
+    dragFromIdx = null;
+  });
+  thumbGrid.addEventListener('dragover', (e) => e.preventDefault());
+  thumbGrid.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const li = e.target.closest('[data-idx]');
+    if (!li || dragFromIdx === null) return;
+    const toIdx = parseInt(li.dataset.idx, 10);
+    if (toIdx === dragFromIdx) return;
+    const [moved] = pages.splice(dragFromIdx, 1);
+    pages.splice(toIdx, 0, moved);
+    dragFromIdx = null;
+    renderGrid();
+  });
+
+  // Save reordered PDF
+  saveBtn.addEventListener('click', async () => {
+    if (!pdfBytes || !pages.length || processing) return;
+    processing = true;
+    saveBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    saveLabel.textContent = 'Saving…';
+    setStatus('Building PDF in your browser…');
+
+    try {
+      const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const newDoc = await PDFDocument.create();
+      const origIndices = pages.map((p) => p.origIdx);
+      const copied = await newDoc.copyPages(srcDoc, origIndices);
+      copied.forEach((p) => newDoc.addPage(p));
+
+      setStatus('Writing file…');
+      const out = await newDoc.save();
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}-reordered.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(`✓ Downloaded — ${pages.length} page${pages.length !== 1 ? 's' : ''} in new order.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || 'could not save — check the file is a valid PDF.'}`, true);
+    } finally {
+      processing = false;
+      spinner.classList.add('hidden');
+      saveLabel.textContent = 'Save reordered PDF';
+      saveBtn.disabled = false;
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

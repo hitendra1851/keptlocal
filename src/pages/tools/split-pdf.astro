@@ -1,0 +1,76 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import SplitPdf from "../../components/tools/SplitPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "split-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <SplitPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to split a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click "choose a file" to browse.</li>
+      <li>Choose a mode: <strong>Extract pages</strong> to pull out specific pages, or <strong>Split all pages</strong> to turn every page into its own file.</li>
+      <li>For extraction, type the pages you want — for example <code>1, 3, 5-8</code> pulls pages 1, 3, 5, 6, 7, and 8 into a single PDF. Ranges and individual page numbers can be combined freely.</li>
+      <li>Click the download button. A PDF (for extraction) or a ZIP archive (when splitting all pages) saves directly to your downloads folder.</li>
+    </ol>
+    <p>
+      Everything runs inside the browser tab you have open. No file is sent anywhere.
+      Open DevTools (<code>F12</code>), go to the Network tab, and run the tool — you will see zero upload requests.
+    </p>
+
+    <h2>When to split a PDF</h2>
+    <ul>
+      <li><strong>Sharing one chapter from a report</strong> — extract pages 14–27 and send only the section that's relevant, rather than a 150-page document.</li>
+      <li><strong>Separating a combined invoice file</strong> — an accountant receives a single PDF with twelve monthly invoices; splitting yields twelve individual files that can be filed separately.</li>
+      <li><strong>Isolating a signed page</strong> — you receive a countersigned contract and need just the signature page to attach to another package.</li>
+      <li><strong>Splitting a scanned document stack</strong> — a batch scan of multiple letters came out as one file; splitting all pages lets you rename and archive each letter individually.</li>
+      <li><strong>Removing a cover page before sharing</strong> — extract everything except page 1 to strip an internal cover sheet from a document before sending it externally.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      keptlocal uses <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>,
+      an open-source JavaScript library that reads and writes PDF structure directly in the browser.
+      When you upload a file, its bytes are read into an <code>ArrayBuffer</code> in your browser's memory — the data stays in the tab, not on any server.
+    </p>
+    <p>
+      For extraction, the tool creates a new blank PDF document and copies the requested page objects from the source.
+      For split-all, it creates one new document per page. Page content — text layers, fonts, images, vector graphics — is copied byte-for-byte without re-rendering,
+      so the output is identical in quality to the original.
+    </p>
+    <p>
+      When you split all pages of a multi-page PDF, the individual files are bundled into a ZIP archive using
+      <a href="https://stuk.github.io/jszip/" target="_blank" rel="noopener">JSZip</a>, which also runs in-browser.
+      The ZIP is assembled in memory and downloaded as a single file — again, no server involved.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>File size:</strong> no enforced limit. Very large PDFs (several hundred megabytes) may be slow depending on your device's RAM.</li>
+      <li><strong>Password-protected PDFs:</strong> the tool attempts to open encrypted files using the <code>ignoreEncryption</code> flag. If the PDF requires a password to view its content, splitting will fail — unlock it in your PDF reader first and save a new copy.</li>
+      <li><strong>Embedded forms and annotations:</strong> copied on a best-effort basis. Complex interactive forms may lose field state in split documents.</li>
+      <li><strong>Split-all on large documents:</strong> splitting a 200-page PDF into 200 individual PDFs takes a few seconds and produces a ZIP. Expect 1–3 seconds of processing time per 50 pages on a modern laptop.</li>
+      <li><strong>Browser support:</strong> works in any modern browser — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. Older browsers without WebAssembly support will not work.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Nothing leaves your machine. When you drop a PDF into keptlocal, the browser reads the file bytes directly into JavaScript memory using the
+      <code>File</code> and <code>ArrayBuffer</code> APIs. There is no upload step, no WebSocket connection, no proxy — the network is not involved at all.
+    </p>
+    <p>
+      This matters particularly when splitting sensitive documents: legal filings, medical records, financial statements, confidential reports.
+      With server-based tools you are trusting a third party's infrastructure and deletion policy. With keptlocal the question does not arise,
+      because the file bytes are local from start to finish.
+    </p>
+    <p>
+      Compare this to the dominant PDF tools: iLovePDF, Smallpdf, and Sejda all upload your file to their servers for processing.
+      Their privacy policies promise deletion within hours, but you have no way to verify that.
+      keptlocal's architecture makes the promise verifiable — you can watch the Network tab while it runs.
+    </p>
+  </Fragment>
+</ToolLayout>

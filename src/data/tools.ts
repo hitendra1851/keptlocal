@@ -51,7 +51,43 @@ export const tools: Tool[] = [
     ],
   },
   // Future tools (status: soon) — visible on homepage to telegraph the roadmap
-  { slug: "split-pdf", name: "Split PDF", shortName: "Split PDF", description: "Extract pages or split into separate documents.", longDescription: "", category: "PDF", icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "split-pdf",
+    name: "Split PDF",
+    shortName: "Split PDF",
+    description: "Extract pages or split into separate documents — entirely in your browser.",
+    longDescription: "Upload a PDF, choose which pages to extract or split every page into its own file. Downloads instantly. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+    status: "live",
+    keywords: ["split pdf", "extract pages from pdf", "split pdf without uploading", "pdf splitter online free", "extract pdf pages browser"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. keptlocal runs entirely in your browser. Your PDF never leaves your device. Open DevTools → Network while splitting to confirm there are no upload requests.",
+      },
+      {
+        q: "Can I extract non-consecutive pages?",
+        a: "Yes. Enter a comma-separated list of pages and ranges — for example \"1, 3, 5-8\" extracts pages 1, 3, 5, 6, 7, and 8 into a single new PDF.",
+      },
+      {
+        q: "What happens when I split all pages?",
+        a: "Each page becomes its own PDF file. If the document has more than one page, the files are bundled into a ZIP archive that downloads automatically.",
+      },
+      {
+        q: "Is there a page or file size limit?",
+        a: "No hard limit. The practical ceiling is your device's available RAM — most modern laptops handle hundreds of pages without issue.",
+      },
+      {
+        q: "Will the split pages keep their original quality?",
+        a: "Yes. pdf-lib copies page content byte-for-byte without re-rendering, so text stays selectable, images stay sharp, and vector graphics are preserved.",
+      },
+      {
+        q: "Can I split a password-protected PDF?",
+        a: "Only if the PDF can be opened without a password (some PDFs restrict editing but allow viewing). If you need to unlock a protected PDF first, use your PDF reader to save an unlocked copy.",
+      },
+    ],
+  },
   { slug: "pdf-to-jpg", name: "PDF to JPG", shortName: "PDF → JPG", description: "Convert PDF pages to high-quality JPG images.", longDescription: "", category: "PDF", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z", status: "soon", keywords: [], faq: [] },
   { slug: "jpg-to-pdf", name: "JPG to PDF", shortName: "JPG → PDF", description: "Combine images into a single PDF document.", longDescription: "", category: "PDF", icon: "M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12", status: "soon", keywords: [], faq: [] },
   { slug: "rotate-pdf", name: "Rotate PDF", shortName: "Rotate PDF", description: "Rotate pages 90°, 180°, or 270°.", longDescription: "", category: "PDF", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", status: "soon", keywords: [], faq: [] },

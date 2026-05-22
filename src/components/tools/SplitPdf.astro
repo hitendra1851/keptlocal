@@ -1,0 +1,341 @@
+---
+// Split PDF — runs entirely in the browser via pdf-lib + JSZip loaded as ESM
+---
+
+<div
+  id="split-pdf-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">
+        One PDF at a time. Files never leave your browser.
+      </p>
+    </div>
+  </div>
+
+  <!-- File loaded state -->
+  <div id="file-loaded" class="hidden px-4 pb-4">
+    <!-- File info bar -->
+    <div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md mb-4">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-accent)] shrink-0">
+        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-meta" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="change-file-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0">
+        Change file
+      </button>
+    </div>
+
+    <!-- Mode tabs -->
+    <div class="flex gap-1 mb-4 p-1 bg-[var(--color-paper-dark)] rounded-lg">
+      <button type="button" id="tab-extract" class="tab-btn flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors">
+        Extract pages
+      </button>
+      <button type="button" id="tab-split" class="tab-btn flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors">
+        Split all pages
+      </button>
+    </div>
+
+    <!-- Extract pages panel -->
+    <div id="panel-extract">
+      <label class="block text-sm text-[var(--color-ink-soft)] mb-2">
+        Pages to extract
+        <span class="text-[var(--color-ink-muted)] font-normal ml-1">(e.g. 1, 3, 5-8)</span>
+      </label>
+      <input
+        type="text"
+        id="page-range-input"
+        placeholder="1, 3, 5-8"
+        class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)] mb-2"
+      />
+      <p id="range-preview" class="text-xs text-[var(--color-ink-muted)] min-h-[1rem]"></p>
+    </div>
+
+    <!-- Split all panel -->
+    <div id="panel-split" class="hidden">
+      <p class="text-sm text-[var(--color-ink-soft)]">
+        Each page becomes its own PDF. If there is more than one page, all files are bundled into a ZIP.
+      </p>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Upload a PDF to get started.
+    </div>
+    <button type="button" id="action-btn" class="btn-primary" disabled>
+      <span id="action-label">Split & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
+  import JSZip from "https://esm.sh/jszip@3.10.1";
+
+  let pdfBytes = null;
+  let pageCount = 0;
+  let fileName = "";
+  let mode = "extract"; // "extract" | "split"
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  const dropZone = $("drop-zone");
+  const fileInput = $("file-input");
+  const browseBtn = $("browse-btn");
+  const emptyState = $("empty-state");
+  const fileLoaded = $("file-loaded");
+  const fileNameEl = $("file-name");
+  const fileMeta = $("file-meta");
+  const changeFileBtn = $("change-file-btn");
+  const tabExtract = $("tab-extract");
+  const tabSplit = $("tab-split");
+  const panelExtract = $("panel-extract");
+  const panelSplit = $("panel-split");
+  const pageRangeInput = $("page-range-input");
+  const rangePreview = $("range-preview");
+  const actionBtn = $("action-btn");
+  const actionLabel = $("action-label");
+  const spinner = $("spinner");
+  const statusMsg = $("status-msg");
+
+  const fmtSize = (b) => {
+    if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+    return `${(b / 1024 / 1024).toFixed(1)} MB`;
+  };
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? "var(--color-warn)" : "";
+  };
+
+  // Parse "1, 3, 5-8" → [0, 2, 4, 5, 6, 7] (0-indexed, deduplicated, sorted)
+  const parseRange = (raw) => {
+    const pages = new Set();
+    const parts = raw.split(",").map((s) => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      const match = part.match(/^(\d+)(?:-(\d+))?$/);
+      if (!match) return null;
+      const start = parseInt(match[1], 10);
+      const end = match[2] ? parseInt(match[2], 10) : start;
+      if (start < 1 || end < start || end > pageCount) return null;
+      for (let i = start; i <= end; i++) pages.add(i - 1);
+    }
+    return pages.size > 0 ? [...pages].sort((a, b) => a - b) : null;
+  };
+
+  const updateRangePreview = () => {
+    const val = pageRangeInput.value.trim();
+    if (!val) {
+      rangePreview.textContent = "";
+      actionBtn.disabled = true;
+      return;
+    }
+    const indices = parseRange(val);
+    if (!indices) {
+      rangePreview.textContent = `Invalid range — enter numbers between 1 and ${pageCount}.`;
+      rangePreview.style.color = "var(--color-warn)";
+      actionBtn.disabled = true;
+    } else {
+      rangePreview.textContent = `${indices.length} page${indices.length !== 1 ? "s" : ""} selected.`;
+      rangePreview.style.color = "var(--color-accent)";
+      actionBtn.disabled = false;
+    }
+  };
+
+  const setMode = (m) => {
+    mode = m;
+    if (m === "extract") {
+      tabExtract.classList.add("bg-[var(--color-paper)]", "text-[var(--color-ink)]", "shadow-sm");
+      tabExtract.classList.remove("text-[var(--color-ink-muted)]");
+      tabSplit.classList.remove("bg-[var(--color-paper)]", "text-[var(--color-ink)]", "shadow-sm");
+      tabSplit.classList.add("text-[var(--color-ink-muted)]");
+      panelExtract.classList.remove("hidden");
+      panelSplit.classList.add("hidden");
+      actionLabel.textContent = "Extract & download";
+      updateRangePreview();
+    } else {
+      tabSplit.classList.add("bg-[var(--color-paper)]", "text-[var(--color-ink)]", "shadow-sm");
+      tabSplit.classList.remove("text-[var(--color-ink-muted)]");
+      tabExtract.classList.remove("bg-[var(--color-paper)]", "text-[var(--color-ink)]", "shadow-sm");
+      tabExtract.classList.add("text-[var(--color-ink-muted)]");
+      panelSplit.classList.remove("hidden");
+      panelExtract.classList.add("hidden");
+      actionLabel.textContent = "Split & download";
+      actionBtn.disabled = false;
+    }
+    setStatus(`Ready — ${pageCount} page${pageCount !== 1 ? "s" : ""} loaded.`);
+  };
+
+  const loadFile = async (file) => {
+    if (!file || !(file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) {
+      setStatus("Only PDF files are accepted.", true);
+      return;
+    }
+    pdfBytes = await file.arrayBuffer();
+    fileName = file.name.replace(/\.pdf$/i, "");
+    // Peek at page count without fully parsing
+    try {
+      const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      pageCount = doc.getPageCount();
+    } catch {
+      setStatus("Could not read PDF — check that the file is a valid PDF.", true);
+      pdfBytes = null;
+      return;
+    }
+
+    fileNameEl.textContent = file.name;
+    fileMeta.textContent = `${pageCount} page${pageCount !== 1 ? "s" : ""} · ${fmtSize(file.size)}`;
+    emptyState.classList.add("hidden");
+    fileLoaded.classList.remove("hidden");
+    setMode("extract");
+  };
+
+  const reset = () => {
+    pdfBytes = null;
+    pageCount = 0;
+    fileName = "";
+    pageRangeInput.value = "";
+    emptyState.classList.remove("hidden");
+    fileLoaded.classList.add("hidden");
+    actionBtn.disabled = true;
+    setStatus("Upload a PDF to get started.");
+  };
+
+  // ---- Events ----
+  browseBtn?.addEventListener("click", () => fileInput.click());
+  changeFileBtn?.addEventListener("click", () => { reset(); fileInput.click(); });
+
+  fileInput.addEventListener("change", (e) => {
+    if (e.target.files?.[0]) loadFile(e.target.files[0]);
+    fileInput.value = "";
+  });
+
+  ["dragenter", "dragover"].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragging");
+    })
+  );
+  ["dragleave", "drop"].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragging");
+    })
+  );
+  dropZone.addEventListener("drop", (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file) loadFile(file);
+  });
+  dropZone.addEventListener("click", (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  tabExtract.addEventListener("click", () => setMode("extract"));
+  tabSplit.addEventListener("click", () => setMode("split"));
+  pageRangeInput.addEventListener("input", updateRangePreview);
+
+  // ---- Download helper ----
+  const triggerDownload = (bytes, name) => {
+    const blob = new Blob([bytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // ---- Action ----
+  actionBtn.addEventListener("click", async () => {
+    if (!pdfBytes || processing) return;
+    processing = true;
+    actionBtn.disabled = true;
+    spinner.classList.remove("hidden");
+    setStatus("Working in your browser…");
+
+    try {
+      const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+
+      if (mode === "extract") {
+        const indices = parseRange(pageRangeInput.value.trim());
+        if (!indices) { setStatus("Invalid page range.", true); return; }
+
+        setStatus(`Extracting ${indices.length} page${indices.length !== 1 ? "s" : ""}…`);
+        const newDoc = await PDFDocument.create();
+        const copied = await newDoc.copyPages(srcDoc, indices);
+        copied.forEach((p) => newDoc.addPage(p));
+        const out = await newDoc.save();
+        triggerDownload(out, `${fileName}-pages-${pageRangeInput.value.replace(/\s/g, "")}.pdf`);
+        setStatus(`✓ Downloaded ${indices.length} page${indices.length !== 1 ? "s" : ""}.`);
+
+      } else {
+        // Split all pages
+        const total = srcDoc.getPageCount();
+        if (total === 1) {
+          // Single page — just download the original
+          const newDoc = await PDFDocument.create();
+          const [page] = await newDoc.copyPages(srcDoc, [0]);
+          newDoc.addPage(page);
+          const out = await newDoc.save();
+          triggerDownload(out, `${fileName}-page-1.pdf`);
+          setStatus("✓ Single page downloaded.");
+        } else {
+          const zip = new JSZip();
+          for (let i = 0; i < total; i++) {
+            setStatus(`Splitting page ${i + 1} of ${total}…`);
+            const pageDoc = await PDFDocument.create();
+            const [page] = await pageDoc.copyPages(srcDoc, [i]);
+            pageDoc.addPage(page);
+            const pageBytes = await pageDoc.save();
+            zip.file(`${fileName}-page-${String(i + 1).padStart(String(total).length, "0")}.pdf`, pageBytes);
+          }
+          setStatus("Compressing ZIP…");
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const url = URL.createObjectURL(zipBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `${fileName}-split.zip`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          setStatus(`✓ Downloaded ZIP with ${total} PDFs.`);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not process — check the file is a valid PDF."}`, true);
+    } finally {
+      processing = false;
+      spinner.classList.add("hidden");
+      actionBtn.disabled = false;
+      actionLabel.textContent = mode === "extract" ? "Extract & download" : "Split & download";
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ""; }
+  });
+</script>

@@ -236,7 +236,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "watermark-pdf", name: "Watermark PDF", shortName: "Watermark PDF", description: "Add a text or image watermark to PDF pages.", longDescription: "", category: "PDF", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "watermark-pdf",
+    name: "Watermark PDF",
+    shortName: "Watermark PDF",
+    description: "Stamp a diagonal text watermark across every PDF page — entirely in your browser.",
+    longDescription: "Type your watermark text, choose a colour, opacity, and size, then download the stamped PDF instantly. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z",
+    status: "live",
+    keywords: ["watermark pdf", "add watermark to pdf", "stamp pdf online free", "watermark pdf without uploading", "confidential watermark pdf"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. The watermark is drawn directly onto the PDF in your browser using pdf-lib. Your file never leaves your device — open DevTools → Network while watermarking to confirm no uploads.",
+      },
+      {
+        q: "Can I remove the watermark later?",
+        a: "The watermark is drawn as content on each page, not as a separate layer. It cannot be cleanly removed from the output PDF with standard tools. Keep the original unwatermarked file if you need to produce clean copies later.",
+      },
+      {
+        q: "Can I watermark only specific pages?",
+        a: "The tool currently applies the watermark to all pages. To watermark a subset, use Split PDF to extract those pages, watermark them, then use Merge PDF to recombine.",
+      },
+      {
+        q: "What font is used?",
+        a: "Helvetica — a PDF standard font that is embedded in every PDF viewer without needing to be bundled in the file, keeping the output file size small.",
+      },
+      {
+        q: "Will the watermark cover the page content?",
+        a: "The watermark is drawn at 15–35% opacity so underlying text and images remain readable through it. Adjust the opacity slider to suit your content.",
+      },
+      {
+        q: "Is there a page or file size limit?",
+        a: "No hard limit. The practical ceiling is your device's available RAM. Watermarking is fast — it only adds text drawing instructions to each page.",
+      },
+    ],
+  },
   {
     slug: "pdf-page-count",
     name: "PDF Info Viewer",

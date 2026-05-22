@@ -1,0 +1,297 @@
+---
+// Watermark PDF — draws diagonal text on each page via pdf-lib, entirely in browser
+---
+
+<div
+  id="watermark-pdf-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">One PDF at a time. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls" class="hidden px-4 pb-4 space-y-5">
+    <!-- File info -->
+    <div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-accent)] shrink-0">
+        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-meta" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="change-file-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0">Change file</button>
+    </div>
+
+    <!-- Watermark text -->
+    <div>
+      <label for="watermark-text" class="block text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Watermark text</label>
+      <input
+        type="text"
+        id="watermark-text"
+        value="CONFIDENTIAL"
+        maxlength="40"
+        class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)]"
+      />
+    </div>
+
+    <!-- Colour -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Colour</p>
+      <div class="flex gap-2">
+        <button type="button" data-color="gray"  class="color-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Gray</button>
+        <button type="button" data-color="red"   class="color-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Red</button>
+        <button type="button" data-color="blue"  class="color-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Blue</button>
+        <button type="button" data-color="black" class="color-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Black</button>
+      </div>
+    </div>
+
+    <!-- Size -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Size</p>
+      <div class="flex gap-2">
+        <button type="button" data-size="48"  class="size-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Small</button>
+        <button type="button" data-size="72"  class="size-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Medium</button>
+        <button type="button" data-size="96"  class="size-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Large</button>
+      </div>
+    </div>
+
+    <!-- Opacity -->
+    <div>
+      <div class="flex justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">Opacity</p>
+        <span id="opacity-value" class="text-xs text-[var(--color-ink-muted)] tabular-nums">25%</span>
+      </div>
+      <input
+        type="range"
+        id="opacity-slider"
+        min="10" max="50" value="25" step="5"
+        class="w-full accent-[var(--color-accent)]"
+      />
+      <div class="flex justify-between text-xs text-[var(--color-ink-muted)] mt-1">
+        <span>Subtle</span><span>Bold</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Upload a PDF to get started.</div>
+    <button type="button" id="watermark-btn" class="btn-primary" disabled>
+      <span id="watermark-label">Apply & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument, StandardFonts, rgb, degrees } from 'https://esm.sh/pdf-lib@1.17.1';
+
+  let pdfBytes   = null;
+  let fileName   = '';
+  let pageCount  = 0;
+  let chosenColor = 'gray';
+  let fontSize   = 72;
+  let opacity    = 0.25;
+  let processing = false;
+
+  const COLORS = {
+    gray:  rgb(0.45, 0.45, 0.45),
+    red:   rgb(0.75, 0.10, 0.10),
+    blue:  rgb(0.10, 0.20, 0.70),
+    black: rgb(0.05, 0.05, 0.05),
+  };
+
+  const $ = (id) => document.getElementById(id);
+
+  const dropZone      = $('drop-zone');
+  const fileInput     = $('file-input');
+  const browseBtn     = $('browse-btn');
+  const emptyState    = $('empty-state');
+  const controls      = $('controls');
+  const fileNameEl    = $('file-name');
+  const fileMeta      = $('file-meta');
+  const changeFileBtn = $('change-file-btn');
+  const watermarkText = $('watermark-text');
+  const opacitySlider = $('opacity-slider');
+  const opacityValue  = $('opacity-value');
+  const watermarkBtn  = $('watermark-btn');
+  const watermarkLabel= $('watermark-label');
+  const spinner       = $('spinner');
+  const statusMsg     = $('status-msg');
+
+  const fmtSize = (b) =>
+    b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Colour buttons
+  const colorBtns = document.querySelectorAll('.color-btn');
+  const setColor = (c) => {
+    chosenColor = c;
+    colorBtns.forEach((btn) => {
+      const active = btn.dataset.color === c;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  colorBtns.forEach((btn) => btn.addEventListener('click', () => setColor(btn.dataset.color)));
+  setColor('gray');
+
+  // Size buttons
+  const sizeBtns = document.querySelectorAll('.size-btn');
+  const setSize = (s) => {
+    fontSize = parseInt(s, 10);
+    sizeBtns.forEach((btn) => {
+      const active = btn.dataset.size === s;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  sizeBtns.forEach((btn) => btn.addEventListener('click', () => setSize(btn.dataset.size)));
+  setSize('72');
+
+  // Opacity slider
+  opacitySlider.addEventListener('input', () => {
+    opacity = parseInt(opacitySlider.value, 10) / 100;
+    opacityValue.textContent = `${opacitySlider.value}%`;
+  });
+
+  // Load file
+  const loadFile = async (file) => {
+    if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+      setStatus('Only PDF files are accepted.', true);
+      return;
+    }
+    pdfBytes = await file.arrayBuffer();
+    fileName = file.name.replace(/\.pdf$/i, '');
+    try {
+      const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      pageCount = doc.getPageCount();
+    } catch {
+      setStatus('Could not read the PDF — check that the file is valid.', true);
+      pdfBytes = null;
+      return;
+    }
+    fileNameEl.textContent = file.name;
+    fileMeta.textContent = `${pageCount} page${pageCount !== 1 ? 's' : ''} · ${fmtSize(file.size)}`;
+    emptyState.classList.add('hidden');
+    controls.classList.remove('hidden');
+    watermarkBtn.disabled = false;
+    setStatus(`Ready — watermark will be applied to all ${pageCount} page${pageCount !== 1 ? 's' : ''}.`);
+  };
+
+  const reset = () => {
+    pdfBytes = null; fileName = ''; pageCount = 0;
+    emptyState.classList.remove('hidden');
+    controls.classList.add('hidden');
+    watermarkBtn.disabled = true;
+    setStatus('Upload a PDF to get started.');
+  };
+
+  // Drop zone events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  changeFileBtn?.addEventListener('click', () => { reset(); fileInput.click(); });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.[0]) loadFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer?.files?.[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  // Apply watermark & download
+  watermarkBtn.addEventListener('click', async () => {
+    const text = watermarkText.value.trim();
+    if (!pdfBytes || !text || processing) return;
+
+    processing = true;
+    watermarkBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    watermarkLabel.textContent = 'Applying…';
+    setStatus('Adding watermark in your browser…');
+
+    try {
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const font   = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const color  = COLORS[chosenColor];
+      const total  = pdfDoc.getPageCount();
+
+      for (let i = 0; i < total; i++) {
+        const page = pdfDoc.getPage(i);
+        const { width, height } = page.getSize();
+
+        // Scale font size to page — keeps the watermark proportional across A4, Letter, etc.
+        const scale    = Math.sqrt(width * width + height * height) / Math.sqrt(595 * 595 + 842 * 842);
+        const adjSize  = Math.round(fontSize * scale);
+        const textW    = font.widthOfTextAtSize(text, adjSize);
+
+        page.drawText(text, {
+          x: width / 2 - textW / 2,
+          y: height / 2 - adjSize / 4,
+          size: adjSize,
+          font,
+          color,
+          opacity,
+          rotate: degrees(45),
+        });
+      }
+
+      setStatus('Saving…');
+      const out  = await pdfDoc.save();
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}-watermarked.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(`✓ Downloaded — "${text}" watermark applied to ${total} page${total !== 1 ? 's' : ''}.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || 'watermarking failed — check the file is a valid PDF.'}`, true);
+    } finally {
+      processing = false;
+      spinner.classList.add('hidden');
+      watermarkLabel.textContent = 'Apply & download';
+      watermarkBtn.disabled = false;
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

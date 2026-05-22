@@ -1,0 +1,68 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import WatermarkPdf from "../../components/tools/WatermarkPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "watermark-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <WatermarkPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to watermark a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse.</li>
+      <li>Type the watermark text — common choices are <strong>CONFIDENTIAL</strong>, <strong>DRAFT</strong>, <strong>DO NOT COPY</strong>, or your company name.</li>
+      <li>Choose a colour (Gray, Red, Blue, or Black), size (Small / Medium / Large), and opacity. The opacity slider controls how transparent the watermark is — lower values keep page content more readable underneath.</li>
+      <li>Click <strong>Apply & download</strong>. The watermarked PDF saves to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>. No file is sent to a server — open DevTools (<code>F12</code>) → Network while applying to confirm zero uploads.
+    </p>
+
+    <h2>When to watermark a PDF</h2>
+    <ul>
+      <li><strong>Sharing a draft for review</strong> — stamp DRAFT so recipients know the document is not final and should not be distributed further.</li>
+      <li><strong>Sending a confidential document</strong> — CONFIDENTIAL or PRIVATE acts as a visible reminder that the content is not for public circulation.</li>
+      <li><strong>Distributing a proof for approval</strong> — PROOF or FOR APPROVAL signals that the document requires sign-off before use.</li>
+      <li><strong>Marking a document as superseded</strong> — SUPERSEDED or VOID prevents an outdated version from being acted on if it resurfaces.</li>
+      <li><strong>Branding shared documents</strong> — add a company name or URL as a watermark to PDFs shared publicly, so the source is clear if the file is redistributed.</li>
+      <li><strong>Internal distribution control</strong> — INTERNAL USE ONLY marks documents that should not leave the organisation.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      PDF pages contain a content stream — a sequence of drawing instructions that render text, images, and vector graphics. pdf-lib appends additional drawing instructions to each page's content stream to stamp the watermark text.
+    </p>
+    <p>
+      The text is drawn using Helvetica, one of the 14 standard PDF fonts that every viewer includes without needing the font embedded in the file. This keeps the output file size nearly identical to the input — typically only a few kilobytes larger per page.
+    </p>
+    <p>
+      The watermark is placed at the centre of each page and rotated 45°. pdf-lib's <code>drawText</code> method accepts a <code>rotate</code> parameter that applies a rotation transform around the text's anchor point. The font width at the chosen size is calculated first (<code>font.widthOfTextAtSize</code>), so the text is centred accurately before rotation.
+    </p>
+    <p>
+      The opacity value is applied using the PDF graphics state — pdf-lib sets the fill opacity for that drawing operation only, leaving the rest of the page content at full opacity. This is why page content remains readable through the watermark rather than the entire page becoming translucent.
+    </p>
+    <p>
+      For pages that differ from standard A4 dimensions (e.g. US Letter, or custom sizes), the font size is scaled proportionally to the page diagonal so the watermark fills approximately the same visual proportion regardless of page size.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>The watermark cannot be cleanly removed</strong> — it is drawn as content on each page, not stored as a separate layer. Keep the original unwatermarked file if you need to produce clean copies.</li>
+      <li><strong>Text length:</strong> the tool accepts up to 40 characters. Very long strings may extend slightly beyond the page edges at larger sizes — use a shorter text or the Small size for long labels.</li>
+      <li><strong>All pages are watermarked:</strong> the tool applies the watermark to every page. To target specific pages, use Split PDF to extract them, watermark separately, then Merge PDF to recombine.</li>
+      <li><strong>Password-protected PDFs:</strong> the tool attempts to load encrypted PDFs using the <code>ignoreEncryption</code> flag. PDFs that require a password to view their content will fail — unlock them first.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your PDF is read into browser memory, modified locally by pdf-lib, and downloaded directly to your device. Nothing is sent to a server. The watermarking operation happens entirely within the browser tab — open the Network tab in DevTools while applying to see zero outbound requests.
+    </p>
+    <p>
+      This matters particularly when the document being watermarked is itself sensitive. Confidential contracts, financial reports, and legal filings should not need to pass through a third-party server just to have the word "CONFIDENTIAL" added to them. With keptlocal, they do not.
+    </p>
+  </Fragment>
+</ToolLayout>

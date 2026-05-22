@@ -88,7 +88,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "pdf-to-jpg", name: "PDF to JPG", shortName: "PDF → JPG", description: "Convert PDF pages to high-quality JPG images.", longDescription: "", category: "PDF", icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "pdf-to-jpg",
+    name: "PDF to JPG",
+    shortName: "PDF → JPG",
+    description: "Convert PDF pages to high-quality JPG images — entirely in your browser.",
+    longDescription: "Upload a PDF and choose a quality preset. Every page renders to a crisp JPEG. One page downloads as a single file; multiple pages download as a ZIP. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",
+    status: "live",
+    keywords: ["pdf to jpg", "convert pdf to image", "pdf to jpeg online free", "pdf to jpg without uploading", "export pdf pages as images"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Everything runs in your browser using pdf.js and the Canvas API. Your PDF bytes never leave your device — verify this in DevTools → Network while converting.",
+      },
+      {
+        q: "What quality settings should I choose?",
+        a: "Standard (1.5×) suits screen display and email attachments. High (2×) is good for presentations and web use. Best (3×) produces print-ready images around 216 DPI — use it when the output needs to be zoomed in or printed.",
+      },
+      {
+        q: "Can I convert just one page instead of the whole PDF?",
+        a: "Use our Split PDF tool to extract the page you want first, then run it through PDF to JPG. This keeps the tool focused and the download simple.",
+      },
+      {
+        q: "How large will the output files be?",
+        a: "A typical A4 page at Standard quality produces a JPG of roughly 200–500 KB. At Best quality expect 800 KB–2 MB per page, depending on content density.",
+      },
+      {
+        q: "Will text in the PDF stay sharp?",
+        a: "Yes. pdf.js renders text using the embedded font data at the scale you choose, so text is as sharp as the chosen resolution allows. Higher quality settings produce crisper text at smaller display sizes.",
+      },
+      {
+        q: "Does this work on password-protected PDFs?",
+        a: "Only PDFs that can be opened without a password. If the PDF requires a password to view its contents, the conversion will fail — unlock it in your PDF reader first.",
+      },
+    ],
+  },
   { slug: "jpg-to-pdf", name: "JPG to PDF", shortName: "JPG → PDF", description: "Combine images into a single PDF document.", longDescription: "", category: "PDF", icon: "M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12", status: "soon", keywords: [], faq: [] },
   { slug: "rotate-pdf", name: "Rotate PDF", shortName: "Rotate PDF", description: "Rotate pages 90°, 180°, or 270°.", longDescription: "", category: "PDF", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", status: "soon", keywords: [], faq: [] },
   { slug: "reorder-pdf", name: "Reorder PDF Pages", shortName: "Reorder Pages", description: "Drag pages into the order you need.", longDescription: "", category: "PDF", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", status: "soon", keywords: [], faq: [] },

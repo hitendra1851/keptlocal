@@ -1,0 +1,72 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PdfToJpg from "../../components/tools/PdfToJpg.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "pdf-to-jpg")!;
+---
+
+<ToolLayout tool={tool}>
+  <PdfToJpg slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert PDF to JPG</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse for a file.</li>
+      <li>Choose an output quality: <strong>Standard</strong> for screen and email, <strong>High</strong> for presentations and web, or <strong>Best</strong> for printing and zooming in.</li>
+      <li>Click <strong>Convert & download</strong>. A single PDF page downloads as one <code>.jpg</code> file. Multiple pages are bundled into a ZIP archive automatically.</li>
+    </ol>
+    <p>
+      The conversion runs entirely in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the HTML5 Canvas API.
+      No file is sent to a server. Open DevTools (<code>F12</code>) and watch the Network tab while converting to confirm there are no upload requests.
+    </p>
+    <p>
+      Need just specific pages? Use <a href="/tools/split-pdf">Split PDF</a> to extract them first, then convert.
+    </p>
+
+    <h2>When to convert PDF to JPG</h2>
+    <ul>
+      <li><strong>Sharing on social media</strong> — platforms like LinkedIn, X, and Instagram don't support PDF embeds. Converting slides or infographics to JPG lets you post them directly.</li>
+      <li><strong>Embedding in a Word or PowerPoint document</strong> — Office applications handle images far more reliably than embedded PDFs across different operating systems.</li>
+      <li><strong>Sending a preview without the editable file</strong> — a JPG of a contract or proposal gives the other party something to view quickly without risking accidental edits.</li>
+      <li><strong>Uploading to a CMS or form that only accepts images</strong> — many HR portals, tender systems, and property listing platforms require image uploads, not PDFs.</li>
+      <li><strong>Creating thumbnails for a document library</strong> — convert the first page of each PDF to generate preview images for a web-based document index.</li>
+      <li><strong>Archiving scanned documents as images</strong> — some workflows prefer flat image archives over PDF containers for long-term storage compatibility.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      PDF is a vector-based format — pages are defined by drawing instructions, not pixels. Converting to JPG requires <em>rasterising</em>: executing those drawing instructions on a pixel grid at a chosen resolution.
+    </p>
+    <p>
+      keptlocal uses <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a>, Mozilla's open-source PDF renderer originally built for Firefox. It parses the PDF structure, resolves fonts and images embedded in the file, and draws each page onto an HTML <code>&lt;canvas&gt;</code> element at the scale you choose. Once the canvas is filled, the browser's native <code>canvas.toBlob()</code> method encodes it as JPEG at 92% quality — a setting that balances file size and visual fidelity.
+    </p>
+    <p>
+      The scale factor controls output resolution. A standard A4 PDF page is 595 × 842 points (1 point = 1/72 inch). At scale 1.5 (Standard), the canvas is 893 × 1263 pixels — roughly 108 DPI. At scale 3.0 (Best), it reaches 1785 × 2526 pixels, or 216 DPI, which is comfortable for print use.
+    </p>
+    <p>
+      When the PDF has multiple pages, the JPG blobs are collected in memory and handed off to <a href="https://stuk.github.io/jszip/" target="_blank" rel="noopener">JSZip</a>, which assembles a ZIP archive in-browser. The ZIP downloads as a single file — no server, no temporary storage.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Resolution and file size:</strong> Best quality on a dense A4 page can produce JPGs of 1–3 MB each. For a 50-page document at Best quality, expect a ZIP of 50–150 MB — allow a few minutes for rendering and compression.</li>
+      <li><strong>Fonts:</strong> pdf.js handles embedded fonts reliably. PDFs that subset or obfuscate fonts (common in some design tools) render correctly because pdf.js uses the embedded font data directly.</li>
+      <li><strong>Transparency:</strong> JPEG does not support transparency. Any transparent areas in the PDF (common in logos and watermarks) are composited onto a white background, matching the default white page colour.</li>
+      <li><strong>Password-protected PDFs:</strong> files that require a password to view their content cannot be rendered — unlock them in your PDF reader first.</li>
+      <li><strong>Very large PDFs:</strong> rendering is CPU-bound. A 200-page document at Best quality may take 30–60 seconds on a mid-range laptop. The browser tab remains responsive; a progress counter shows each page as it completes.</li>
+      <li><strong>Browser support:</strong> requires Canvas API and WebAssembly. Works in Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your PDF</h2>
+    <p>
+      Your file never leaves your device. pdf.js loads the PDF bytes into browser memory using the <code>File</code> API, renders each page to an off-screen canvas, and exports the resulting JPEG — all without a network request.
+    </p>
+    <p>
+      This distinction matters for PDFs that contain sensitive content: medical scans, legal documents, financial records, ID cards. With server-based converters you are uploading the file and trusting a third party's infrastructure. With keptlocal there is nothing to trust because the file stays local from upload to download.
+    </p>
+    <p>
+      Competitors including ILovePDF, Smallpdf, and Adobe Acrobat online all upload your file to process it. Their privacy pages commit to file deletion within a set window, but you cannot verify that. On keptlocal, the verification is immediate: open the Network tab and watch zero bytes leave your machine.
+    </p>
+  </Fragment>
+</ToolLayout>

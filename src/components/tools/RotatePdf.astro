@@ -1,0 +1,313 @@
+---
+// Rotate PDF — sets PDF rotation flags via pdf-lib, entirely in browser
+---
+
+<div
+  id="rotate-pdf-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">One PDF at a time. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Controls (shown after file loads) -->
+  <div id="controls" class="hidden px-4 pb-4 space-y-5">
+    <!-- File info -->
+    <div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-accent)] shrink-0">
+        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-meta" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="change-file-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0">Change file</button>
+    </div>
+
+    <!-- Rotation picker -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Rotation</p>
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" data-deg="270" class="rot-btn flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border text-sm font-medium transition-colors">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M20 20v-5h-.581m-15.356-2A8.001 8.001 0 0119.419 15M20 20H15" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>90° Left</span>
+        </button>
+        <button type="button" data-deg="180" class="rot-btn flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border text-sm font-medium transition-colors">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M7 16V4m10 0v12M4 8l3-3 3 3M14 16l3 3 3-3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>180°</span>
+        </button>
+        <button type="button" data-deg="90" class="rot-btn flex flex-col items-center gap-1.5 py-3 px-2 rounded-lg border text-sm font-medium transition-colors">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+            <path d="M4 4v5h.581m15.357 2A8.001 8.001 0 014.581 9M4 4h5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>90° Right</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Page target -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Apply to</p>
+      <div class="flex gap-2 mb-3">
+        <button type="button" id="target-all" class="target-btn flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors">
+          All pages
+        </button>
+        <button type="button" id="target-range" class="target-btn flex-1 py-2 px-3 rounded-lg border text-sm font-medium transition-colors">
+          Specific pages
+        </button>
+      </div>
+      <div id="range-wrap" class="hidden">
+        <input
+          type="text"
+          id="page-range-input"
+          placeholder="e.g. 1, 3, 5-8"
+          class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)] mb-1"
+        />
+        <p id="range-preview" class="text-xs text-[var(--color-ink-muted)] min-h-[1rem]"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Upload a PDF to get started.</div>
+    <button type="button" id="rotate-btn" class="btn-primary" disabled>
+      <span id="rotate-label">Rotate & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument, degrees } from 'https://esm.sh/pdf-lib@1.17.1';
+
+  let pdfBytes = null;
+  let pageCount = 0;
+  let fileName = '';
+  let rotationDeg = 90;   // default: 90° right
+  let targetMode = 'all'; // 'all' | 'range'
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  const dropZone      = $('drop-zone');
+  const fileInput     = $('file-input');
+  const browseBtn     = $('browse-btn');
+  const emptyState    = $('empty-state');
+  const controls      = $('controls');
+  const fileNameEl    = $('file-name');
+  const fileMeta      = $('file-meta');
+  const changeFileBtn = $('change-file-btn');
+  const rotateBtn     = $('rotate-btn');
+  const rotateLabel   = $('rotate-label');
+  const spinner       = $('spinner');
+  const statusMsg     = $('status-msg');
+  const targetAll     = $('target-all');
+  const targetRange   = $('target-range');
+  const rangeWrap     = $('range-wrap');
+  const pageRangeInput = $('page-range-input');
+  const rangePreview  = $('range-preview');
+
+  const fmtSize = (b) =>
+    b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Rotation buttons
+  const rotBtns = document.querySelectorAll('.rot-btn');
+  const setRotation = (deg) => {
+    rotationDeg = deg;
+    rotBtns.forEach((btn) => {
+      const active = parseInt(btn.dataset.deg) === deg;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  rotBtns.forEach((btn) => btn.addEventListener('click', () => setRotation(parseInt(btn.dataset.deg))));
+  setRotation(90);
+
+  // Target buttons
+  const setTarget = (mode) => {
+    targetMode = mode;
+    const allActive = mode === 'all';
+    [targetAll, targetRange].forEach((btn, i) => {
+      const active = i === 0 ? allActive : !allActive;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+    rangeWrap.classList.toggle('hidden', mode === 'all');
+    updateReadiness();
+  };
+  targetAll.addEventListener('click', () => setTarget('all'));
+  targetRange.addEventListener('click', () => setTarget('range'));
+
+  // Page range parser — identical to SplitPdf
+  const parseRange = (raw) => {
+    const pages = new Set();
+    for (const part of raw.split(',').map((s) => s.trim()).filter(Boolean)) {
+      const m = part.match(/^(\d+)(?:-(\d+))?$/);
+      if (!m) return null;
+      const start = parseInt(m[1], 10);
+      const end = m[2] ? parseInt(m[2], 10) : start;
+      if (start < 1 || end < start || end > pageCount) return null;
+      for (let i = start; i <= end; i++) pages.add(i - 1);
+    }
+    return pages.size > 0 ? [...pages].sort((a, b) => a - b) : null;
+  };
+
+  const updateReadiness = () => {
+    if (!pdfBytes) { rotateBtn.disabled = true; return; }
+    if (targetMode === 'all') {
+      rotateBtn.disabled = false;
+      rangePreview.textContent = '';
+      setStatus(`Ready — will rotate all ${pageCount} page${pageCount !== 1 ? 's' : ''}.`);
+    } else {
+      const val = pageRangeInput.value.trim();
+      if (!val) { rotateBtn.disabled = true; rangePreview.textContent = ''; return; }
+      const indices = parseRange(val);
+      if (!indices) {
+        rangePreview.textContent = `Invalid — enter numbers between 1 and ${pageCount}.`;
+        rangePreview.style.color = 'var(--color-warn)';
+        rotateBtn.disabled = true;
+      } else {
+        rangePreview.textContent = `${indices.length} page${indices.length !== 1 ? 's' : ''} selected.`;
+        rangePreview.style.color = 'var(--color-accent)';
+        rotateBtn.disabled = false;
+        setStatus(`Ready — will rotate ${indices.length} page${indices.length !== 1 ? 's' : ''}.`);
+      }
+    }
+  };
+  pageRangeInput.addEventListener('input', updateReadiness);
+
+  // Load file
+  const loadFile = async (file) => {
+    if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+      setStatus('Only PDF files are accepted.', true);
+      return;
+    }
+    pdfBytes = await file.arrayBuffer();
+    fileName = file.name.replace(/\.pdf$/i, '');
+    try {
+      const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      pageCount = doc.getPageCount();
+    } catch {
+      setStatus('Could not read the PDF — check that the file is valid.', true);
+      pdfBytes = null;
+      return;
+    }
+    fileNameEl.textContent = file.name;
+    fileMeta.textContent = `${pageCount} page${pageCount !== 1 ? 's' : ''} · ${fmtSize(file.size)}`;
+    emptyState.classList.add('hidden');
+    controls.classList.remove('hidden');
+    setTarget('all');
+  };
+
+  const reset = () => {
+    pdfBytes = null; pageCount = 0; fileName = '';
+    pageRangeInput.value = '';
+    emptyState.classList.remove('hidden');
+    controls.classList.add('hidden');
+    rotateBtn.disabled = true;
+    setStatus('Upload a PDF to get started.');
+  };
+
+  // Drop zone events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  changeFileBtn?.addEventListener('click', () => { reset(); fileInput.click(); });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.[0]) loadFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer?.files?.[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  // Rotate & download
+  rotateBtn.addEventListener('click', async () => {
+    if (!pdfBytes || processing) return;
+    processing = true;
+    rotateBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    rotateLabel.textContent = 'Rotating…';
+    setStatus('Working in your browser…');
+
+    try {
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const total = pdfDoc.getPageCount();
+
+      let indices;
+      if (targetMode === 'all') {
+        indices = Array.from({ length: total }, (_, i) => i);
+      } else {
+        indices = parseRange(pageRangeInput.value.trim());
+        if (!indices) throw new Error('Invalid page range.');
+      }
+
+      for (const i of indices) {
+        const page = pdfDoc.getPage(i);
+        const current = page.getRotation().angle;
+        page.setRotation(degrees((current + rotationDeg) % 360));
+      }
+
+      setStatus('Saving…');
+      const out = await pdfDoc.save();
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}-rotated.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+
+      const label = rotationDeg === 270 ? '90° left' : rotationDeg === 180 ? '180°' : '90° right';
+      setStatus(`✓ Downloaded — ${indices.length} page${indices.length !== 1 ? 's' : ''} rotated ${label}.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || 'rotation failed — check the file is a valid PDF.'}`, true);
+    } finally {
+      processing = false;
+      spinner.classList.add('hidden');
+      rotateLabel.textContent = 'Rotate & download';
+      rotateBtn.disabled = false;
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

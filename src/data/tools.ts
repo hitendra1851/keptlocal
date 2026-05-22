@@ -162,7 +162,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "rotate-pdf", name: "Rotate PDF", shortName: "Rotate PDF", description: "Rotate pages 90°, 180°, or 270°.", longDescription: "", category: "PDF", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "rotate-pdf",
+    name: "Rotate PDF",
+    shortName: "Rotate PDF",
+    description: "Rotate all pages or specific pages 90°, 180°, or 270° — entirely in your browser.",
+    longDescription: "Upload a PDF, choose a rotation, and optionally target specific pages. Downloads instantly. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15",
+    status: "live",
+    keywords: ["rotate pdf", "rotate pdf pages", "rotate pdf without uploading", "fix upside down pdf", "rotate pdf online free"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Rotation runs entirely in your browser using pdf-lib. Your PDF never leaves your device — open DevTools → Network while rotating to confirm no upload requests.",
+      },
+      {
+        q: "Can I rotate only specific pages?",
+        a: "Yes. Leave 'Apply to' set to All pages to rotate everything, or enter a page range like '1, 3, 5-8' to target specific pages. The rest of the document is left unchanged.",
+      },
+      {
+        q: "Does rotating change the page content or quality?",
+        a: "No. pdf-lib sets the PDF rotation flag on each page — this tells PDF viewers how to display the page. The underlying content is untouched, so text stays selectable and images stay sharp.",
+      },
+      {
+        q: "My PDF already has some rotated pages — will this make it worse?",
+        a: "The rotation you choose is added to each page's existing rotation. So if a page is already rotated 90° and you apply 90° clockwise, the result is 180°. Use the preview in your PDF reader after downloading to check.",
+      },
+      {
+        q: "Is there a page or file size limit?",
+        a: "No hard limit. The practical ceiling is your device's available RAM.",
+      },
+      {
+        q: "Will bookmarks and annotations be preserved?",
+        a: "Yes. The tool only changes rotation metadata. All other document structure — bookmarks, annotations, form fields, embedded fonts — is preserved.",
+      },
+    ],
+  },
   { slug: "reorder-pdf", name: "Reorder PDF Pages", shortName: "Reorder Pages", description: "Drag pages into the order you need.", longDescription: "", category: "PDF", icon: "M4 6h16M4 10h16M4 14h16M4 18h16", status: "soon", keywords: [], faq: [] },
   { slug: "watermark-pdf", name: "Watermark PDF", shortName: "Watermark PDF", description: "Add a text or image watermark to PDF pages.", longDescription: "", category: "PDF", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", status: "soon", keywords: [], faq: [] },
   { slug: "pdf-page-count", name: "PDF Info Viewer", shortName: "PDF Info", description: "View page count, size, and metadata.", longDescription: "", category: "PDF", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z", status: "soon", keywords: [], faq: [] },

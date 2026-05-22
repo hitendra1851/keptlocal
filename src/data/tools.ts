@@ -237,7 +237,43 @@ export const tools: Tool[] = [
     ],
   },
   { slug: "watermark-pdf", name: "Watermark PDF", shortName: "Watermark PDF", description: "Add a text or image watermark to PDF pages.", longDescription: "", category: "PDF", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z", status: "soon", keywords: [], faq: [] },
-  { slug: "pdf-page-count", name: "PDF Info Viewer", shortName: "PDF Info", description: "View page count, size, and metadata.", longDescription: "", category: "PDF", icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "pdf-page-count",
+    name: "PDF Info Viewer",
+    shortName: "PDF Info",
+    description: "View page count, dimensions, metadata, and PDF version — entirely in your browser.",
+    longDescription: "Drop a PDF to instantly see its page count, file size, PDF version, page dimensions, and embedded metadata like title, author, and creation date. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+    status: "live",
+    keywords: ["pdf info viewer", "pdf metadata viewer", "pdf page count", "check pdf details", "view pdf properties online free"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. The PDF is read and parsed entirely in your browser using pdf-lib. Your file never leaves your device.",
+      },
+      {
+        q: "What metadata can I see?",
+        a: "Page count, file size, PDF version, page dimensions (width × height in mm and inches), title, author, subject, creator application, producer, creation date, and modification date.",
+      },
+      {
+        q: "Why are some metadata fields blank?",
+        a: "PDF metadata is optional. Many PDFs — especially those exported from tools like Word or printed to PDF — omit fields like Title or Author entirely. Blank fields mean the PDF has no value stored for that property.",
+      },
+      {
+        q: "What does 'mixed page sizes' mean?",
+        a: "Some PDFs contain pages of different dimensions — for example a portrait report with a landscape appendix. The tool reports each unique size found and how many pages use it.",
+      },
+      {
+        q: "Can I edit the metadata?",
+        a: "This tool is read-only. Editing PDF metadata requires a PDF editor.",
+      },
+      {
+        q: "What is the PDF version number?",
+        a: "The PDF specification has evolved through versions 1.0 to 1.7 and 2.0. The version stored in the file header indicates which features it may use. Most modern PDFs are version 1.4–1.7.",
+      },
+    ],
+  },
   { slug: "compress-image", name: "Compress Image", shortName: "Compress Image", description: "Shrink JPG, PNG, and WebP files without quality loss.", longDescription: "", category: "Image", icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4", status: "soon", keywords: [], faq: [] },
   { slug: "resize-image", name: "Resize Image", shortName: "Resize Image", description: "Change image dimensions with aspect lock.", longDescription: "", category: "Image", icon: "M4 4h6v6H4V4zm10 10h6v6h-6v-6zM4 14h6v6H4v-6zm10-10h6v6h-6V4z", status: "soon", keywords: [], faq: [] },
   { slug: "convert-image", name: "Convert Image", shortName: "Convert Image", description: "Convert between HEIC, WebP, AVIF, JPG, PNG.", longDescription: "", category: "Image", icon: "M8 7l4-4m0 0l4 4m-4-4v18", status: "soon", keywords: [], faq: [] },

@@ -1,0 +1,59 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PdfInfo from "../../components/tools/PdfInfo.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "pdf-page-count")!;
+---
+
+<ToolLayout tool={tool}>
+  <PdfInfo slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to view PDF information</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse. Results appear in under a second.</li>
+      <li>The tool reports three groups of information: <strong>File</strong> (name, size, PDF version), <strong>Pages</strong> (count, orientation, dimensions), and <strong>Metadata</strong> (title, author, dates, and more).</li>
+      <li>Click <strong>Copy</strong> to copy all information to your clipboard as plain text — useful for filing a bug report, documenting a file for an archive, or pasting into a spreadsheet.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>. No file is sent to a server — open DevTools (<code>F12</code>) → Network while inspecting to confirm there are no upload requests.
+    </p>
+
+    <h2>When to check PDF info</h2>
+    <ul>
+      <li><strong>Before sending a file</strong> — confirm the page count is correct after merging or splitting, or verify the file size is within an email attachment limit.</li>
+      <li><strong>Checking a client-supplied PDF before printing</strong> — verify page dimensions match the expected print size (A4, Letter, etc.) and that the PDF version is compatible with your RIP or printer software.</li>
+      <li><strong>Auditing document metadata for privacy</strong> — PDFs exported from Word, Excel, or design tools often carry the author's full name, company, and revision history in their metadata. Check before sending externally.</li>
+      <li><strong>Debugging a PDF that won't open correctly</strong> — the PDF version number helps identify compatibility issues with older viewers.</li>
+      <li><strong>Verifying a scanned document</strong> — confirm how many pages were captured and whether any came out landscape when they should be portrait.</li>
+      <li><strong>Archiving documents</strong> — record page count, file size, and creation date as part of a document management workflow.</li>
+    </ul>
+
+    <h2>What each field means</h2>
+    <p><strong>PDF version</strong> — the PDF specification has evolved from version 1.0 (1993) through 1.7 (2008) to 2.0 (2017). Higher versions may use features not supported by older readers. Most PDFs in circulation today are version 1.4–1.7.</p>
+    <p><strong>Page size in points</strong> — PDF dimensions are measured in points, where 1 point = 1/72 of an inch. A standard A4 page is 595 × 842 points. US Letter is 612 × 792 points. The tool also displays dimensions in millimetres and inches for convenience.</p>
+    <p><strong>Mixed page sizes</strong> — when a PDF contains pages of different dimensions (common in reports with landscape appendices or slide decks exported from presentation software), the tool lists each unique size and the number of pages that use it.</p>
+    <p><strong>Creator vs. Producer</strong> — the Creator field records the application that originally generated the content (e.g. "Microsoft Word 16.0"). Producer records the software that converted it to PDF (e.g. "Adobe PDF Library 15.0"). A PDF printed to PDF from a browser might show Chrome as the Producer.</p>
+    <p><strong>Blank metadata fields</strong> — metadata is entirely optional in the PDF format. Many PDFs — particularly those generated programmatically or exported from lightweight tools — have no title, author, or date fields set at all.</p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      When you drop a PDF, the browser reads the file bytes into an <code>ArrayBuffer</code> using the File API. pdf-lib parses the PDF's cross-reference table and object dictionary to extract structural information (page count, page sizes) and the document information dictionary (title, author, dates, etc.).
+    </p>
+    <p>
+      The PDF version is read directly from the file header — the first line of every valid PDF is a comment like <code>%PDF-1.7</code> that declares the spec version used.
+    </p>
+    <p>
+      Page dimensions are retrieved from each page's MediaBox entry, which defines the full page boundary in points. The tool checks all pages and groups them by size, so mixed-size documents are reported accurately.
+    </p>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your PDF is parsed entirely in browser memory. Nothing is uploaded, nothing is stored, nothing is logged. The tool reads metadata and displays it — the data goes from your disk to your screen and nowhere else.
+    </p>
+    <p>
+      This is particularly relevant when auditing metadata for privacy. If you are checking whether a document exposes your name or employer before sending it externally, you can do that audit here without handing the document to a third-party server in the process.
+    </p>
+  </Fragment>
+</ToolLayout>

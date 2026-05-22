@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "Privacy Policy — keptlocal";
+const description = "How keptlocal handles your data: we don't collect, store, or transmit your files. Detailed privacy policy.";
+const lastUpdated = "May 2026";
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-2">Privacy Policy</h1>
+    <p class="text-sm text-[var(--color-ink-muted)] mb-10">Last updated: {lastUpdated}</p>
+
+    <div class="prose-doc">
+      <h2>The short version</h2>
+      <p>
+        keptlocal's tools run entirely in your browser. Your files are <strong>never uploaded to
+        any server</strong>. We collect minimal, anonymous analytics about page visits so we can
+        improve the site, and we show ads (via Google AdSense) on tool pages to cover hosting costs.
+      </p>
+
+      <h2>1. What we don't do</h2>
+      <p>
+        We do not:
+      </p>
+      <ul>
+        <li>Upload your PDFs, images, or other files to any server</li>
+        <li>Store any file content on our infrastructure</li>
+        <li>Require you to create an account, log in, or provide an email address</li>
+        <li>Sell, rent, or share personal data with third parties (we collect almost none to begin with)</li>
+        <li>Track you across other websites</li>
+      </ul>
+
+      <h2>2. How file processing works</h2>
+      <p>
+        When you use a tool on keptlocal, the file you select is read by your browser into local
+        memory. JavaScript and WebAssembly code that we serve to your browser performs the requested
+        operation (merging, splitting, converting, etc.) on your device. The output is then offered
+        as a download. The original file and the processed file remain on your computer the
+        entire time.
+      </p>
+      <p>
+        You can verify this. Open your browser's developer tools (F12), go to the Network tab,
+        and watch while you use a tool. After the initial page load, no further requests are made
+        to our servers.
+      </p>
+
+      <h2>3. What information we do collect</h2>
+      <p>
+        <strong>Analytics.</strong> We use Cloudflare Web Analytics, a cookieless analytics service.
+        It collects anonymous, aggregated data such as page views, country (not city), referrer, and
+        browser type. No individual user is identifiable. We may also use Google Analytics 4 with
+        IP anonymization enabled.
+      </p>
+      <p>
+        <strong>Server logs.</strong> Like any website, our hosting provider (Cloudflare) keeps
+        short-term access logs containing your IP address, the URL you visited, and the time of
+        the visit. These are used for abuse prevention and standard operational purposes, and
+        are deleted on Cloudflare's standard retention schedule.
+      </p>
+      <p>
+        <strong>Contact form.</strong> If you email us through the address listed on the
+        <a href="/contact">contact page</a>, your message and email address are stored in our inbox
+        for as long as needed to respond. We do not add you to any mailing list.
+      </p>
+
+      <h2>4. Cookies</h2>
+      <p>
+        keptlocal itself sets one cookie-equivalent: a <code>localStorage</code> entry that
+        remembers whether you've selected light or dark mode. It contains no personal information.
+      </p>
+      <p>
+        Third-party services on the site (advertising and analytics) may set their own cookies.
+        See the next section for details.
+      </p>
+
+      <h2>5. Advertising (Google AdSense)</h2>
+      <p>
+        We use Google AdSense to display ads on tool pages. Google may use cookies and similar
+        technologies to serve ads based on your prior visits to our site or other websites.
+        You can opt out of personalized advertising by visiting
+        <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">Google Ads Settings</a>,
+        or opt out of third-party vendor cookies via
+        <a href="https://www.aboutads.info/" target="_blank" rel="noopener">aboutads.info</a>.
+      </p>
+      <p>
+        For users in the European Economic Area, the United Kingdom, and Switzerland, we display
+        a consent banner before personalized ads are shown, as required by the GDPR and the
+        UK Data Protection Act.
+      </p>
+
+      <h2>6. Children's privacy</h2>
+      <p>
+        keptlocal is not directed at children under 13. We do not knowingly collect personal
+        information from anyone under 13.
+      </p>
+
+      <h2>7. Your rights</h2>
+      <p>
+        Because we collect almost no personal data, there is very little to access, correct, or
+        delete. If you have questions about data we may hold relating to you (such as a contact
+        form email), reach us via the <a href="/contact">contact page</a> and we'll respond
+        within 30 days.
+      </p>
+
+      <h2>8. International transfers</h2>
+      <p>
+        keptlocal is hosted on Cloudflare's global CDN. When you visit, you are served from the
+        Cloudflare edge location closest to you. Aggregated analytics may be processed in the
+        United States.
+      </p>
+
+      <h2>9. Changes to this policy</h2>
+      <p>
+        We may update this policy from time to time as the site evolves. Material changes will
+        be noted at the top of this page with a new "Last updated" date.
+      </p>
+
+      <h2>10. Contact</h2>
+      <p>
+        Questions about privacy: use the <a href="/contact">contact page</a>.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

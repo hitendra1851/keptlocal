@@ -1,0 +1,93 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "Terms of Service — keptlocal";
+const description = "Terms governing your use of keptlocal's browser-based PDF and image tools.";
+const lastUpdated = "May 2026";
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-2">Terms of Service</h1>
+    <p class="text-sm text-[var(--color-ink-muted)] mb-10">Last updated: {lastUpdated}</p>
+
+    <div class="prose-doc">
+      <h2>1. Acceptance</h2>
+      <p>
+        By accessing or using keptlocal.com (the "Service"), you agree to these Terms of Service.
+        If you do not agree, please don't use the Service.
+      </p>
+
+      <h2>2. The service</h2>
+      <p>
+        keptlocal provides free, browser-based tools for working with PDF and image files. All file
+        processing occurs locally in your browser — we do not receive, store, or process the
+        content of files you work with on the site.
+      </p>
+
+      <h2>3. Acceptable use</h2>
+      <p>
+        You agree to use keptlocal only for lawful purposes. You must not:
+      </p>
+      <ul>
+        <li>Use the Service to process files you don't have the legal right to modify</li>
+        <li>Attempt to bypass any technical limits we put in place</li>
+        <li>Use automated systems to scrape, hammer, or overload the Service</li>
+        <li>Reverse-engineer the Service in violation of applicable law</li>
+        <li>Use the Service to create or distribute content that is illegal, harmful, infringing, defamatory, or that violates the rights of others</li>
+      </ul>
+
+      <h2>4. No warranty</h2>
+      <p>
+        The Service is provided "as is" without warranty of any kind, express or implied. We do not
+        warrant that the Service will be uninterrupted, error-free, or that any specific file
+        processing will succeed. <strong>Always keep a backup of important files</strong> before
+        running any tool.
+      </p>
+
+      <h2>5. Limitation of liability</h2>
+      <p>
+        To the maximum extent permitted by law, keptlocal and its operators are not liable for any
+        indirect, incidental, special, consequential, or punitive damages, or for any loss of data,
+        revenue, or profits, arising from your use of or inability to use the Service. Our total
+        liability for any claim arising from these Terms or the Service shall not exceed
+        USD $100.
+      </p>
+
+      <h2>6. Intellectual property</h2>
+      <p>
+        The keptlocal brand, design, copy, and proprietary code are owned by us. You retain all
+        rights to the files you process — we make no claim on them, since we never receive them.
+        Open-source libraries used in the Service (such as pdf-lib) are governed by their own licenses.
+      </p>
+
+      <h2>7. Third-party services</h2>
+      <p>
+        The Service uses Google AdSense for advertising and Cloudflare for hosting and analytics.
+        Your interactions with those services are subject to their own terms and policies.
+      </p>
+
+      <h2>8. Changes to the service or terms</h2>
+      <p>
+        We may modify, suspend, or discontinue the Service (or parts of it) at any time without
+        notice. We may also update these Terms; the "Last updated" date at the top reflects when.
+        Continued use after a change constitutes acceptance.
+      </p>
+
+      <h2>9. Governing law</h2>
+      <p>
+        These Terms are governed by the laws of India, without regard to conflict-of-laws principles.
+        Any dispute shall be resolved in the courts of Ahmedabad, Gujarat.
+      </p>
+
+      <h2>10. Contact</h2>
+      <p>
+        Questions about these Terms: use the <a href="/contact">contact page</a>.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

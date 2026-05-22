@@ -1,0 +1,24 @@
+---
+export interface Props {
+  variant?: "inline" | "block";
+}
+const { variant = "inline" } = Astro.props;
+---
+
+{variant === "block" ? (
+  <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-accent-tint)] text-[var(--color-accent)] text-xs font-medium">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="11" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+      <path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" stroke-width="2" />
+    </svg>
+    <span>Files never leave your browser</span>
+  </div>
+) : (
+  <span class="inline-flex items-center gap-1.5 text-xs text-[var(--color-accent)]">
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+      <rect x="4" y="11" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2" />
+      <path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" stroke-width="2" />
+    </svg>
+    100% local
+  </span>
+)}

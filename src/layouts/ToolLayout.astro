@@ -1,0 +1,119 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import PrivacyBadge from "../components/PrivacyBadge.astro";
+import FAQ from "../components/FAQ.astro";
+import type { Tool } from "../data/tools";
+
+export interface Props {
+  tool: Tool;
+}
+
+const { tool } = Astro.props;
+
+const title = `${tool.name} — Free & Private | keptlocal`;
+const description = tool.longDescription || tool.description;
+
+// Schema: WebApplication + FAQPage + BreadcrumbList
+const schema: Record<string, unknown>[] = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tool.name,
+    description,
+    url: `https://keptlocal.com/tools/${tool.slug}`,
+    applicationCategory: tool.category === "PDF" ? "UtilitiesApplication" : "MultimediaApplication",
+    operatingSystem: "Any (Web Browser)",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    browserRequirements: "Requires JavaScript and WebAssembly support.",
+    permissions: "No permissions required. Runs entirely in the browser.",
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://keptlocal.com/" },
+      { "@type": "ListItem", position: 2, name: `${tool.category} Tools`, item: `https://keptlocal.com/#${tool.category.toLowerCase()}` },
+      { "@type": "ListItem", position: 3, name: tool.name, item: `https://keptlocal.com/tools/${tool.slug}` },
+    ],
+  },
+];
+
+if (tool.faq.length > 0) {
+  schema.push({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: tool.faq.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  });
+}
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Header />
+
+  <main class="max-w-5xl mx-auto px-6 pt-10 pb-16">
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-[var(--color-ink-muted)] mb-6" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-ink)]">Home</a>
+      <span class="mx-2">/</span>
+      <span>{tool.category} Tools</span>
+      <span class="mx-2">/</span>
+      <span class="text-[var(--color-ink-soft)]">{tool.name}</span>
+    </nav>
+
+    <!-- Tool header -->
+    <div class="mb-8 reveal">
+      <PrivacyBadge variant="block" />
+      <h1 class="font-display text-4xl md:text-5xl text-[var(--color-ink)] mt-4 mb-3 tracking-tighter">
+        {tool.name}
+      </h1>
+      <p class="text-lg text-[var(--color-ink-soft)] max-w-2xl leading-relaxed">
+        {tool.longDescription || tool.description}
+      </p>
+    </div>
+
+    <!-- The tool itself -->
+    <div class="reveal" style="animation-delay: 0.1s">
+      <slot name="tool" />
+    </div>
+
+    <!-- Ad slot: below tool output is the highest-RPM slot -->
+    <div class="ad-slot" data-ad-position="below-tool"></div>
+
+    <!-- SEO content body -->
+    <div class="grid md:grid-cols-3 gap-12 mt-12">
+      <article class="md:col-span-2 prose-doc">
+        <slot name="content" />
+
+        {tool.faq.length > 0 && (
+          <>
+            <h2>Frequently asked questions</h2>
+            <FAQ items={tool.faq} />
+          </>
+        )}
+      </article>
+
+      <aside class="md:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <div class="ad-slot" data-ad-position="sidebar" style="min-height: 250px;"></div>
+          <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
+            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
+            <ol class="text-sm text-[var(--color-ink-soft)] space-y-2 list-decimal pl-4">
+              <li>Open browser DevTools (F12)</li>
+              <li>Switch to the Network tab</li>
+              <li>Run the tool above</li>
+              <li>No POST or upload requests appear</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

@@ -1,0 +1,69 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PdfMerge from "../../components/tools/PdfMerge.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "merge-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <PdfMerge slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to merge PDF files</h2>
+    <ol>
+      <li>Drag the PDFs you want to combine into the drop zone above, or click "choose files" to browse.</li>
+      <li>Drag rows to set the order pages will appear in the final PDF — page 1 of the top file becomes page 1 of the result.</li>
+      <li>Click <strong>Merge &amp; download</strong>. The combined PDF saves directly to your downloads folder.</li>
+    </ol>
+    <p>
+      Everything runs inside the browser tab you have open right now. No file is sent to a server.
+      If you want to confirm that, open browser DevTools (press <code>F12</code>), switch to the
+      <strong>Network</strong> tab, and watch while you merge — you'll see no upload requests.
+    </p>
+
+    <h2>When to merge PDFs</h2>
+    <ul>
+      <li><strong>Bundling supporting documents</strong> — combine a cover letter, resume, and references into a single attachment for a job application.</li>
+      <li><strong>Scanned receipts</strong> — group expense receipts into one PDF for an end-of-month reimbursement claim.</li>
+      <li><strong>Multi-page forms</strong> — stitch together signed pages that came back from different people.</li>
+      <li><strong>Course material</strong> — combine separate chapter PDFs from an instructor into one studyable document.</li>
+      <li><strong>Property and legal paperwork</strong> — consolidate a contract, addenda, and exhibits before sending or archiving.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      keptlocal uses <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>,
+      an open-source JavaScript library that reads and writes PDF documents directly in JavaScript.
+      When you add files, the bytes are read into an <code>ArrayBuffer</code> in your browser's memory.
+      Merging creates a new PDF document and copies the page objects from each source — text remains selectable,
+      images stay at their original resolution, and the result is a standard PDF that opens in any viewer.
+    </p>
+    <p>
+      Because the work happens locally, there is no upload-then-process latency. The merge typically completes
+      in under a second even for documents totaling hundreds of pages. Performance is bounded only by your
+      device's RAM.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>File size:</strong> no hard limit, but very large documents (~500 MB+) may slow your browser.</li>
+      <li><strong>Password-protected PDFs:</strong> we attempt to read encrypted PDFs with the <code>ignoreEncryption</code> flag. If a file requires a password to open the content, the merge may fail — unlock it first using your PDF reader.</li>
+      <li><strong>Form fields and annotations:</strong> preserved on a best-effort basis. Complex interactive forms occasionally lose field state during merge.</li>
+      <li><strong>Browser support:</strong> works in any modern browser (Chrome 90+, Firefox 90+, Safari 15+, Edge). Older browsers without WebAssembly support won't work.</li>
+    </ul>
+
+    <h2>Privacy compared to other PDF mergers</h2>
+    <p>
+      Most online PDF tools — including the popular ones — upload your files to their server, process them
+      there, and serve the result back. They publish privacy policies that say files are deleted after some
+      number of hours, but you have no way to verify that. With keptlocal, the question doesn't arise:
+      the file simply never leaves your machine.
+    </p>
+    <p>
+      This matters most for documents you wouldn't share casually — contracts, financial records, ID scans,
+      medical paperwork. Use keptlocal whenever the content is private and you'd rather not trust a
+      third-party server with it.
+    </p>
+  </Fragment>
+</ToolLayout>

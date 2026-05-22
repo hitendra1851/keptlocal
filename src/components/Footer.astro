@@ -1,0 +1,62 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-[var(--color-rule)] mt-24 bg-[var(--color-paper)]">
+  <div class="max-w-6xl mx-auto px-6 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+      <div class="col-span-2 md:col-span-1">
+        <div class="flex items-center gap-2 mb-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-[var(--color-accent)]">
+            <rect x="4" y="11" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.75" />
+            <path d="M8 11V7a4 4 0 118 0v4" stroke="currentColor" stroke-width="1.75" />
+            <circle cx="12" cy="16" r="1.25" fill="currentColor" />
+          </svg>
+          <span class="font-display text-xl">
+            kept<span class="text-[var(--color-accent)]">local</span>
+          </span>
+        </div>
+        <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed max-w-xs">
+          Browser-only file tools. No uploads, no accounts, no tracking.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">PDF</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/tools/merge-pdf" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Merge PDF</a></li>
+          <li><span class="text-[var(--color-ink-muted)]">Split PDF · soon</span></li>
+          <li><span class="text-[var(--color-ink-muted)]">PDF → JPG · soon</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">Image</h4>
+        <ul class="space-y-2 text-sm">
+          <li><span class="text-[var(--color-ink-muted)]">Compress · soon</span></li>
+          <li><span class="text-[var(--color-ink-muted)]">Resize · soon</span></li>
+          <li><span class="text-[var(--color-ink-muted)]">Convert · soon</span></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">About</h4>
+        <ul class="space-y-2 text-sm">
+          <li><a href="/about" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">About</a></li>
+          <li><a href="/privacy" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Privacy</a></li>
+          <li><a href="/terms" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Terms</a></li>
+          <li><a href="/contact" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="border-t border-[var(--color-rule)] pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <p class="text-xs text-[var(--color-ink-muted)]">
+        © {year} keptlocal. Built quietly.
+      </p>
+      <p class="text-xs text-[var(--color-ink-muted)]">
+        All processing happens in your browser.
+      </p>
+    </div>
+  </div>
+</footer>

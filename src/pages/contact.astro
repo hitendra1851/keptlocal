@@ -1,0 +1,45 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "Contact — keptlocal";
+const description = "Get in touch with the keptlocal team. Bug reports, feature requests, partnership inquiries.";
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-4">Contact</h1>
+    <p class="text-lg text-[var(--color-ink-soft)] mb-10 leading-relaxed">
+      Have a bug to report, a tool you'd like us to build, or want to talk shop?
+      Send a note. We read everything.
+    </p>
+
+    <div class="prose-doc">
+      <h2>Reach us by email</h2>
+      <p>
+        <a href="mailto:hello@keptlocal.com">hello@keptlocal.com</a>
+      </p>
+      <p>
+        Please mention the tool name (if it's tool-specific) and your browser version
+        — it helps us reproduce issues faster.
+      </p>
+
+      <h2>What we'd love to hear</h2>
+      <ul>
+        <li><strong>Bug reports.</strong> Something broke, gave the wrong output, or behaved strangely.</li>
+        <li><strong>Tool requests.</strong> A file operation you do regularly that you wish lived here.</li>
+        <li><strong>Edge cases.</strong> Files that didn't process cleanly — share what kind of PDF or image, and we'll dig in.</li>
+        <li><strong>Partnership.</strong> Press, integrations, or anything commercial.</li>
+      </ul>
+
+      <h2>Response time</h2>
+      <p>
+        We aim to reply within 2 business days. We're a small team — sometimes urgent
+        bugs get a faster reply than partnership emails. Sorry in advance for that.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

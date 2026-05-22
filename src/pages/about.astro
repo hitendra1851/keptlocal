@@ -1,0 +1,84 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "About keptlocal — Private browser-only file tools";
+const description = "The story behind keptlocal: why we built a privacy-first PDF and image toolkit that processes files entirely in your browser.";
+---
+
+<BaseLayout title={title} description={description}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-4">About</h1>
+    <p class="text-lg text-[var(--color-ink-soft)] mb-10 leading-relaxed">
+      keptlocal is a small set of privacy-first PDF and image tools that run entirely
+      inside your browser. We're building it because every other free PDF tool on the
+      internet asks you to upload your file to their server — and most people's files
+      shouldn't have to take that trip.
+    </p>
+
+    <div class="prose-doc">
+      <h2>What "kept local" actually means</h2>
+      <p>
+        When you use a typical online PDF tool, your file travels over the network to a server
+        you've never seen, gets processed by code you can't audit, and comes back to you. The
+        privacy policy says they delete it within a few hours. You take their word for it.
+      </p>
+      <p>
+        keptlocal is built differently. The tools run on your device using WebAssembly — your
+        browser does the work. Your file enters memory, gets transformed, and the result
+        downloads. No part of it touches a network.
+      </p>
+      <p>
+        This isn't a marketing claim — it's an architectural fact you can verify. Open your
+        browser's Network tab (F12) while using any tool. You'll see the initial page load,
+        and then no further activity. Zero uploads.
+      </p>
+
+      <h2>Who's behind this</h2>
+      <p>
+        keptlocal is built and maintained by Hiten Mahalwar, a software engineer with
+        fifteen-plus years in healthcare IT. The site started as a side project after one
+        too many friends asked "is it safe to upload my tax forms to that PDF site?" —
+        and the honest answer was "probably, but you can't really know."
+      </p>
+      <p>
+        Tools that respect your data shouldn't be a luxury. They should be the default.
+      </p>
+
+      <h2>How keptlocal stays free</h2>
+      <p>
+        The tools cost us almost nothing to run — your browser does the heavy lifting, and
+        the rest is static files on a content delivery network. We show a small number of
+        non-intrusive ads on the pages around the tools to cover hosting and domain costs.
+        We don't put ads inside the tool itself.
+      </p>
+      <p>
+        We don't:
+      </p>
+      <ul>
+        <li>Track you across sites</li>
+        <li>Sell your data (we don't collect any to sell)</li>
+        <li>Require accounts or email signups</li>
+        <li>Use dark patterns to push you onto a paid plan</li>
+      </ul>
+      <p>
+        See our <a href="/privacy">privacy policy</a> for specifics.
+      </p>
+
+      <h2>What's coming</h2>
+      <p>
+        We're adding tools one or two at a time. The current roadmap covers the
+        essentials — split, compress, rotate, convert, watermark, image resize and convert —
+        and then a small set of AI-powered "smart" tools (PDF summarization, structured data
+        extraction) for users who want them and explicitly opt in to a cloud-side option.
+      </p>
+      <p>
+        Found a bug, want a tool, or have feedback? Reach us at our
+        <a href="/contact">contact page</a>.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

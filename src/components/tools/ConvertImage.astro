@@ -1,0 +1,320 @@
+---
+// Convert Image — Canvas API for web formats, heic2any for HEIC input, all client-side
+---
+
+<div
+  id="convert-image-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif,.avif,image/avif" multiple class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M8 7l4-4m0 0l4 4m-4-4v18" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop images here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose files from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">HEIC, JPG, PNG, WebP, AVIF · Multiple files supported · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls" class="hidden px-4 pb-4 space-y-5">
+    <!-- Convert to -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Convert to</p>
+      <div class="flex gap-2">
+        <button type="button" data-fmt="image/jpeg" class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">JPG</button>
+        <button type="button" data-fmt="image/png"  class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">PNG</button>
+        <button type="button" data-fmt="image/webp" class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">WebP</button>
+      </div>
+    </div>
+
+    <!-- JPG quality (shown for JPEG output only) -->
+    <div id="quality-row" class="hidden">
+      <div class="flex justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">JPG quality</p>
+        <span id="quality-value" class="text-xs text-[var(--color-ink-muted)] tabular-nums">92%</span>
+      </div>
+      <input type="range" id="quality-slider" min="50" max="100" value="92" step="1" class="w-full accent-[var(--color-accent)]" />
+      <div class="flex justify-between text-xs text-[var(--color-ink-muted)] mt-1"><span>Smaller</span><span>Better quality</span></div>
+    </div>
+
+    <!-- File list -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">Files</p>
+        <button type="button" id="add-more-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]">+ Add more</button>
+      </div>
+      <div id="file-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Upload images to get started.</div>
+    <div class="flex gap-2 shrink-0">
+      <button type="button" id="download-zip-btn" class="hidden px-4 py-2 rounded-lg border border-[var(--color-rule)] text-sm font-medium text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+        Download ZIP
+      </button>
+      <button type="button" id="convert-btn" class="btn-primary" disabled>
+        <span id="convert-label">Convert</span>
+        <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 11-6.219-8.56" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import heic2any from 'https://esm.sh/heic2any@0.0.4';
+  import JSZip from 'https://esm.sh/jszip@3.10.1';
+
+  const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
+  const ACCEPTED_EXTS  = /\.(jpg|jpeg|png|webp|heic|heif|avif)$/i;
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone      = $('drop-zone');
+  const fileInput     = $('file-input');
+  const browseBtn     = $('browse-btn');
+  const emptyState    = $('empty-state');
+  const controls      = $('controls');
+  const fileListEl    = $('file-list');
+  const addMoreBtn    = $('add-more-btn');
+  const convertBtn    = $('convert-btn');
+  const convertLabel  = $('convert-label');
+  const spinner       = $('spinner');
+  const statusMsg     = $('status-msg');
+  const downloadZipBtn= $('download-zip-btn');
+  const qualityRow    = $('quality-row');
+  const qualitySlider = $('quality-slider');
+  const qualityValue  = $('quality-value');
+
+  let files = [];   // { id, file, status, result: null | { blob, name } }
+  let outFmt = 'image/jpeg';
+  let quality = 0.92;
+  let processing = false;
+  let idCounter = 0;
+
+  const fmtSize = (b) =>
+    b < 1024 ? `${b} B`
+    : b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB`
+    : `${(b / 1024 / 1024).toFixed(2)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  const extForMime = (mime) =>
+    mime === 'image/jpeg' ? 'jpg' : mime === 'image/webp' ? 'webp' : 'png';
+
+  // Format buttons
+  const fmtBtns = document.querySelectorAll('.fmt-btn');
+  const setFmt = (f) => {
+    outFmt = f;
+    fmtBtns.forEach((btn) => {
+      const active = btn.dataset.fmt === f;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+    qualityRow.classList.toggle('hidden', f !== 'image/jpeg');
+  };
+  fmtBtns.forEach((btn) => btn.addEventListener('click', () => setFmt(btn.dataset.fmt)));
+  setFmt('image/jpeg');
+
+  qualitySlider.addEventListener('input', () => {
+    quality = parseInt(qualitySlider.value, 10) / 100;
+    qualityValue.textContent = `${qualitySlider.value}%`;
+  });
+
+  const renderFileList = () => {
+    fileListEl.innerHTML = files.map((item) => {
+      let sizeRow = fmtSize(item.file.size);
+      let right = '';
+
+      if (item.status === 'done' && item.result) {
+        sizeRow = `${fmtSize(item.file.size)} → <strong>${fmtSize(item.result.blob.size)}</strong>`;
+        right = `<button type="button" data-id="${item.id}" class="dl-btn text-xs px-2.5 py-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors shrink-0">Save</button>`;
+      } else if (item.status === 'converting') {
+        right = `<svg class="animate-spin shrink-0 text-[var(--color-accent)]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>`;
+      } else if (item.status === 'error') {
+        sizeRow = `<span class="text-[var(--color-warn)]">Error — could not convert this file</span>`;
+      }
+
+      return `<div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-ink-muted)] shrink-0">
+          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-[var(--color-ink)] truncate">${item.file.name}</div>
+          <div class="text-xs text-[var(--color-ink-muted)]">${sizeRow}</div>
+        </div>
+        ${right}
+      </div>`;
+    }).join('');
+
+    fileListEl.querySelectorAll('.dl-btn').forEach((btn) =>
+      btn.addEventListener('click', () => downloadSingle(parseInt(btn.dataset.id)))
+    );
+  };
+
+  const addFiles = (newFiles) => {
+    let added = 0;
+    for (const f of newFiles) {
+      const ok = ACCEPTED_TYPES.has(f.type) || ACCEPTED_EXTS.test(f.name);
+      if (!ok) { setStatus(`${f.name}: unsupported format.`, true); continue; }
+      files.push({ id: idCounter++, file: f, status: 'pending', result: null });
+      added++;
+    }
+    if (!added) return;
+    emptyState.classList.add('hidden');
+    controls.classList.remove('hidden');
+    convertBtn.disabled = false;
+    downloadZipBtn.classList.add('hidden');
+    renderFileList();
+    setStatus(`${files.length} image${files.length !== 1 ? 's' : ''} ready — click Convert to start.`);
+  };
+
+  const downloadSingle = (id) => {
+    const item = files.find((f) => f.id === id);
+    if (!item?.result) return;
+    const url = URL.createObjectURL(item.result.blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = item.result.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadZip = async () => {
+    const done = files.filter((f) => f.status === 'done');
+    if (!done.length) return;
+    downloadZipBtn.textContent = 'Zipping…';
+    downloadZipBtn.disabled = true;
+    const zip = new JSZip();
+    for (const item of done) {
+      zip.file(item.result.name, await item.result.blob.arrayBuffer());
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'converted-images.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    downloadZipBtn.textContent = 'Download ZIP';
+    downloadZipBtn.disabled = false;
+  };
+
+  // Convert a single file to a Blob in the target format
+  const convertFile = async (file) => {
+    const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+      || /\.(heic|heif)$/i.test(file.name);
+
+    let srcBlob = file;
+
+    if (isHeic) {
+      // heic2any converts HEIC → JPEG blob (or PNG)
+      const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.95 });
+      srcBlob = Array.isArray(converted) ? converted[0] : converted;
+    }
+
+    // For AVIF, we need to go via an image element → canvas
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(srcBlob);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const q = outFmt === 'image/jpeg' ? quality : outFmt === 'image/webp' ? 0.92 : 1;
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('toBlob returned null'));
+        }, outFmt, q);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not decode image')); };
+      img.src = url;
+    });
+  };
+
+  const convertAll = async () => {
+    const pending = files.filter((f) => f.status === 'pending');
+    if (processing || !pending.length) return;
+    processing = true;
+    convertBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    convertLabel.textContent = 'Converting…';
+    setStatus('Converting in your browser…');
+
+    for (const item of pending) {
+      item.status = 'converting';
+      renderFileList();
+      try {
+        const blob = await convertFile(item.file);
+        const base = item.file.name.replace(/\.[^.]+$/, '');
+        const ext  = extForMime(outFmt);
+        item.result = { blob, name: `${base}.${ext}` };
+        item.status = 'done';
+      } catch (err) {
+        console.error(err);
+        item.status = 'error';
+      }
+      renderFileList();
+    }
+
+    const done = files.filter((f) => f.status === 'done');
+    const errors = files.filter((f) => f.status === 'error').length;
+    let msg = `Done — ${done.length} image${done.length !== 1 ? 's' : ''} converted`;
+    if (errors > 0) msg += ` · ${errors} failed`;
+    msg += '.';
+    setStatus(msg);
+
+    if (done.length > 1) downloadZipBtn.classList.remove('hidden');
+
+    processing = false;
+    spinner.classList.add('hidden');
+    convertLabel.textContent = 'Convert';
+    const stillPending = files.filter((f) => f.status === 'pending').length;
+    convertBtn.disabled = stillPending === 0;
+  };
+
+  // Events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  addMoreBtn?.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.length) addFiles([...e.target.files]);
+    fileInput.value = '';
+  });
+  convertBtn.addEventListener('click', convertAll);
+  downloadZipBtn.addEventListener('click', downloadZip);
+
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    const imgs = [...(e.dataTransfer?.files ?? [])].filter(
+      (f) => ACCEPTED_TYPES.has(f.type) || ACCEPTED_EXTS.test(f.name)
+    );
+    if (imgs.length) addFiles(imgs);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

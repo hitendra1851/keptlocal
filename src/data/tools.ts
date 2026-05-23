@@ -392,7 +392,47 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "convert-image", name: "Convert Image", shortName: "Convert Image", description: "Convert between HEIC, WebP, AVIF, JPG, PNG.", longDescription: "", category: "Image", icon: "M8 7l4-4m0 0l4 4m-4-4v18", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "convert-image",
+    name: "Convert Image",
+    shortName: "Convert Image",
+    description: "Convert HEIC, JPG, PNG, WebP, and AVIF images — including iPhone HEIC photos — entirely in your browser.",
+    longDescription: "Drop one or more images and choose an output format. HEIC files from iPhone and iPad are fully supported. Nothing is uploaded to a server.",
+    category: "Image",
+    icon: "M8 7l4-4m0 0l4 4m-4-4v18",
+    status: "live",
+    keywords: ["convert image", "heic to jpg", "convert heic to jpeg online free", "png to webp browser", "image format converter no upload"],
+    faq: [
+      {
+        q: "Are my images uploaded to a server?",
+        a: "No. All conversion runs in your browser. HEIC decoding uses the heic2any library and format conversion uses the Canvas API — neither sends your files anywhere. Open DevTools → Network while converting to confirm zero upload requests.",
+      },
+      {
+        q: "What formats can I convert from and to?",
+        a: "Supported input formats: HEIC, HEIF (iPhone/iPad), JPG, PNG, WebP, and AVIF. Supported output formats: JPG, PNG, and WebP. AVIF output requires browser support for the AVIF encoder — available in Chrome 85+ and Firefox 93+.",
+      },
+      {
+        q: "Why do I need to convert HEIC photos?",
+        a: "iPhones and iPads capture photos in HEIC (High Efficiency Image Container) format by default from iOS 11 onwards. HEIC files are not universally supported — Windows, older Android devices, most websites, and many apps cannot open them. Converting to JPG makes photos universally compatible.",
+      },
+      {
+        q: "Which output format should I choose?",
+        a: "JPG is the universal choice — every device, app, and website supports it. PNG is best when you need a transparent background (logos, screenshots). WebP offers the best compression-to-quality ratio for web use and is supported in all modern browsers, but older software may not open it.",
+      },
+      {
+        q: "Can I convert multiple HEIC photos at once?",
+        a: "Yes — select or drop several files at once. Each is converted individually and shown in the list. When more than one conversion succeeds, a Download ZIP button appears so you can grab all the files in one click.",
+      },
+      {
+        q: "Will the image quality change when converting?",
+        a: "JPG output uses 92% quality by default, which is visually lossless for most content. Adjust the quality slider to trade between file size and visual fidelity. PNG output is lossless. WebP output uses 92% quality.",
+      },
+      {
+        q: "Does converting HEIC to JPG preserve metadata (location, date)?",
+        a: "EXIF metadata (camera settings, date) may not be fully preserved during HEIC decoding in the browser — this is a limitation of the heic2any library. If EXIF preservation is critical, use a desktop tool like EXIF-aware converters.",
+      },
+    ],
+  },
   { slug: "crop-image", name: "Crop Image", shortName: "Crop Image", description: "Free-form or fixed-ratio image crop.", longDescription: "", category: "Image", icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4", status: "soon", keywords: [], faq: [] },
 ];
 

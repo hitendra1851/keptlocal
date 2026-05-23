@@ -4,78 +4,159 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
 const title = "About keptlocal — Private browser-only file tools";
-const description = "The story behind keptlocal: why we built a privacy-first PDF and image toolkit that processes files entirely in your browser.";
+const description = "keptlocal is built by Hiten Mahalwar, a Healthcare IT engineer with 15+ years of experience. Every tool runs entirely in your browser — no uploads, no accounts, no tracking.";
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  name: "About keptlocal",
+  description,
+  url: "https://keptlocal.com/about",
+  mainEntity: {
+    "@type": "Person",
+    name: "Hiten Mahalwar",
+    jobTitle: "Technical Lead",
+    worksFor: {
+      "@type": "Organization",
+      name: "Vohra Wound Physicians",
+    },
+    knowsAbout: [
+      "PDF processing",
+      "Browser-based file tools",
+      "Healthcare IT",
+      "Azure AI",
+      ".NET development",
+      "Data engineering",
+    ],
+    url: "https://keptlocal.com/about",
+  },
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={schema}>
   <Header />
   <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+
+    <nav class="text-xs text-[var(--color-ink-muted)] mb-8" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-ink)]">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-[var(--color-ink-soft)]">About</span>
+    </nav>
+
     <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-4">About</h1>
-    <p class="text-lg text-[var(--color-ink-soft)] mb-10 leading-relaxed">
-      keptlocal is a small set of privacy-first PDF and image tools that run entirely
-      inside your browser. We're building it because every other free PDF tool on the
-      internet asks you to upload your file to their server — and most people's files
-      shouldn't have to take that trip.
+    <p class="text-lg text-[var(--color-ink-soft)] mb-12 leading-relaxed">
+      keptlocal is a growing toolkit of privacy-first PDF and image tools that run entirely
+      inside your browser. No uploads. No accounts. No file ever leaves your device.
     </p>
+
+    <!-- Author card -->
+    <div class="flex items-start gap-5 p-6 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-dark)] mb-12">
+      <div class="w-16 h-16 rounded-full bg-[var(--color-accent-tint)] border-2 border-[var(--color-accent)] flex items-center justify-center shrink-0">
+        <span class="font-display text-2xl text-[var(--color-accent)] tracking-tight">HM</span>
+      </div>
+      <div>
+        <div class="font-medium text-[var(--color-ink)] text-lg leading-tight">Hiten Mahalwar</div>
+        <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">Technical Lead · Vohra Wound Physicians</div>
+        <div class="text-sm text-[var(--color-ink-muted)]">Ahmedabad, India · 15+ years in Healthcare IT</div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">.NET / Azure AI</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Data engineering</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Healthcare IT</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Browser tools</span>
+        </div>
+      </div>
+    </div>
 
     <div class="prose-doc">
       <h2>What "kept local" actually means</h2>
       <p>
         When you use a typical online PDF tool, your file travels over the network to a server
-        you've never seen, gets processed by code you can't audit, and comes back to you. The
+        you have never seen, gets processed by code you cannot audit, and comes back. The
         privacy policy says they delete it within a few hours. You take their word for it.
       </p>
       <p>
-        keptlocal is built differently. The tools run on your device using WebAssembly — your
-        browser does the work. Your file enters memory, gets transformed, and the result
-        downloads. No part of it touches a network.
+        keptlocal is built differently. The tools run on your device using JavaScript libraries
+        and the browser's built-in Canvas API — your browser does the work. Your file enters
+        memory, gets transformed, and the result downloads. No part of it touches a network.
       </p>
       <p>
-        This isn't a marketing claim — it's an architectural fact you can verify. Open your
-        browser's Network tab (F12) while using any tool. You'll see the initial page load,
-        and then no further activity. Zero uploads.
+        This is not a marketing claim. It is an architectural fact you can verify yourself.
+        Open your browser's Network tab (F12) while using any tool. You will see the initial
+        page load, and then no further activity. Zero uploads.
       </p>
 
-      <h2>Who's behind this</h2>
+      <h2>Who built this</h2>
       <p>
-        keptlocal is built and maintained by Hiten Mahalwar, a software engineer with
-        fifteen-plus years in healthcare IT. The site started as a side project after one
-        too many friends asked "is it safe to upload my tax forms to that PDF site?" —
-        and the honest answer was "probably, but you can't really know."
+        keptlocal is built and maintained by Hiten Mahalwar. I have spent fifteen years in
+        Healthcare IT — building data pipelines, integrating Azure AI Document Intelligence,
+        and working with the kind of sensitive documents (clinical notes, insurance records,
+        patient data) that should never casually leave a controlled environment.
       </p>
       <p>
-        Tools that respect your data shouldn't be a luxury. They should be the default.
+        The site started after one too many conversations where a friend or colleague asked
+        "is it safe to upload my tax forms to that PDF site?" — and the honest answer was
+        "probably, but you genuinely cannot know." That answer was not good enough.
+      </p>
+      <p>
+        Tools that respect your data should not be a niche product. They should be the
+        default. keptlocal is my attempt to make that true for everyday file tasks.
+      </p>
+
+      <h2>What is available today</h2>
+      <p>
+        keptlocal currently has <strong>12 tools across two categories</strong>, all fully client-side:
+      </p>
+      <ul>
+        <li><a href="/tools/merge-pdf">Merge PDF</a> — combine multiple PDFs into one</li>
+        <li><a href="/tools/split-pdf">Split PDF</a> — extract pages or split all pages</li>
+        <li><a href="/tools/pdf-to-jpg">PDF to JPG</a> — render PDF pages as images</li>
+        <li><a href="/tools/jpg-to-pdf">JPG to PDF</a> — combine images into a PDF</li>
+        <li><a href="/tools/rotate-pdf">Rotate PDF</a> — fix page orientation</li>
+        <li><a href="/tools/reorder-pdf">Reorder PDF Pages</a> — drag-to-reorder thumbnails</li>
+        <li><a href="/tools/watermark-pdf">Watermark PDF</a> — stamp diagonal text on every page</li>
+        <li><a href="/tools/pdf-page-count">PDF Info Viewer</a> — page count, size, metadata</li>
+        <li><a href="/tools/compress-image">Compress Image</a> — shrink JPG, PNG, WebP</li>
+        <li><a href="/tools/resize-image">Resize Image</a> — dimensions, percentage, or longest side</li>
+        <li><a href="/tools/convert-image">Convert Image</a> — HEIC, JPG, PNG, WebP, AVIF</li>
+        <li><a href="/tools/crop-image">Crop Image</a> — free-form or fixed-ratio crop</li>
+      </ul>
+      <p>
+        The <a href="/blog">blog</a> covers practical guides on PDF workflows, image formats,
+        browser security, and the privacy risks of server-based file tools.
       </p>
 
       <h2>How keptlocal stays free</h2>
       <p>
-        The tools cost us almost nothing to run — your browser does the heavy lifting, and
-        the rest is static files on a content delivery network. We show a small number of
-        non-intrusive ads on the pages around the tools to cover hosting and domain costs.
-        We don't put ads inside the tool itself.
+        The tools cost very little to run — your browser does the heavy lifting, and the
+        rest is static files served from a CDN. A small number of non-intrusive ads on the
+        pages around the tools cover hosting and domain costs. There are no ads inside the
+        tool itself.
       </p>
       <p>
-        We don't:
+        keptlocal does not:
       </p>
       <ul>
         <li>Track you across sites</li>
-        <li>Sell your data (we don't collect any to sell)</li>
+        <li>Sell your data (there is none to sell — the tools do not receive your files)</li>
         <li>Require accounts or email signups</li>
-        <li>Use dark patterns to push you onto a paid plan</li>
+        <li>Apply file size limits to push you toward a paid plan</li>
+        <li>Add watermarks to processed files</li>
       </ul>
       <p>
-        See our <a href="/privacy">privacy policy</a> for specifics.
+        See the <a href="/privacy">privacy policy</a> for specifics.
       </p>
 
-      <h2>What's coming</h2>
+      <h2>What is coming next</h2>
       <p>
-        We're adding tools one or two at a time. The current roadmap covers the
-        essentials — split, compress, rotate, convert, watermark, image resize and convert —
-        and then a small set of AI-powered "smart" tools (PDF summarization, structured data
-        extraction) for users who want them and explicitly opt in to a cloud-side option.
+        The immediate roadmap is more tools: bulk image operations, additional PDF
+        manipulation tools, and a small set of AI-powered document tools (PDF summarisation,
+        table extraction, invoice parsing) built on Azure AI Document Intelligence. The AI
+        tools will require optional cloud processing and will be clearly marked as such,
+        with explicit privacy disclosures — a deliberate departure from the fully local model,
+        offered only where the capability genuinely requires it.
       </p>
       <p>
-        Found a bug, want a tool, or have feedback? Reach us at our
+        Found a bug, want a specific tool, or have feedback? Use the
         <a href="/contact">contact page</a>.
       </p>
     </div>

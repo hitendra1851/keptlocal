@@ -4,6 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import PrivacyBadge from "../components/PrivacyBadge.astro";
 import FAQ from "../components/FAQ.astro";
+import { tools } from "../data/tools";
 import type { Tool } from "../data/tools";
 
 export interface Props {
@@ -11,6 +12,10 @@ export interface Props {
 }
 
 const { tool } = Astro.props;
+
+const relatedTools = tools
+  .filter((t) => t.category === tool.category && t.slug !== tool.slug && t.status === "live")
+  .slice(0, 4);
 
 const title = `${tool.name} — Free & Private | keptlocal`;
 const description = tool.longDescription || tool.description;
@@ -101,6 +106,25 @@ if (tool.faq.length > 0) {
       <aside class="md:col-span-1">
         <div class="sticky top-24 space-y-6">
           <div class="ad-slot" data-ad-position="sidebar" style="min-height: 250px;"></div>
+          {relatedTools.length > 0 && (
+            <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
+              <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">
+                More {tool.category} tools
+              </h4>
+              <ul class="space-y-2">
+                {relatedTools.map((t) => (
+                  <li>
+                    <a
+                      href={`/tools/${t.slug}`}
+                      class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4"
+                    >
+                      {t.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
             <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
             <ol class="text-sm text-[var(--color-ink-soft)] space-y-2 list-decimal pl-4">

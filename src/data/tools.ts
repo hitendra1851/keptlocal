@@ -355,7 +355,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "resize-image", name: "Resize Image", shortName: "Resize Image", description: "Change image dimensions with aspect lock.", longDescription: "", category: "Image", icon: "M4 4h6v6H4V4zm10 10h6v6h-6v-6zM4 14h6v6H4v-6zm10-10h6v6h-6V4z", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "resize-image",
+    name: "Resize Image",
+    shortName: "Resize Image",
+    description: "Resize JPG, PNG, and WebP images by dimensions, percentage, or longest side — in your browser.",
+    longDescription: "Upload an image, set a target size using dimensions, a percentage scale, or a longest-side limit, and download the resized file instantly. Aspect ratio lock keeps proportions correct. Nothing is uploaded.",
+    category: "Image",
+    icon: "M4 4h6v6H4V4zm10 10h6v6h-6v-6zM4 14h6v6H4v-6zm10-10h6v6h-6V4z",
+    status: "live",
+    keywords: ["resize image", "resize image online free", "change image dimensions", "resize jpg without upload", "scale image browser"],
+    faq: [
+      {
+        q: "Are my images uploaded to a server?",
+        a: "No. Resizing runs entirely in your browser using the Canvas API. Your image never leaves your device — open DevTools → Network while resizing to confirm there are no upload requests.",
+      },
+      {
+        q: "What resize modes are available?",
+        a: "Three modes: Dimensions lets you set an exact width and height in pixels, with an optional aspect ratio lock. Percentage scales the image by a percentage of its original size — 50% halves both dimensions. Longest side resizes the image so its longest edge matches a pixel value, keeping proportions intact — useful for thumbnail generation.",
+      },
+      {
+        q: "How does the aspect ratio lock work?",
+        a: "When the lock icon is active (locked), changing the width automatically updates the height to maintain the original proportions, and vice versa. Click the lock icon to unlock it and set width and height independently.",
+      },
+      {
+        q: "Can I change the output format?",
+        a: "Yes — choose JPG, PNG, or WebP, or keep the same format as the original. Converting a PNG to WebP typically reduces file size further. JPG does not support transparency; transparent PNGs resaved as JPG will get a white background.",
+      },
+      {
+        q: "Will resizing up (enlarging) look good?",
+        a: "Enlarging beyond the original dimensions degrades quality — browsers use bilinear interpolation which produces soft or pixelated results for significant upscaling. For upscaling, AI-powered tools (not currently on keptlocal) produce much better results.",
+      },
+      {
+        q: "What formats are supported?",
+        a: "JPG, PNG, and WebP. HEIC files need to be converted first — use the Convert Image tool.",
+      },
+    ],
+  },
   { slug: "convert-image", name: "Convert Image", shortName: "Convert Image", description: "Convert between HEIC, WebP, AVIF, JPG, PNG.", longDescription: "", category: "Image", icon: "M8 7l4-4m0 0l4 4m-4-4v18", status: "soon", keywords: [], faq: [] },
   { slug: "crop-image", name: "Crop Image", shortName: "Crop Image", description: "Free-form or fixed-ratio image crop.", longDescription: "", category: "Image", icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4", status: "soon", keywords: [], faq: [] },
 ];

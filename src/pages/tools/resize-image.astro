@@ -1,0 +1,78 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ResizeImage from "../../components/tools/ResizeImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "resize-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <ResizeImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to resize an image</h2>
+    <ol>
+      <li>Drop your image into the zone above, or click to browse. JPG, PNG, and WebP files are supported.</li>
+      <li>Choose a resize mode:
+        <ul>
+          <li><strong>Dimensions</strong> — enter a target width and height in pixels. The lock icon keeps the aspect ratio; click it to set dimensions independently.</li>
+          <li><strong>Percentage</strong> — scale the image to a fraction of its original size. 50% halves both dimensions; 200% doubles them.</li>
+          <li><strong>Longest side</strong> — set a maximum for the longest edge (width or height, whichever is larger). The other dimension scales proportionally. Useful for generating thumbnails or web-ready images at a consistent scale.</li>
+        </ul>
+      </li>
+      <li>Choose an output format — keep the original, or convert to JPG, PNG, or WebP.</li>
+      <li>Click <strong>Resize &amp; download</strong>. The resized image saves to your device.</li>
+    </ol>
+    <p>
+      All resizing happens in your browser using the Canvas API. No file is sent to a server — open DevTools (<code>F12</code>) → Network while resizing to confirm zero upload requests.
+    </p>
+
+    <h2>When to resize an image</h2>
+    <ul>
+      <li><strong>Uploading a profile photo or avatar</strong> — most platforms impose a maximum image dimension (typically 1000–2000 px) and reject larger uploads. Resizing beforehand avoids the upload error and ensures the displayed image is not scaled down by the platform in an unexpected way.</li>
+      <li><strong>Preparing images for a website or CMS</strong> — serving a 5000 × 3000 px photograph as a 400 × 267 px thumbnail wastes bandwidth. Resizing the image to its display dimensions before upload dramatically reduces page weight and improves Core Web Vitals scores.</li>
+      <li><strong>Creating thumbnails for a product catalogue</strong> — the Longest side mode lets you batch-resize multiple images to consistent proportions without cropping, regardless of whether they are portrait or landscape.</li>
+      <li><strong>Reducing image size for email</strong> — large-dimension images carry large file sizes even after JPEG compression. A 4000 × 3000 photo downsized to 1600 × 1200 before compression loses no perceptible quality on screen while cutting the file size by 80%.</li>
+      <li><strong>Fitting an image to a specific document size</strong> — when embedding images in PDFs, presentations, or design files, having them match the exact target dimensions in pixels avoids scaling artefacts introduced by the host application.</li>
+    </ul>
+
+    <h2>Choosing the right resize mode</h2>
+    <p>
+      <strong>Dimensions</strong> gives you precise control and is the right choice when you know exactly how many pixels the output must be — a social media post with specific dimension requirements, a submission form that enforces exact pixel sizes, or a design spec with fixed image slots. Enable the aspect ratio lock to scale proportionally; disable it to stretch or squash the image freely.
+    </p>
+    <p>
+      <strong>Percentage</strong> is the simplest mode for quick reductions. "I want this image at half size" or "make it 75% of the original" maps directly. It is also useful when you have a batch of images at different dimensions and want all of them reduced by the same relative amount.
+    </p>
+    <p>
+      <strong>Longest side</strong> is the standard approach for web and email optimisation. A common workflow: take any photo, regardless of orientation or aspect ratio, and resize it so the longest edge is 1920 px. Portrait photos, landscape photos, and squares all come out at the right scale without cropping. 1920 px is enough for full-bleed desktop display; 1200 px suits most CMS hero images; 800 px is fine for email body images.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The browser's Canvas API provides a hardware-accelerated drawing surface that can scale and composite images at native speed. When you click Resize, the tool creates an off-screen <code>&lt;canvas&gt;</code> element at the target dimensions, draws the original image into it using <code>ctx.drawImage()</code>, then calls <code>canvas.toBlob()</code> to encode the canvas pixels into the chosen format and trigger a download.
+    </p>
+    <p>
+      The scaling algorithm used by <code>drawImage</code> is bilinear interpolation — the browser blends neighbouring pixel values to produce smooth results when shrinking. Shrinking by more than 50% in a single pass can introduce mild aliasing on sharp edges (text, icons). For best quality when reducing by a large factor, two-pass downsampling produces cleaner results. The tool performs single-pass resizing, which is excellent for photographic content and fine for most use cases.
+    </p>
+    <p>
+      Output quality: JPG and WebP are encoded at 0.92 quality (on a 0–1 scale), which is the standard high-quality web setting and produces files that are visually lossless for most content. PNG is encoded losslessly (full quality) — PNG file size is determined by the pixel dimensions, not a quality setting.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Upscaling quality:</strong> enlarging an image beyond its original dimensions cannot add detail. The output will be visibly softer or pixelated at significant upscale factors. For AI-based upscaling, dedicated tools are required.</li>
+      <li><strong>Transparency:</strong> PNG files with transparent backgrounds are handled correctly — transparency is preserved in PNG and WebP output. Converting a transparent PNG to JPG fills the transparent areas with white (JPG does not support transparency).</li>
+      <li><strong>Very large images:</strong> images above 100 MP may approach browser memory limits on devices with limited RAM. The practical ceiling is typically several hundred megapixels on modern laptops.</li>
+      <li><strong>HEIC files:</strong> iPhone HEIC photos are not supported. Use the Convert Image tool to convert HEIC to JPG first.</li>
+      <li><strong>Animated images:</strong> only the first frame of an animated GIF or WebP is resized. Use a dedicated GIF tool for animated content.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your image</h2>
+    <p>
+      Your image is loaded into browser memory via the File API, drawn to an off-screen canvas, and downloaded directly to your device. Nothing is transmitted to a server at any point. The resizing happens entirely within the browser tab — close the tab and the image data is gone.
+    </p>
+    <p>
+      Unlike server-based image resizing services, keptlocal does not retain your images, does not log file names or metadata, and does not require account creation. There is no risk of a personal or confidential image appearing in a server log or being retained for machine learning training.
+    </p>
+  </Fragment>
+</ToolLayout>

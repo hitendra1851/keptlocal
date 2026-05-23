@@ -1,0 +1,129 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+
+const title = "Blog — PDF & Image Privacy Guides | keptlocal";
+const description = "Practical guides on PDF tools, image formats, and why browser-based processing is safer and faster than uploading your files to a server.";
+
+const posts = [
+  {
+    slug: "merge-pdf-without-uploading",
+    title: "How to Merge PDFs Without Uploading Them",
+    description: "Most online PDF mergers upload your files to a server — including contracts, invoices, and confidential documents. Here is how to do it entirely in your browser.",
+    date: "2026-05-23",
+    readTime: 8,
+    tags: ["PDF", "Privacy"],
+  },
+  {
+    slug: "why-pdf-tools-should-not-upload-your-files",
+    title: "Why Your PDF Tools Shouldn't Be Uploading Your Files",
+    description: "Every time you use an online PDF tool, your document may be stored on a third-party server for days. Here is what actually happens and what to use instead.",
+    date: "2026-05-23",
+    readTime: 7,
+    tags: ["Privacy", "PDF"],
+  },
+  {
+    slug: "compress-pdf-file-size-vs-quality",
+    title: "Compressing PDFs: File Size vs. Quality Explained",
+    description: "Why PDFs can be surprisingly large, what compression actually removes, and how to choose a target size without making your document unreadable.",
+    date: "2026-05-23",
+    readTime: 7,
+    tags: ["PDF"],
+  },
+  {
+    slug: "pdf-to-jpg-when-and-when-not-to-convert",
+    title: "PDF to JPG: When (and When Not) to Convert",
+    description: "Converting a PDF to images loses text selectability, searchability, and copy-paste. Here is when the trade-off is worth making and when to keep the PDF.",
+    date: "2026-05-23",
+    readTime: 6,
+    tags: ["PDF", "Images"],
+  },
+  {
+    slug: "heic-to-jpg-iphone-photo-problem",
+    title: "HEIC to JPG: The iPhone Photo Problem and How to Fix It",
+    description: "Since iOS 11, iPhones save photos in HEIC format. Windows cannot open them, most websites reject them, and email clients show a blank file. Here is the fix.",
+    date: "2026-05-23",
+    readTime: 6,
+    tags: ["Images", "iPhone"],
+  },
+  {
+    slug: "image-compression-formats-jpg-webp-avif-2026",
+    title: "Image Compression Formats Compared: JPG vs WebP vs AVIF in 2026",
+    description: "Which format gives the best quality at the smallest file size? A practical comparison of JPG, WebP, and AVIF with real numbers and browser support data.",
+    date: "2026-05-23",
+    readTime: 8,
+    tags: ["Images"],
+  },
+  {
+    slug: "how-browser-based-file-tools-work-webassembly",
+    title: "How Browser-Based File Tools Actually Work (WebAssembly Explained)",
+    description: "WebAssembly lets your browser run near-native code for tasks like PDF processing and image compression. A plain-English explanation of what is happening under the hood.",
+    date: "2026-05-23",
+    readTime: 8,
+    tags: ["Technical"],
+  },
+  {
+    slug: "pdf-privacy-what-happens-to-files-on-free-online-tools",
+    title: "PDF Privacy: What Happens to Files on Free Online Tools",
+    description: "Free PDF tools have to make money somehow. When you upload a document, where does it go, how long is it kept, and who can access it? We investigated.",
+    date: "2026-05-23",
+    readTime: 7,
+    tags: ["Privacy", "PDF"],
+  },
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: "keptlocal Blog",
+  description,
+  url: "https://keptlocal.com/blog",
+  publisher: {
+    "@type": "Organization",
+    name: "keptlocal",
+    url: "https://keptlocal.com",
+  },
+};
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Header />
+
+  <main class="max-w-5xl mx-auto px-6 pt-10 pb-16">
+    <nav class="text-xs text-[var(--color-ink-muted)] mb-6" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-ink)]">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-[var(--color-ink-soft)]">Blog</span>
+    </nav>
+
+    <div class="mb-10">
+      <h1 class="font-display text-4xl md:text-5xl text-[var(--color-ink)] tracking-tighter mb-3">Blog</h1>
+      <p class="text-lg text-[var(--color-ink-soft)] max-w-2xl">Practical guides on PDF tools, image formats, browser security, and why keeping files local matters.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-6">
+      {posts.map((post) => {
+        const dateDisplay = new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+        return (
+          <a
+            href={`/blog/${post.slug}`}
+            class="group block p-6 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] transition-colors"
+          >
+            <div class="flex items-center gap-2 mb-3 flex-wrap">
+              {post.tags.map((tag) => (
+                <span class="text-xs px-2 py-0.5 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">{tag}</span>
+              ))}
+              <span class="text-xs text-[var(--color-ink-muted)] ml-auto">{post.readTime} min read</span>
+            </div>
+            <h2 class="font-display text-xl text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">{post.title}</h2>
+            <p class="text-sm text-[var(--color-ink-soft)] leading-relaxed mb-4">{post.description}</p>
+            <time class="text-xs text-[var(--color-ink-muted)]" datetime={post.date}>{dateDisplay}</time>
+          </a>
+        );
+      })}
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

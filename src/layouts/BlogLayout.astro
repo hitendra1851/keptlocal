@@ -1,0 +1,147 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+export interface Props {
+  title: string;
+  description: string;
+  publishDate: string;    // ISO 8601 e.g. "2026-05-23"
+  readTime: number;       // minutes
+  tags?: string[];
+  canonical?: string;
+}
+
+const { title, description, publishDate, readTime, tags = [], canonical } = Astro.props;
+
+const siteUrl = "https://keptlocal.com";
+const pageUrl  = canonical ?? `${siteUrl}${Astro.url.pathname}`;
+
+const dateObj    = new Date(publishDate);
+const dateDisplay = dateObj.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+const dateIso    = dateObj.toISOString();
+
+const metaTitle = `${title} | keptlocal`;
+
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: title,
+    description,
+    url: pageUrl,
+    datePublished: dateIso,
+    dateModified: dateIso,
+    author: {
+      "@type": "Person",
+      name: "Hiten Mahalwar",
+      url: `${siteUrl}/about`,
+      jobTitle: "Technical Lead",
+      worksFor: { "@type": "Organization", name: "Vohra Wound Physicians" },
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "keptlocal",
+      url: siteUrl,
+      logo: { "@type": "ImageObject", url: `${siteUrl}/logo.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${siteUrl}/` },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${siteUrl}/blog` },
+      { "@type": "ListItem", position: 3, name: title, item: pageUrl },
+    ],
+  },
+];
+---
+
+<BaseLayout title={metaTitle} description={description} canonical={pageUrl} schema={schema}>
+  <Header />
+
+  <main class="max-w-5xl mx-auto px-6 pt-10 pb-16">
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-[var(--color-ink-muted)] mb-6" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-ink)]">Home</a>
+      <span class="mx-2">/</span>
+      <a href="/blog" class="hover:text-[var(--color-ink)]">Blog</a>
+      <span class="mx-2">/</span>
+      <span class="text-[var(--color-ink-soft)]">{title}</span>
+    </nav>
+
+    <div class="grid md:grid-cols-3 gap-12">
+      <!-- Article column -->
+      <article class="md:col-span-2">
+        <!-- Meta -->
+        <div class="flex items-center gap-3 text-xs text-[var(--color-ink-muted)] mb-4 flex-wrap">
+          <time datetime={dateIso}>{dateDisplay}</time>
+          <span>·</span>
+          <span>{readTime} min read</span>
+          {tags.length > 0 && (
+            <>
+              <span>·</span>
+              {tags.map((tag) => (
+                <span class="px-2 py-0.5 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">{tag}</span>
+              ))}
+            </>
+          )}
+        </div>
+
+        <!-- Title -->
+        <h1 class="font-display text-4xl md:text-5xl text-[var(--color-ink)] mb-6 tracking-tighter leading-tight">
+          {title}
+        </h1>
+
+        <!-- Author -->
+        <div class="flex items-center gap-3 mb-8 pb-8 border-b border-[var(--color-rule)]">
+          <div class="w-9 h-9 rounded-full bg-[var(--color-accent-tint)] border border-[var(--color-accent)] flex items-center justify-center">
+            <span class="text-xs font-semibold text-[var(--color-accent)]">HM</span>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-[var(--color-ink)]">Hiten Mahalwar</div>
+            <div class="text-xs text-[var(--color-ink-muted)]">Founder, keptlocal · Technical Lead, Healthcare IT</div>
+          </div>
+        </div>
+
+        <!-- Ad slot: in-content top -->
+        <div class="ad-slot mb-8" data-ad-position="in-content-top"></div>
+
+        <!-- Content -->
+        <div class="prose-doc">
+          <slot />
+        </div>
+
+        <!-- Ad slot: in-content bottom -->
+        <div class="ad-slot mt-10" data-ad-position="in-content-bottom"></div>
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="md:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <div class="ad-slot" data-ad-position="sidebar" style="min-height: 250px;"></div>
+
+          <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
+            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Privacy-first tools</h4>
+            <p class="text-xs text-[var(--color-ink-muted)] mb-3">All keptlocal tools run entirely in your browser. Files never leave your device.</p>
+            <a href="/" class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4">Browse all tools →</a>
+          </div>
+
+          <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
+            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
+            <ol class="text-xs text-[var(--color-ink-muted)] space-y-1.5 list-decimal pl-4">
+              <li>Open DevTools (F12)</li>
+              <li>Switch to the Network tab</li>
+              <li>Run any keptlocal tool</li>
+              <li>No upload requests appear</li>
+            </ol>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

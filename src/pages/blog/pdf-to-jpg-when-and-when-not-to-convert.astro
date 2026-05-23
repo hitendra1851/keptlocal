@@ -1,0 +1,115 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="PDF to JPG: When (and When Not) to Convert"
+  description="Converting a PDF to images loses text selectability, searchability, and copy-paste. Here is when that trade-off is worth making — and when you should keep the PDF."
+  publishDate="2026-05-23"
+  readTime={6}
+  tags={["PDF", "Images"]}
+>
+
+<p class="lead">
+  PDF to JPG conversion is one of the most-requested file operations online — and one of the most misused. Converting a text-based PDF to a series of JPEG images discards everything that makes a PDF valuable: the ability to search it, copy text from it, read it with a screen reader, and compress it efficiently. Before you convert, it is worth asking whether you should.
+</p>
+
+<h2>What you give up when you convert PDF to JPG</h2>
+
+<p>
+  A PDF containing text stores that text as actual characters — a stream of Unicode code points associated with font data and position information. This means:
+</p>
+
+<ul>
+  <li><strong>Text is selectable and copyable.</strong> You can highlight a paragraph and paste it elsewhere.</li>
+  <li><strong>The document is searchable.</strong> Ctrl+F finds any word in the file, and search engines can index the text.</li>
+  <li><strong>Screen readers can read it.</strong> Accessibility tools parse the text stream to render audio output for visually impaired readers.</li>
+  <li><strong>The file is compact.</strong> A page of text as PDF might be 50–200 KB. The same page rendered at 150 DPI and saved as JPEG might be 300–800 KB. Images are larger than the text they represent.</li>
+  <li><strong>It scales without degradation.</strong> Vector text in a PDF is resolution-independent. Zoomed to 400%, it is still sharp. A JPEG zoomed to 400% shows pixels and compression artefacts.</li>
+</ul>
+
+<p>
+  When you convert a PDF to JPG, you get a photograph of the document. That photograph is less functional, larger, and lower quality than the PDF it came from — for most use cases.
+</p>
+
+<h2>When PDF to JPG conversion is the right choice</h2>
+
+<h3>Embedding PDF content in a document that does not support PDFs</h3>
+<p>
+  Word documents, PowerPoint slides, and Google Docs cannot embed a PDF as a native object that renders correctly across all viewers. Converting the relevant PDF page to a high-resolution JPG and inserting it as an image is the reliable workaround. Use the Best quality setting (3× scale, ~216 DPI) to keep text legible when the image is scaled down in the presentation.
+</p>
+
+<h3>Sharing a page on social media or messaging apps</h3>
+<p>
+  Social platforms accept images universally; PDF uploads are unsupported on most consumer platforms (Twitter, Instagram, WhatsApp). Converting a single relevant page to JPG is the standard workflow for sharing document content on these platforms.
+</p>
+
+<h3>Creating a preview thumbnail</h3>
+<p>
+  Web applications that handle document uploads often display a thumbnail preview of the first page. The thumbnail generation pipeline — whether in a CMS, a document management system, or a custom app — typically converts the first page to a JPEG. A standard quality setting (1.5× scale) is sufficient for thumbnails.
+</p>
+
+<h3>Sending a document you do not want the recipient to modify</h3>
+<p>
+  A JPEG cannot be edited with standard text editors or PDF tools. Converting a finalised document to images before sending is a crude form of content protection — the recipient can view it but cannot easily extract and reuse the text. This is particularly common for final invoices, certificates, and formal notices. Note that this is not security: the text is visible and can be transcribed or OCR'd. It is a deterrence, not a barrier.
+</p>
+
+<h3>Working with PDF viewers that render incorrectly</h3>
+<p>
+  Some legacy or embedded PDF viewers struggle with complex PDFs: unusual fonts, transparent layers, form fields, or non-standard PDF versions. Converting to images bypasses the rendering chain entirely — what you see is what the conversion tool rendered, independent of the viewer's interpretation.
+</p>
+
+<h3>The source PDF is already a scan</h3>
+<p>
+  A scanned PDF is already a sequence of images. The PDF wrapper adds structure but the underlying content is pixels, not selectable text (unless OCR has been applied). Converting a scanned PDF to JPG extracts those underlying images with no meaningful loss — you are just changing the container format. In this case, the trade-offs listed above do not apply.
+</p>
+
+<h2>How to convert PDF to JPG without uploading the file</h2>
+
+<p>
+  The <a href="/tools/pdf-to-jpg">keptlocal PDF to JPG tool</a> renders each page using pdf.js — the same PDF rendering engine used in Firefox — and exports them as JPEG images. The rendering happens inside your browser; no file is uploaded to a server.
+</p>
+
+<p>
+  Choose the quality setting based on how you will use the images:
+</p>
+
+<ul>
+  <li><strong>Standard (1.5× scale, ~108 DPI):</strong> suitable for screen display, thumbnails, and social media sharing. File sizes are small — typically 100–400 KB per page.</li>
+  <li><strong>High (2× scale, ~144 DPI):</strong> good for email attachments, presentation embeds, and web content. A clear step up in quality without the file size of the Best setting.</li>
+  <li><strong>Best (3× scale, ~216 DPI):</strong> the closest you can get to print quality from a browser-based converter. Use this for any context where the image will be displayed at sizes larger than the original page — a zoomable web viewer, a printed handout, a high-resolution embed.</li>
+</ul>
+
+<p>
+  A single-page PDF downloads as a single JPEG. Multi-page PDFs download as a ZIP archive containing one JPEG per page.
+</p>
+
+<h2>Alternatives to conversion worth considering</h2>
+
+<p>
+  Before converting, consider whether one of these meets your need without discarding the PDF's capabilities:
+</p>
+
+<ul>
+  <li><strong>Share the PDF directly.</strong> Every modern operating system and most mobile devices have native PDF viewers. Email clients display PDFs as attachments. Slack, Teams, and most professional messaging tools show PDF previews. Unless there is a specific reason JPG is required, the PDF is usually the better share format.</li>
+  <li><strong>Use your PDF viewer's screenshot function.</strong> Most viewers let you select a region and copy it to the clipboard as an image. This gives you exactly the part of the page you need without converting the whole document.</li>
+  <li><strong>Export at source.</strong> If the PDF was generated from Word, PowerPoint, or a design tool, re-export from the source application as an image. The source application's image export pipeline typically produces better results than PDF-to-image conversion because it bypasses the PDF rendering step entirely.</li>
+</ul>
+
+<h2>Quality expectations and browser limitations</h2>
+
+<p>
+  pdf.js renders PDFs using the browser's graphics pipeline. The quality of the output is limited by:
+</p>
+
+<ul>
+  <li><strong>Font rendering:</strong> if the PDF embeds unusual or proprietary fonts, pdf.js may substitute a standard font for rendering. The layout will usually be correct, but the exact letterforms may differ from a native PDF viewer.</li>
+  <li><strong>Transparency and blend modes:</strong> complex transparency effects in PDFs occasionally render differently across different PDF engines. pdf.js handles standard cases well.</li>
+  <li><strong>Very large PDFs:</strong> rendering at Best quality (3×) is memory-intensive for large page sizes. A tabloid-size (A3) page at 3× scale produces a canvas of approximately 3500 × 5000 pixels — around 50 megapixels. This is within browser limits on most devices but may take several seconds per page.</li>
+</ul>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert your PDF pages to images in your browser — no upload, no watermark, no account — with the <a href="/tools/pdf-to-jpg" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal PDF to JPG tool</a>.
+</p>
+
+</BlogLayout>

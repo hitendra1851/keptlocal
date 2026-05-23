@@ -1,0 +1,189 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Merge PDFs Without Uploading Them"
+  description="Most online PDF mergers upload your files to a server — including contracts, invoices, and confidential documents. Here is how to do it entirely in your browser, with zero uploads."
+  publishDate="2026-05-23"
+  readTime={8}
+  tags={["PDF", "Privacy"]}
+>
+
+<p class="lead">
+  Every time you use a popular online PDF tool to merge files, your documents travel to a server somewhere — a server you know nothing about, operated by a company whose privacy policy you almost certainly have not read. Contracts, invoices, tax returns, medical records: the kind of documents that end up in PDF merges are often the ones you least want to hand to a stranger.
+</p>
+
+<p>
+  There is a better way. Modern browsers can merge PDFs directly — no upload required. This guide explains how it works, how to verify it is truly local, and when server-side merging might actually be the right call.
+</p>
+
+<h2>Why most PDF tools require an upload</h2>
+
+<p>
+  For the first decade of browser-based tools, the browser was a thin client. Heavy computation happened on a server, the result came back over the network, and you downloaded it. This made sense in 2010 when JavaScript was slow and browser APIs were limited.
+</p>
+
+<p>
+  The economics were also convenient for tool builders. Every upload is a data touchpoint. You see the user, you see the file type, you can log the event, you can run ads based on what was uploaded. "Free" PDF tools that require uploads are often using your files to subsidise their business in ways that go beyond what their privacy policies clearly disclose.
+</p>
+
+<p>
+  As a result, the upload-first model became the default and stayed there long after browsers gained the capability to run the same processing locally.
+</p>
+
+<h2>What actually happens when you upload to a free PDF merger</h2>
+
+<p>
+  When you upload to a service like SmallPDF, iLovePDF, or similar tools, your file is transmitted to their servers over HTTPS (which means it is encrypted in transit — but that only protects it from interception while travelling, not from the server itself). Once it arrives, several things may happen:
+</p>
+
+<ul>
+  <li><strong>The file is stored temporarily</strong> — most services delete files after a window of one to a few hours. Some keep them longer. Their privacy policies typically say "up to X hours" but rarely commit to zero retention.</li>
+  <li><strong>The file passes through shared infrastructure</strong> — cloud hosting means your PDF sits on a physical server alongside files from thousands of other users. The infrastructure provider (AWS, Google Cloud, Azure) has its own access policies.</li>
+  <li><strong>Metadata is logged</strong> — at minimum, server logs capture your IP address, the time, the file size, and often the file name. Some tools capture more.</li>
+  <li><strong>Staff may be able to access files</strong> — customer support and technical operations teams at most companies can access uploaded files in practice, even if they are not supposed to do so routinely.</li>
+</ul>
+
+<p>
+  None of this is necessarily malicious. Most services handle files responsibly. But "responsible" is not the same as "private." The moment you upload a file, you have lost control of it.
+</p>
+
+<h2>How browser-based PDF merging works</h2>
+
+<p>
+  Browsers can now execute near-native code via WebAssembly and run sophisticated JavaScript libraries that were previously only feasible on a server. <a href="https://github.com/Hopding/pdf-lib">pdf-lib</a> is one such library — it implements the PDF specification in pure JavaScript, allowing it to read, manipulate, and write PDF files entirely within the browser.
+</p>
+
+<p>
+  When you merge PDFs using a browser-based tool like <a href="/tools/merge-pdf">keptlocal's Merge PDF</a>, here is what happens:
+</p>
+
+<ol>
+  <li>You select files using the browser's File API — the files move from your disk into the browser's memory (RAM). They have not touched the network at this point.</li>
+  <li>pdf-lib reads the PDF object structure from each file's byte array in memory.</li>
+  <li>It creates a new empty PDF document and copies the pages from each source document into it, in the order you specified.</li>
+  <li>It serialises the merged document back to a byte array.</li>
+  <li>The browser constructs a temporary object URL from that byte array and triggers a download. The file goes from browser memory directly to your downloads folder.</li>
+</ol>
+
+<p>
+  No network request is made at any point in that sequence. The entire operation runs on your CPU, in your browser tab, using your device's RAM.
+</p>
+
+<h2>Step by step: merging PDFs in your browser with no upload</h2>
+
+<ol>
+  <li>
+    <strong>Go to <a href="/tools/merge-pdf">keptlocal.com/tools/merge-pdf</a>.</strong> The page loads the pdf-lib library from a CDN (a one-time fetch of the library code, not your files).
+  </li>
+  <li>
+    <strong>Add your PDFs.</strong> Click "choose files" or drag them into the drop zone. Select as many as you need — there is no limit. The files load into browser memory only.
+  </li>
+  <li>
+    <strong>Arrange the order.</strong> Drag the rows in the file list to set the sequence they will appear in the merged document.
+  </li>
+  <li>
+    <strong>Click "Merge &amp; download".</strong> The merge runs immediately in your browser. For most documents it completes in under a second. Larger documents take a few seconds — you will see a progress indicator.
+  </li>
+  <li>
+    <strong>The merged PDF downloads directly to your device.</strong> The filename defaults to <code>merged.pdf</code>. Rename it as needed.
+  </li>
+</ol>
+
+<h2>How to verify your files never left your device</h2>
+
+<p>
+  You do not have to take our word for it. Here is how to confirm no upload occurs:
+</p>
+
+<ol>
+  <li>Open your browser's DevTools — press <strong>F12</strong> in Chrome, Edge, or Firefox, or <strong>Option + Command + I</strong> on Mac Safari.</li>
+  <li>Switch to the <strong>Network</strong> tab.</li>
+  <li>Load the merge tool page and select your files. Do not click merge yet.</li>
+  <li>In the Network tab, click the filter icon and select <strong>Fetch/XHR</strong> to show only data requests (filtering out CSS, fonts, and other static assets).</li>
+  <li>Now click <strong>Merge &amp; download</strong>.</li>
+  <li>Watch the network panel. No new requests appear during or after the merge — because none are made.</li>
+</ol>
+
+<p>
+  If you see a POST request or an upload to an external URL, stop and leave the site — that tool is uploading your files regardless of what it claims. With keptlocal, the network panel stays quiet.
+</p>
+
+<h2>What browser-based merging cannot do (and when a server makes sense)</h2>
+
+<p>
+  Browser-based PDF merging handles the vast majority of real-world use cases. There are scenarios where server-side processing is genuinely the right tool:
+</p>
+
+<ul>
+  <li><strong>Very large files (multiple gigabytes):</strong> your device's RAM is the ceiling. Merging ten 200 MB engineering drawings may exhaust browser memory on a device with 8 GB RAM. Server-side tools allocate as much storage as needed.</li>
+  <li><strong>Batch automation:</strong> merging hundreds of PDFs programmatically as part of a pipeline requires an API or a scripting environment, not a browser UI.</li>
+  <li><strong>PDF/A compliance and archival formats:</strong> specialist PDF standards (PDF/A for legal archiving, PDF/X for print) require validation and conversion that goes beyond what pdf-lib currently supports.</li>
+  <li><strong>True PDF compression:</strong> shrinking a PDF's file size via Ghostscript-level compression requires native code execution that is not feasible in a browser tab. See our <a href="/blog/compress-pdf-file-size-vs-quality">guide to PDF compression</a> for more.</li>
+</ul>
+
+<p>
+  If your use case falls into one of those categories, a server-side tool is the right choice — but go in with clear eyes about what that means for your file's privacy.
+</p>
+
+<h2>Which documents most need local-only processing</h2>
+
+<p>
+  Not every merge warrants concern. A PDF of publicly available product specs merged with a price list is not sensitive. But consider these categories before uploading:
+</p>
+
+<ul>
+  <li><strong>Legal documents</strong> — contracts, NDAs, court filings, wills. These contain personal information and may be subject to attorney-client privilege.</li>
+  <li><strong>Medical records</strong> — lab results, discharge summaries, prescriptions. Uploading these may violate HIPAA in the US or GDPR in Europe.</li>
+  <li><strong>Financial documents</strong> — tax returns, bank statements, payroll records. File names alone ("Q3_payroll_2026.pdf") reveal information about your organisation.</li>
+  <li><strong>HR documents</strong> — employee reviews, disciplinary records, offer letters. These are typically subject to data protection obligations.</li>
+  <li><strong>Client documents</strong> — anything a client trusted you with carries an implicit confidentiality expectation.</li>
+</ul>
+
+<p>
+  The test is simple: would you hand a physical copy of this document to a stranger and ask them to merge it for you, then hand it back? If not, do not upload it to a server you do not control.
+</p>
+
+<h2>Browser support</h2>
+
+<p>
+  Browser-based PDF merging works in any modern browser: Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. It works on Windows, macOS, Linux, Android, and iOS. No plugin or extension is required. No account or signup is needed.
+</p>
+
+<p>
+  Once the page is loaded and the pdf-lib library is cached, merging works even if you disable your network connection. You can verify this yourself: load the page, disconnect from the internet, then merge files. The merge completes normally.
+</p>
+
+<h2>Frequently asked questions</h2>
+
+<h3>Is it safe to merge PDFs in a browser?</h3>
+<p>
+  Yes — more so than uploading to a server. The risk of using any browser tool is the same as the risk of running software locally: you are trusting the code that runs. With an open-source library like pdf-lib, the code is publicly auditable. With a closed server-side service, you are trusting not just the code but the company's infrastructure, employees, and future ownership.
+</p>
+
+<h3>Does browser-based merging preserve bookmarks, annotations, and form fields?</h3>
+<p>
+  pdf-lib copies the page content from each source document. Bookmarks (document outline) from source PDFs are not currently combined into a single merged outline — that is a limitation of how pdf-lib handles document-level metadata. Page-level annotations, form fields, and embedded fonts are preserved.
+</p>
+
+<h3>Can I merge PDFs on my phone?</h3>
+<p>
+  Yes. The merge tool works on iOS Safari 15+ and Android Chrome. The drag-to-reorder interface uses touch events. For very large files, a phone with limited RAM may run out of memory — for those cases, a desktop browser is more reliable.
+</p>
+
+<h3>Is there a file size limit?</h3>
+<p>
+  There is no enforced limit. The practical ceiling is your device's available RAM. Most PDFs in everyday use are well under 100 MB, which is trivial for any modern device.
+</p>
+
+<h3>What happens if I close the tab while merging?</h3>
+<p>
+  The merge operation stops and any partial output is discarded. The source PDFs remain on your device — nothing has been transmitted. Simply reopen the tool and start again.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Ready to merge? Try the <a href="/tools/merge-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal Merge PDF tool</a> — no upload, no account, no limit.
+</p>
+
+</BlogLayout>

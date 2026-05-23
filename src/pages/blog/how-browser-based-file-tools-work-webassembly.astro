@@ -1,0 +1,139 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How Browser-Based File Tools Actually Work (WebAssembly Explained)"
+  description="Modern browsers can run PDF processing, image compression, and file conversion at near-native speed without a server. A plain-English explanation of the technology."
+  publishDate="2026-05-23"
+  readTime={8}
+  tags={["Technical"]}
+>
+
+<p class="lead">
+  A few years ago, the idea of merging PDFs, compressing images, or converting HEIC photos in a browser — with no server, no download, no waiting — would have seemed implausible. Today it works on any modern phone or laptop. The technology that made this possible is WebAssembly, and understanding how it works explains why browser-based tools are now genuinely competitive with desktop software.
+</p>
+
+<h2>The old model: why browsers needed servers</h2>
+
+<p>
+  Before 2017, JavaScript was the only language that ran in browsers. JavaScript is a dynamically typed, interpreted language — convenient for building interactive interfaces, but slow for computationally intensive tasks like decoding image formats, parsing binary file structures, or applying compression algorithms.
+</p>
+
+<p>
+  The consequence was a hard boundary: anything requiring real computation happened on a server. You uploaded your file, a server ran a C++ or Python program to process it, and the result came back over the network. This was not a design choice — it was a technical necessity.
+</p>
+
+<p>
+  It also created the business model that defines most "free" online tools today: the server is the product. Hosting, bandwidth, and compute cost money. Tools recoup those costs through advertising, freemium conversion, or (less visibly) data retention and use.
+</p>
+
+<h2>What WebAssembly is</h2>
+
+<p>
+  WebAssembly (abbreviated Wasm) is a binary instruction format designed to run in browsers at near-native speed. Introduced in 2017 and now supported by all major browsers, it is not a programming language you write directly — it is a compilation target.
+</p>
+
+<p>
+  Code written in C, C++, Rust, Go, or other systems languages can be compiled to WebAssembly instead of (or in addition to) native machine code. The resulting .wasm file contains compact binary instructions that the browser's WebAssembly engine executes directly, bypassing the JavaScript interpreter.
+</p>
+
+<p>
+  The performance difference is significant. WebAssembly runs at roughly 80–90% of native speed for compute-intensive tasks. A C++ PDF library compiled to WebAssembly and running in Chrome performs comparably to the same library running as a native desktop application — not identically, but close enough that the user cannot tell the difference for typical file operations.
+</p>
+
+<h2>How keptlocal's tools use this</h2>
+
+<p>
+  keptlocal's PDF tools use <a href="https://github.com/Hopding/pdf-lib">pdf-lib</a>, a pure JavaScript implementation of the PDF specification. When you load the merge tool, pdf-lib is downloaded from a CDN (once, then cached) — this is a JavaScript library, not WebAssembly, but JavaScript performance is sufficient for the PDF operations pdf-lib performs: reading page structures, copying content streams, and writing the output.
+</p>
+
+<p>
+  The image tools use the browser's built-in Canvas API and the JPEG/PNG/WebP encoders that browsers ship natively — these are implemented in native code inside the browser engine and exposed to JavaScript through the canvas API. When you call <code>canvas.toBlob('image/webp', 0.85)</code>, the browser's internal C++ WebP encoder runs on your CPU.
+</p>
+
+<p>
+  HEIC decoding uses <a href="https://github.com/alexcorvi/heic2any">heic2any</a>, which implements the HEVC decoder in JavaScript — a computationally intensive operation, which is why HEIC conversion is slower than simpler format conversions.
+</p>
+
+<p>
+  None of these operations require a network connection once the library code is cached. The file bytes never leave the browser.
+</p>
+
+<h2>The File API: how files get into the browser</h2>
+
+<p>
+  WebAssembly solves the computation problem. But how does a file from your disk get into the browser in the first place without uploading it?
+</p>
+
+<p>
+  The File API (part of the web platform since 2012) lets browser code read files that you explicitly select or drop. When you drag a PDF onto a drop zone or click a file input and select a file, the browser reads the file's bytes into memory. The JavaScript code can then access those bytes directly using the <code>FileReader</code> API or the newer <code>File.arrayBuffer()</code> method.
+</p>
+
+<p>
+  Critically, this is a local read — the equivalent of opening a file in a desktop application. No network request is made. The bytes move from your disk to your browser's RAM. The browser's security model prevents JavaScript from reading files outside the ones you explicitly selected — so the tool cannot access your entire file system, only the specific files you give it permission to read.
+</p>
+
+<h2>The download side: how processed files get back to your disk</h2>
+
+<p>
+  Once the processing is done, the output bytes are in browser memory (a JavaScript <code>Uint8Array</code> or <code>ArrayBuffer</code>). Getting them to your disk also requires no server:
+</p>
+
+<ol>
+  <li>A <code>Blob</code> is created from the output bytes with the appropriate MIME type (<code>application/pdf</code>, <code>image/jpeg</code>, etc.).</li>
+  <li>A temporary object URL is created from the blob using <code>URL.createObjectURL(blob)</code>. This URL looks like <code>blob:https://keptlocal.com/...</code> and exists only in memory.</li>
+  <li>A hidden <code>&lt;a&gt;</code> element is created with the object URL as its <code>href</code> and the desired filename as its <code>download</code> attribute.</li>
+  <li>The click is triggered programmatically, which causes the browser to save the blob to your downloads folder.</li>
+  <li>The object URL is revoked to free the memory.</li>
+</ol>
+
+<p>
+  The file goes from browser RAM to your disk via the browser's download mechanism — the same path as any other file download, but without a server on the other end.
+</p>
+
+<h2>What the browser's security model guarantees</h2>
+
+<p>
+  Several browser security properties make client-side file processing safe:
+</p>
+
+<ul>
+  <li><strong>Origin isolation:</strong> JavaScript on one website cannot read data from another website. A keptlocal tool cannot access your banking session or read cookies from other tabs.</li>
+  <li><strong>File system access is opt-in:</strong> the tool can only read files you explicitly select. Drag-and-drop and file input are both user-initiated — the browser cannot silently read files in the background.</li>
+  <li><strong>No network access by default:</strong> a script cannot make arbitrary network requests without the browser allowing it. The Network tab in DevTools shows every request made — nothing is hidden.</li>
+  <li><strong>Memory isolation:</strong> each browser tab runs in its own process (in Chromium-based browsers and Firefox). A tool in one tab cannot access data in another tab's memory.</li>
+</ul>
+
+<p>
+  These properties do not make browser-based tools immune to all attacks — a malicious script could exfiltrate your file data by making a network request. This is why the Network tab audit matters: if a tool claims to be local but makes an outbound request when you process a file, it is not actually local regardless of what its homepage says.
+</p>
+
+<h2>What browser-based tools still cannot do</h2>
+
+<p>
+  The browser environment imposes real constraints:
+</p>
+
+<ul>
+  <li><strong>RAM limits:</strong> browsers impose limits on how much memory a tab can use (typically 1–4 GB depending on device and browser). Processing files larger than available RAM will crash the tab.</li>
+  <li><strong>No persistent file system access:</strong> browser-based tools cannot watch a folder for new files, process a batch of files without you selecting them, or write directly to a file path. Everything is download-on-demand.</li>
+  <li><strong>No native system integration:</strong> a browser-based tool cannot open a file from "the last place you saved," integrate with the system clipboard for file objects, or launch other applications.</li>
+  <li><strong>Performance ceilings:</strong> tasks that are trivial in native code — compressing a 50 MB TIFF image to WebP, running OCR on 200 pages — may be too slow in a browser for a good user experience. This is where server-side processing remains the right call.</li>
+</ul>
+
+<h2>The practical upshot</h2>
+
+<p>
+  Browser-based file tools in 2026 are not a compromise. For the large majority of everyday file operations — PDF merging, splitting, rotating, watermarking, image compression, conversion, and cropping — they are genuinely as capable as the desktop applications most people have used for years, with the added advantage of requiring no installation, no account, and transmitting no data.
+</p>
+
+<p>
+  The gap between "runs in a browser" and "runs natively" has narrowed to the point where it is irrelevant for these use cases. WebAssembly, the File API, and native browser encoders together provide the technical foundation. Privacy is the benefit you get for free.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  All <a href="/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal tools</a> run this way — processing in your browser, files never leaving your device.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,136 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="HEIC to JPG: The iPhone Photo Problem and How to Fix It"
+  description="Since iOS 11, iPhones save photos in HEIC format. Windows cannot open them, most websites reject them, and some email clients show a blank. Here is the practical fix."
+  publishDate="2026-05-23"
+  readTime={6}
+  tags={["Images", "iPhone"]}
+>
+
+<p class="lead">
+  You took photos on your iPhone, transferred them to your Windows PC, and now they show as blank files or with a generic icon. Or you tried to upload them to a website and got an error. Or you sent one to a colleague and they cannot open it. The cause in all three cases is the same: HEIC, Apple's default photo format since iOS 11, is not universally supported outside Apple's own ecosystem.
+</p>
+
+<h2>What is HEIC and why does Apple use it?</h2>
+
+<p>
+  HEIC stands for High Efficiency Image Container. It is a container format that stores images compressed using the HEVC (H.265) video codec — the same algorithm used to compress 4K video.
+</p>
+
+<p>
+  For Apple, the motivation was storage. HEIC compresses a photograph to roughly half the size of an equivalent JPEG at the same perceptible quality. A 12-megapixel iPhone photo in JPEG format is typically 3–6 MB. In HEIC, the same photo is 1.5–3 MB. Across thousands of photos in a camera roll, that difference is significant.
+</p>
+
+<p>
+  Apple introduced HEIC as the default capture format in iOS 11 (2017) and macOS High Sierra. Every iPhone and iPad since has defaulted to HEIC unless you change the settings. Apple's own apps — Photos, iCloud, AirDrop — handle HEIC natively and invisibly. The problem starts the moment a HEIC file leaves the Apple ecosystem.
+</p>
+
+<h2>Where HEIC causes problems</h2>
+
+<ul>
+  <li><strong>Windows (without the codec):</strong> Windows 10 and 11 can open HEIC files, but only if the HEIC Image Extensions codec is installed from the Microsoft Store. This is not installed by default on most Windows machines. Without it, HEIC files show as a generic icon and cannot be previewed or opened.</li>
+  <li><strong>Older Android devices:</strong> HEIC support was added in Android 10 (2019) via hardware decoders, but support varies by device and app. Many Android photo apps do not support HEIC.</li>
+  <li><strong>Web upload forms:</strong> most websites and web applications accept JPEG and PNG. HEIC is not a web standard and will be rejected by upload forms that validate file type.</li>
+  <li><strong>Email clients:</strong> Outlook and other email clients may display HEIC attachments as a blank thumbnail or as a generic file icon rather than showing a preview.</li>
+  <li><strong>Social media:</strong> Instagram, Twitter/X, Facebook, and LinkedIn accept JPEG and PNG for uploads. HEIC files are rejected.</li>
+  <li><strong>Legacy software:</strong> any application built before 2019 and not updated to handle HEIC will not open the files.</li>
+</ul>
+
+<h2>How to stop iPhone from saving photos as HEIC</h2>
+
+<p>
+  If you want to prevent HEIC files going forward, you can change the iPhone's camera capture format:
+</p>
+
+<ol>
+  <li>Open <strong>Settings</strong> on your iPhone.</li>
+  <li>Tap <strong>Camera</strong>.</li>
+  <li>Tap <strong>Formats</strong>.</li>
+  <li>Select <strong>Most Compatible</strong> instead of High Efficiency.</li>
+</ol>
+
+<p>
+  With Most Compatible selected, your iPhone saves photos as JPEG. The trade-off is larger file sizes — roughly double per photo. If storage is a concern, consider keeping HEIC and converting only the photos you need to share.
+</p>
+
+<p>
+  Note: Live Photos captured in HEIC format are stored as HEIC + MOV pairs. In JPEG mode, Live Photos are stored as JPEG + MOV. The video component in both cases is stored separately.
+</p>
+
+<h2>How to convert existing HEIC photos to JPG</h2>
+
+<h3>Option 1: Convert in your browser (no upload required)</h3>
+<p>
+  The <a href="/tools/convert-image">keptlocal Convert Image tool</a> converts HEIC files to JPG, PNG, or WebP entirely in your browser. No upload, no account, no file size limit. Select multiple HEIC files and download them individually or as a ZIP.
+</p>
+<p>
+  The tool uses the heic2any library, which implements a JavaScript HEIC decoder. Processing happens in your browser tab — your photos do not leave your device.
+</p>
+
+<h3>Option 2: iCloud Photos with "Download Original"</h3>
+<p>
+  If you use iCloud Photos and access photos via icloud.com on a Windows or Android device, selecting "Download" converts HEIC to JPEG automatically before the file reaches your device. This is a convenient workaround if you are already using iCloud.
+</p>
+
+<h3>Option 3: AirDrop to a Mac and export as JPEG</h3>
+<p>
+  On macOS, open a HEIC file in Preview and use File → Export → JPEG to save as JPEG. This is a lossless-to-lossy conversion — set the quality to 92–100% for no perceptible difference. For batch export, select multiple files in Finder, right-click, and use Quick Actions → Convert Image.
+</p>
+
+<h3>Option 4: Change the iPhone transfer setting</h3>
+<p>
+  If you transfer photos to Windows by plugging in your iPhone via USB, the iPhone can automatically convert HEIC to JPEG during the transfer:
+</p>
+<ol>
+  <li>Open <strong>Settings</strong>.</li>
+  <li>Tap <strong>Photos</strong>.</li>
+  <li>Under the "Transfer to Mac or PC" section, select <strong>Automatic</strong>.</li>
+</ol>
+<p>
+  With Automatic selected, HEIC files transferred via USB are converted to JPEG. The originals remain in HEIC on the device.
+</p>
+
+<h2>Quality: does converting HEIC to JPG lose quality?</h2>
+
+<p>
+  HEIC and JPEG are both lossy formats. Converting HEIC to JPEG is a transcode — decode from HEIC, re-encode as JPEG — which introduces generation loss. The amount of loss depends on the JPEG quality setting used:
+</p>
+
+<ul>
+  <li>At 92–100% JPEG quality, the generation loss is not visible to the human eye. Use this setting for any photos you plan to keep or print.</li>
+  <li>At 75–85% JPEG quality, you may see very slight degradation in gradients and fine texture if you zoom in and compare directly. At normal viewing sizes it is not perceptible. This is the right setting for email attachments and social sharing.</li>
+  <li>Below 70%, generation loss becomes visible in photographs. Do not use this for photos of lasting value.</li>
+</ul>
+
+<p>
+  The keptlocal Convert Image tool uses 92% JPEG quality by default, which is visually lossless for all practical purposes.
+</p>
+
+<h2>What about Live Photos?</h2>
+
+<p>
+  A Live Photo consists of a still image (HEIC) and a short video clip (MOV). When you convert the HEIC portion to JPEG, you get the still frame — the "photo" part. The MOV video clip is a separate file and is not converted by the image converter.
+</p>
+
+<p>
+  If you want to share the Live Photo as a moving image, convert the MOV to MP4 or GIF using a video converter. For sharing as a still, converting the HEIC to JPEG is sufficient.
+</p>
+
+<h2>HEIC on Windows without the codec</h2>
+
+<p>
+  If you need to open HEIC files on Windows without converting them, install the <strong>HEIC Image Extensions</strong> from the Microsoft Store. This codec adds HEIC support to Windows Photos and File Explorer. It is free. Once installed, HEIC files preview and open normally in Windows without any conversion.
+</p>
+
+<p>
+  However, HEIC files will still be rejected by web upload forms regardless of whether you have the codec — the rejection happens server-side based on file type, not your local viewer. For sharing and uploading, JPG conversion is still required.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert HEIC photos to JPG in your browser — no upload, no account — with the <a href="/tools/convert-image" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal Convert Image tool</a>.
+</p>
+
+</BlogLayout>

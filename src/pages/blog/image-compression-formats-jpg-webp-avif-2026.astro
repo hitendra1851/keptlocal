@@ -1,0 +1,189 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Image Compression Formats Compared: JPG vs WebP vs AVIF in 2026"
+  description="Which format gives the best quality at the smallest file size? A practical comparison of JPG, WebP, and AVIF with real-world data and browser support numbers for 2026."
+  publishDate="2026-05-23"
+  readTime={8}
+  tags={["Images"]}
+>
+
+<p class="lead">
+  Choosing the right image format for the web in 2026 is no longer as simple as "use JPEG." WebP has been widely supported for years. AVIF offers even better compression but comes with encoding complexity. Meanwhile JPEG — introduced in 1992 — is still the universal baseline every device on earth can open. Here is how the formats compare in practice.
+</p>
+
+<h2>The baseline: JPEG</h2>
+
+<p>
+  JPEG (Joint Photographic Experts Group) has been the dominant image format for three decades because it does one thing extremely well: compress photographic images with tunable quality loss at low computational cost.
+</p>
+
+<p>
+  The JPEG algorithm works by dividing an image into 8×8 pixel blocks, applying a discrete cosine transform to each block, and quantising the frequency coefficients. This is why JPEG compression artefacts look like blocks at high compression levels — the block grid becomes visible when too much frequency information is discarded.
+</p>
+
+<p>
+  Typical real-world compression ratios compared to an uncompressed bitmap:
+</p>
+
+<ul>
+  <li>JPEG at 90% quality: 5–15× smaller than uncompressed, minimal visible artefacts</li>
+  <li>JPEG at 75% quality: 15–30× smaller, very mild artefacts visible under close inspection</li>
+  <li>JPEG at 50% quality: 30–60× smaller, visible blocking artefacts at normal viewing size</li>
+</ul>
+
+<p>
+  JPEG's limitations: no transparency support, no lossless mode, and visible artefacts on images with sharp edges (text, graphics, diagrams). For photographic content it is excellent. For anything else, it is wrong tool.
+</p>
+
+<h2>WebP: Google's 2010 answer</h2>
+
+<p>
+  WebP was developed by Google and released in 2010 as a single format with both lossy and lossless modes, transparency support, and animation support. It uses a compression algorithm derived from the VP8 video codec.
+</p>
+
+<p>
+  Key advantages over JPEG:
+</p>
+
+<ul>
+  <li><strong>Better compression efficiency:</strong> WebP lossy achieves comparable visual quality to JPEG at 25–35% smaller file sizes. A photograph that is 200 KB as JPEG at 80% quality is typically 130–150 KB as WebP at equivalent visual quality.</li>
+  <li><strong>Transparency support:</strong> WebP with an alpha channel is smaller than an equivalent PNG in almost all cases — often 25–45% smaller.</li>
+  <li><strong>Lossless mode:</strong> lossless WebP is typically 26% smaller than PNG for the same image.</li>
+  <li><strong>Animation:</strong> animated WebP is typically smaller than an equivalent animated GIF while supporting full colour (GIF is limited to 256 colours per frame).</li>
+</ul>
+
+<p>
+  Browser support as of mid-2026: Chrome (since 2011), Firefox (since 2019), Safari (since 2020), Edge (since 2018). WebP is now supported by 97%+ of browsers globally. It is safe to use as the primary format for web delivery with JPEG as a fallback for legacy systems.
+</p>
+
+<p>
+  WebP's limitation: encoding speed. Creating a WebP file is computationally more expensive than creating a JPEG at the same quality. This matters at scale (image CDNs, on-the-fly conversion) but is imperceptible for individual file operations.
+</p>
+
+<h2>AVIF: the current state of the art</h2>
+
+<p>
+  AVIF (AV1 Image File Format) is a container format that stores images compressed using the AV1 video codec. AV1 was developed by the Alliance for Open Media (a coalition including Google, Apple, Microsoft, Amazon, and others) specifically to outperform HEVC without patent royalties.
+</p>
+
+<p>
+  Compression performance:
+</p>
+
+<ul>
+  <li>AVIF achieves comparable visual quality to JPEG at 50–60% smaller file sizes — roughly double the efficiency gain of WebP over JPEG.</li>
+  <li>AVIF at equivalent visual quality to JPEG 80% is typically 40–50% smaller than an equivalent WebP.</li>
+  <li>AVIF handles gradients, skin tones, and natural photography particularly well — the areas where JPEG blocking artefacts are most noticeable.</li>
+</ul>
+
+<p>
+  Browser support as of mid-2026: Chrome (since 2020), Firefox (since 2021), Safari (since 2022, iOS 16). Edge (since 2021). Global support is around 94–95% of browsers. A small gap remains with older browsers and some mobile browsers.
+</p>
+
+<p>
+  AVIF's real-world limitation is encoding speed. Encoding a high-quality AVIF file is significantly slower than JPEG or WebP — for a single image, this may mean seconds rather than milliseconds. For server-side image pipelines processing thousands of images, this has infrastructure implications. For a user converting a photo manually, it is not a concern.
+</p>
+
+<h2>Practical comparison at the same visual quality</h2>
+
+<p>
+  Using a typical 12-megapixel photograph (4032 × 3024 px) as a reference:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Format</th>
+      <th>Approximate file size</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>JPEG (85% quality)</td>
+      <td>~1.8 MB</td>
+      <td>Baseline. Mild artefacts at edges.</td>
+    </tr>
+    <tr>
+      <td>WebP (equivalent quality)</td>
+      <td>~1.2 MB</td>
+      <td>~33% smaller than JPEG. Similar visual quality.</td>
+    </tr>
+    <tr>
+      <td>AVIF (equivalent quality)</td>
+      <td>~700 KB</td>
+      <td>~60% smaller than JPEG. Excellent for gradients.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  At aggressive compression settings (targeting very small file sizes), AVIF's advantage grows. At maximum quality, the differences narrow because the bottleneck shifts to content detail rather than codec efficiency.
+</p>
+
+<h2>When to use each format</h2>
+
+<h3>Use JPEG when</h3>
+<ul>
+  <li>The file needs to open on any device without exception, including old printers, legacy software, and email clients from 2010.</li>
+  <li>You are distributing photos to a general audience (family, clients) without knowing what software they use.</li>
+  <li>The upload form or platform specifies JPEG or does not accept WebP/AVIF.</li>
+</ul>
+
+<h3>Use WebP when</h3>
+<ul>
+  <li>You are optimising images for a website and control the delivery pipeline.</li>
+  <li>You need transparency (logos, interface elements) and want smaller files than PNG.</li>
+  <li>Your target audience uses modern browsers (97%+ as of 2026).</li>
+  <li>You want a single format with both lossy and lossless modes.</li>
+</ul>
+
+<h3>Use AVIF when</h3>
+<ul>
+  <li>File size is the primary constraint and encoding time is acceptable.</li>
+  <li>You are building a web application targeting Chrome/Firefox/Safari 16+ users.</li>
+  <li>You are working with photographic content with smooth gradients (AVIF excels here).</li>
+  <li>You want to future-proof your image pipeline — AVIF adoption is growing rapidly.</li>
+</ul>
+
+<h3>Use PNG when</h3>
+<ul>
+  <li>The image requires lossless quality: screenshots, interface mockups, pixel art.</li>
+  <li>The image has sharp edges and solid colours (PNG compresses these better than JPEG).</li>
+  <li>You need maximum compatibility with transparency (PNG is universally supported; WebP alpha is not).</li>
+</ul>
+
+<h2>The best practice for web delivery in 2026</h2>
+
+<p>
+  Serving images on the web, the optimal approach is to offer AVIF with WebP as a fallback and JPEG as the final fallback, using the HTML <code>&lt;picture&gt;</code> element:
+</p>
+
+<pre><code>&lt;picture&gt;
+  &lt;source srcset="photo.avif" type="image/avif"&gt;
+  &lt;source srcset="photo.webp" type="image/webp"&gt;
+  &lt;img src="photo.jpg" alt="Description" width="800" height="600"&gt;
+&lt;/picture&gt;</code></pre>
+
+<p>
+  The browser automatically picks the first format it supports. AVIF-capable browsers get the smallest file; WebP-capable browsers get the second-smallest; everyone else gets JPEG. This approach requires maintaining three versions of each image but delivers optimal performance across the entire browser matrix.
+</p>
+
+<p>
+  For a smaller site or simpler workflow, serving WebP with a JPEG fallback covers 97%+ of users and is significantly simpler to implement.
+</p>
+
+<h2>Converting between formats</h2>
+
+<p>
+  The <a href="/tools/convert-image">keptlocal Convert Image tool</a> converts between JPG, PNG, and WebP entirely in your browser. Drop your images, select the output format, and download — no upload required. For converting large batches or for AVIF output requiring the AV1 encoder, desktop tools like Squoosh (which also runs in the browser) or ImageMagick are good options.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert images between JPG, PNG, and WebP in your browser with the <a href="/tools/convert-image" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal Convert Image tool</a> — no upload, no account.
+</p>
+
+</BlogLayout>

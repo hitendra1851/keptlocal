@@ -1,0 +1,130 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="PDF Privacy: What Happens to Files on Free Online Tools"
+  description="Free PDF tools have to make money somehow. When you upload a document, where does it actually go, how long is it kept, and who can access it? We looked into it."
+  publishDate="2026-05-23"
+  readTime={7}
+  tags={["Privacy", "PDF"]}
+>
+
+<p class="lead">
+  "Your files are deleted within one hour." It is a common promise from free online PDF tools. But between the moment you upload a file and the moment it is deleted, your document sits on infrastructure owned by a company you have never heard of, subject to policies written by their lawyers and enforced — or not — by their engineers. Here is what that actually means.
+</p>
+
+<h2>The infrastructure behind "free"</h2>
+
+<p>
+  Running a popular online PDF tool requires substantial infrastructure. Processing PDFs — merging, compressing, converting — requires CPU time. Storing files temporarily requires disk space. Serving millions of users requires bandwidth. None of this is free.
+</p>
+
+<p>
+  Most free tools run on cloud infrastructure: Amazon Web Services, Google Cloud Platform, or Microsoft Azure. Your uploaded PDF is typically written to an object storage bucket (S3, GCS, Azure Blob Storage) in one or more geographic regions. Which regions? That depends on the tool's configuration — and unless the privacy policy specifies, you do not know.
+</p>
+
+<p>
+  For users in the EU, this matters legally. GDPR restricts the transfer of personal data to countries outside the EEA without appropriate safeguards. If your PDF contains personal data (a contract with names and addresses, a medical document, an employment record) and it is processed on a US server, there is a potential GDPR compliance issue — regardless of whether the tool claims GDPR compliance on its homepage.
+</p>
+
+<h2>Analysing what major PDF tools actually say</h2>
+
+<p>
+  We reviewed the terms of service and privacy policies of several major free PDF tools. What we found:
+</p>
+
+<h3>File retention windows</h3>
+<p>
+  Most policies state a retention window of one to a few hours. "Files are deleted automatically after X hours" is standard language. However:
+</p>
+<ul>
+  <li>The clock typically starts from when processing completes, not when you upload. If the tool is under heavy load, processing may be delayed.</li>
+  <li>Backup systems may retain copies longer than the stated window. Automated backups of storage buckets are common practice and are not always addressed in user-facing policies.</li>
+  <li>Log data (file names, sizes, IP addresses, timestamps) is typically retained much longer than the files themselves — often 30–90 days for operational logs and indefinitely in some anonymised analytics systems.</li>
+</ul>
+
+<h3>Improvement clauses</h3>
+<p>
+  "We may use information about how you use our service to improve our products" appears in most policies. In some cases, this clause is broad enough to cover using uploaded files to train or evaluate document processing models. "Anonymised" data from PDF operations — document structure, file size distributions, content type patterns — can be extracted without reading your document's content. Whether tools do this in practice is not disclosed.
+</p>
+
+<h3>Third-party access</h3>
+<p>
+  Every policy we reviewed names multiple categories of third parties that may receive user data:
+</p>
+<ul>
+  <li>Cloud infrastructure providers (AWS, GCP, Azure) who physically host the files</li>
+  <li>Analytics providers (Google Analytics, Amplitude) who receive usage data</li>
+  <li>Payment processors if there is a paid tier</li>
+  <li>Legal authorities "when required by law" — a clause that in some jurisdictions can be triggered by requests that do not require a court order</li>
+</ul>
+
+<h3>Acquisition and business change language</h3>
+<p>
+  Most policies include a clause permitting data transfer in the event of a merger, acquisition, or sale of assets. If a PDF tool company is acquired, your upload history — and potentially retained files — may transfer to the acquirer. The acquirer's privacy policy then applies, which you have not agreed to.
+</p>
+
+<h2>What the Network tab reveals</h2>
+
+<p>
+  We tested several popular free PDF tools with a clearly labelled test document and monitored network traffic. What we found was illuminating:
+</p>
+
+<ul>
+  <li><strong>Files are uploaded before the operation runs.</strong> In every server-based tool, the file is transmitted to the server the moment you trigger the operation — or in some cases, before you have confirmed the operation parameters.</li>
+  <li><strong>Analytics events fire throughout.</strong> Events tracking user behaviour — which page, what action, how long it took — fire continuously to third-party analytics services. These events include session identifiers that can be used to link upload events to later visits.</li>
+  <li><strong>Some tools make multiple outbound calls to different domains.</strong> A single file operation can involve the tool's primary servers, a CDN, an analytics provider, and an ad network, each receiving some signal about the operation.</li>
+</ul>
+
+<p>
+  None of this is illegal, and in most cases it is disclosed somewhere in the policy documents. But it is very different from the "private and secure" marketing language that most tools use.
+</p>
+
+<h2>The specific risk categories</h2>
+
+<p>
+  Not all PDFs carry the same risk. The following categories warrant particular caution:
+</p>
+
+<ul>
+  <li><strong>Documents containing personal data:</strong> anything with names, addresses, identification numbers, financial account details, or health information is potentially subject to data protection law. Processing these on a third-party server creates compliance obligations and liability.</li>
+  <li><strong>Legal documents under privilege:</strong> contracts, attorney-client communications, litigation materials. Some jurisdictions hold that transmitting privileged documents to a third party waives the privilege.</li>
+  <li><strong>Trade secrets and proprietary information:</strong> confidential business plans, unreleased product specifications, internal financial forecasts. These are often covered by NDAs and internal information security policies.</li>
+  <li><strong>Documents from clients or patients:</strong> if you work with client documents or patient records, your obligations to those individuals may prevent you from uploading their documents to third-party tools without disclosure and consent.</li>
+  <li><strong>Government and defence documents:</strong> classified or sensitive government documents should never go near a free online tool. Most organisations that handle such documents have explicit policies prohibiting this.</li>
+</ul>
+
+<h2>The structural solution: browser-based processing</h2>
+
+<p>
+  The alternative to trusting a third party with your files is processing them in a context where no third party has access: your own browser, on your own device.
+</p>
+
+<p>
+  Browser-based tools like those on keptlocal process files using code that runs inside the browser tab. The file bytes load from your disk into your device's RAM. The operation runs using your CPU. The output downloads from RAM to your disk. At no point is a network request made to any external server.
+</p>
+
+<p>
+  This is verifiable. Open the Network tab in DevTools, run a file operation, and watch. No upload request appears. The file stays local from start to finish.
+</p>
+
+<p>
+  The limitation is real: browser-based tools cannot do everything a server can. Extremely large files, complex format conversions, and batch automation are areas where server-side processing is still necessary. For those cases, choose a tool with explicit data handling commitments — and ideally one that can run on your own infrastructure.
+</p>
+
+<h2>Practical guidance</h2>
+
+<ul>
+  <li><strong>Before uploading any document:</strong> ask whether it contains personal data, is subject to confidentiality obligations, or belongs to a client or patient. If any of these apply, use a local tool.</li>
+  <li><strong>Read the retention policy before trusting it:</strong> "deleted after one hour" means little if backup retention is indefinite. Look for language about backup systems and operational logs, not just the primary file store.</li>
+  <li><strong>Check where the servers are:</strong> for EU users, look for explicit EU data residency commitments. "GDPR compliant" without EU data residency is a weaker protection than it sounds.</li>
+  <li><strong>Verify with the Network tab:</strong> for any tool claiming to be local, check that no outbound requests are made during the file operation. This takes thirty seconds and tells you the truth.</li>
+  <li><strong>Use a dedicated solution for high-sensitivity documents:</strong> organisations that regularly handle sensitive PDFs should evaluate self-hosted document tools, enterprise PDF software with explicit data handling agreements, or browser-based tools where the processing is genuinely local.</li>
+</ul>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  keptlocal processes all files locally in your browser. <a href="/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Browse the tools</a> — and verify with DevTools that nothing leaves your device.
+</p>
+
+</BlogLayout>

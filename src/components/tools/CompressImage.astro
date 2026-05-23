@@ -1,0 +1,298 @@
+---
+// Compress Image — browser-image-compression library, all processing client-side
+---
+
+<div
+  id="compress-image-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop images here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose files from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Multiple files supported · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls" class="hidden px-4 pb-4 space-y-5">
+    <!-- Compression level -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Compression level</p>
+      <div class="flex gap-2">
+        <button type="button" data-preset="light" class="preset-btn flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors">
+          <span class="block">Light</span>
+          <span class="block text-xs font-normal opacity-60 mt-0.5">Best quality</span>
+        </button>
+        <button type="button" data-preset="balanced" class="preset-btn flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors">
+          <span class="block">Balanced</span>
+          <span class="block text-xs font-normal opacity-60 mt-0.5">Good quality</span>
+        </button>
+        <button type="button" data-preset="aggressive" class="preset-btn flex-1 py-2.5 rounded-lg border text-sm font-medium transition-colors">
+          <span class="block">Aggressive</span>
+          <span class="block text-xs font-normal opacity-60 mt-0.5">Smallest size</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- File list -->
+    <div>
+      <div class="flex items-center justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">Files</p>
+        <button type="button" id="add-more-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)]">+ Add more</button>
+      </div>
+      <div id="file-list" class="space-y-2"></div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Upload images to get started.</div>
+    <div class="flex gap-2 shrink-0">
+      <button type="button" id="download-zip-btn" class="hidden px-4 py-2 rounded-lg border border-[var(--color-rule)] text-sm font-medium text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+        Download ZIP
+      </button>
+      <button type="button" id="compress-btn" class="btn-primary" disabled>
+        <span id="compress-label">Compress</span>
+        <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12a9 9 0 11-6.219-8.56" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import imageCompression from 'https://esm.sh/browser-image-compression@2.0.2';
+  import JSZip from 'https://esm.sh/jszip@3.10.1';
+
+  const PRESETS = {
+    light:      { initialQuality: 0.85, maxWidthOrHeight: 4096, useWebWorker: false },
+    balanced:   { initialQuality: 0.75, maxWidthOrHeight: 2560, useWebWorker: false },
+    aggressive: { initialQuality: 0.55, maxWidthOrHeight: 1920, useWebWorker: false },
+  };
+
+  const ACCEPTED = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone      = $('drop-zone');
+  const fileInput     = $('file-input');
+  const browseBtn     = $('browse-btn');
+  const emptyState    = $('empty-state');
+  const controls      = $('controls');
+  const fileListEl    = $('file-list');
+  const addMoreBtn    = $('add-more-btn');
+  const compressBtn   = $('compress-btn');
+  const compressLabel = $('compress-label');
+  const spinner       = $('spinner');
+  const statusMsg     = $('status-msg');
+  const downloadZipBtn = $('download-zip-btn');
+
+  let files = [];       // { id, file, status, result: null | { blob, size } }
+  let preset = 'balanced';
+  let processing = false;
+  let idCounter = 0;
+
+  const fmtSize = (b) =>
+    b < 1024 ? `${b} B`
+    : b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB`
+    : `${(b / 1024 / 1024).toFixed(2)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Preset buttons
+  const presetBtns = document.querySelectorAll('.preset-btn');
+  const setPreset = (p) => {
+    preset = p;
+    presetBtns.forEach((btn) => {
+      const active = btn.dataset.preset === p;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  presetBtns.forEach((btn) => btn.addEventListener('click', () => setPreset(btn.dataset.preset)));
+  setPreset('balanced');
+
+  const extFromType = (type) => {
+    if (type === 'image/jpeg') return 'jpg';
+    if (type === 'image/png') return 'png';
+    if (type === 'image/webp') return 'webp';
+    return 'jpg';
+  };
+
+  const renderFileList = () => {
+    fileListEl.innerHTML = files.map((item) => {
+      let sizeRow = fmtSize(item.file.size);
+      let right = '';
+
+      if (item.status === 'done' && item.result) {
+        const pct = ((1 - item.result.size / item.file.size) * 100).toFixed(0);
+        const saved = item.file.size - item.result.size;
+        sizeRow = `${fmtSize(item.file.size)} → <strong>${fmtSize(item.result.size)}</strong> · saved ${pct}% (${fmtSize(saved)})`;
+        right = `<button type="button" data-id="${item.id}" class="dl-btn text-xs px-2.5 py-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors shrink-0">Save</button>`;
+      } else if (item.status === 'compressing') {
+        right = `<svg class="animate-spin shrink-0 text-[var(--color-accent)]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>`;
+      } else if (item.status === 'error') {
+        sizeRow = `<span class="text-[var(--color-warn)]">Error — could not compress this file</span>`;
+      }
+
+      return `<div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-ink-muted)] shrink-0">
+          <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-[var(--color-ink)] truncate">${item.file.name}</div>
+          <div class="text-xs text-[var(--color-ink-muted)]">${sizeRow}</div>
+        </div>
+        ${right}
+      </div>`;
+    }).join('');
+
+    fileListEl.querySelectorAll('.dl-btn').forEach((btn) =>
+      btn.addEventListener('click', () => downloadSingle(parseInt(btn.dataset.id)))
+    );
+  };
+
+  const addFiles = (newFiles) => {
+    let added = 0;
+    for (const f of newFiles) {
+      const accepted = ACCEPTED.has(f.type) || /\.(jpg|jpeg|png|webp)$/i.test(f.name);
+      if (!accepted) {
+        setStatus(`${f.name} is not a supported format (JPG, PNG, WebP only).`, true);
+        continue;
+      }
+      files.push({ id: idCounter++, file: f, status: 'pending', result: null });
+      added++;
+    }
+    if (added === 0) return;
+    emptyState.classList.add('hidden');
+    controls.classList.remove('hidden');
+    compressBtn.disabled = false;
+    downloadZipBtn.classList.add('hidden');
+    renderFileList();
+    const pending = files.filter((f) => f.status === 'pending').length;
+    setStatus(`${files.length} image${files.length !== 1 ? 's' : ''} ready — click Compress to start.`);
+  };
+
+  const downloadSingle = (id) => {
+    const item = files.find((f) => f.id === id);
+    if (!item?.result) return;
+    const url = URL.createObjectURL(item.result.blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const base = item.file.name.replace(/\.[^.]+$/, '');
+    const ext = extFromType(item.result.blob.type || item.file.type);
+    a.download = `${base}-compressed.${ext}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadZip = async () => {
+    const done = files.filter((f) => f.status === 'done');
+    if (done.length === 0) return;
+    downloadZipBtn.textContent = 'Zipping…';
+    downloadZipBtn.disabled = true;
+    const zip = new JSZip();
+    for (const item of done) {
+      const buf = await item.result.blob.arrayBuffer();
+      const base = item.file.name.replace(/\.[^.]+$/, '');
+      const ext = extFromType(item.result.blob.type || item.file.type);
+      zip.file(`${base}-compressed.${ext}`, buf);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'compressed-images.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    downloadZipBtn.textContent = 'Download ZIP';
+    downloadZipBtn.disabled = false;
+  };
+
+  const compressAll = async () => {
+    const pending = files.filter((f) => f.status === 'pending');
+    if (processing || pending.length === 0) return;
+    processing = true;
+    compressBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    compressLabel.textContent = 'Compressing…';
+    setStatus('Compressing in your browser…');
+
+    const options = { ...PRESETS[preset] };
+
+    for (const item of pending) {
+      item.status = 'compressing';
+      renderFileList();
+      try {
+        const compressed = await imageCompression(item.file, options);
+        item.result = { blob: compressed, size: compressed.size };
+        item.status = 'done';
+      } catch (err) {
+        console.error(err);
+        item.status = 'error';
+      }
+      renderFileList();
+    }
+
+    const done = files.filter((f) => f.status === 'done');
+    const totalSaved = done.reduce((acc, f) => acc + (f.file.size - f.result.size), 0);
+    const errors = files.filter((f) => f.status === 'error').length;
+    let msg = `Done — ${done.length} image${done.length !== 1 ? 's' : ''} compressed`;
+    if (totalSaved > 0) msg += `, saved ${fmtSize(totalSaved)} total`;
+    if (errors > 0) msg += ` · ${errors} failed`;
+    msg += '.';
+    setStatus(msg);
+
+    if (done.length > 1) downloadZipBtn.classList.remove('hidden');
+
+    processing = false;
+    spinner.classList.add('hidden');
+    compressLabel.textContent = 'Compress';
+
+    const stillPending = files.filter((f) => f.status === 'pending').length;
+    compressBtn.disabled = stillPending === 0;
+  };
+
+  // Events
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  addMoreBtn?.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.length) addFiles([...e.target.files]);
+    fileInput.value = '';
+  });
+  compressBtn.addEventListener('click', compressAll);
+  downloadZipBtn.addEventListener('click', downloadZip);
+
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    const imgs = [...(e.dataTransfer?.files ?? [])].filter(
+      (f) => ACCEPTED.has(f.type) || /\.(jpg|jpeg|png|webp)$/i.test(f.name)
+    );
+    if (imgs.length) addFiles(imgs);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

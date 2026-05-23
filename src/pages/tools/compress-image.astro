@@ -1,0 +1,79 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import CompressImage from "../../components/tools/CompressImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "compress-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <CompressImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to compress an image</h2>
+    <ol>
+      <li>Drop your images into the zone above, or click to browse. JPG, PNG, and WebP files are all accepted — you can select several at once.</li>
+      <li>Choose a compression level: <strong>Light</strong> for the best visual quality with moderate size reduction, <strong>Balanced</strong> for a good trade-off between quality and file size, or <strong>Aggressive</strong> for the smallest possible files.</li>
+      <li>Click <strong>Compress</strong>. Each image is processed in turn — you can watch the before and after sizes appear as each one finishes.</li>
+      <li>Click <strong>Save</strong> next to any image to download it individually. If you compressed more than one, a <strong>Download ZIP</strong> button appears to grab them all at once.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Donaldcwl/browser-image-compression" target="_blank" rel="noopener">browser-image-compression</a>. No file is ever sent to a server — open DevTools (<code>F12</code>) → Network while compressing to confirm zero upload requests.
+    </p>
+
+    <h2>When to compress an image</h2>
+    <ul>
+      <li><strong>Attaching to an email</strong> — most email providers cap attachments at 10–25 MB. A phone camera can produce 8–15 MB JPGs; compressing them to 1–3 MB makes the message reliably deliverable without visual degradation that recipients will notice.</li>
+      <li><strong>Uploading to a website or CMS</strong> — page load speed is a Google ranking signal and a direct driver of bounce rate. Images are typically the largest assets on any page. Serving a 200 KB hero image instead of a 2 MB one reduces time-to-first-paint dramatically on mobile connections.</li>
+      <li><strong>Submitting to an online form with file size limits</strong> — insurance claim portals, government submission systems, and HR platforms commonly enforce limits of 500 KB or 2 MB per upload. Aggressive compression can bring images within these limits without needing a separate desktop application.</li>
+      <li><strong>Storing a large photo archive</strong> — thousands of full-resolution phone photos can consume hundreds of gigabytes. Batch-compressing with the Balanced preset typically cuts storage by 50–70% while keeping images sharp enough for screen display.</li>
+      <li><strong>Sending images in messaging apps</strong> — apps like WhatsApp re-compress images automatically, often introducing visible degradation. Compressing beforehand with your own quality settings gives you control over the trade-off.</li>
+      <li><strong>Sharing screenshots</strong> — screenshots captured on high-DPI (Retina) displays can reach 3–6 MB even at screen resolution. Compressing to Light quality typically brings these under 300 KB with no perceptible difference.</li>
+    </ul>
+
+    <h2>Choosing the right compression level</h2>
+    <p>
+      <strong>Light (85% quality)</strong> produces output that is visually indistinguishable from the original for most images. File sizes typically reduce by 30–50% for JPGs that were not heavily compressed already. Use this for product photography, portfolio images, and anything where print-level quality matters.
+    </p>
+    <p>
+      <strong>Balanced (75% quality)</strong> is the default because it hits the point where human perception starts to plateau — most people cannot tell a 75% JPEG from an 85% JPEG on a typical screen at typical viewing sizes. Savings are typically 55–70%, making it the right choice for web images, email attachments, and general sharing.
+    </p>
+    <p>
+      <strong>Aggressive (55% quality)</strong> produces the smallest files. Compression artifacts become visible at this level when zooming in, but at normal viewing distances and sizes — a thumbnail, a social media preview, a form upload — the difference is hard to spot. Use this when the size limit is strict and quality is secondary.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The tool uses the browser-image-compression library, which re-encodes the image using the browser's built-in canvas drawing and export pipeline. When you compress a JPG, the library decodes the original into a pixel buffer via the Canvas API, then re-encodes it as a JPEG at the target quality level using the <code>canvas.toBlob()</code> method.
+    </p>
+    <p>
+      For PNG files, compression behaves differently. PNG is a lossless format — every pixel is stored exactly. There is no "quality" setting in the same sense as JPEG. The library handles PNGs by reducing resolution when the image exceeds the <code>maxWidthOrHeight</code> threshold for the chosen preset. A 4000 × 3000 PNG fed into the Balanced preset is scaled down to fit within 2560 × 2560, which reduces file size significantly for large-dimension images. For PNGs that are already small in dimensions, the size reduction will be modest.
+    </p>
+    <p>
+      If you need maximum PNG compression, consider using the Convert Image tool to convert to WebP — WebP achieves similar visual quality at roughly 25–35% smaller file sizes than PNG for photographic content.
+    </p>
+    <p>
+      The compression runs on the browser's main thread (not a Web Worker) to ensure compatibility across browsers when loading the library from a CDN. For typical images up to 20 MB, this takes under two seconds. Larger images or batches of many files will take proportionally longer — the status indicator updates as each file completes.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Format support:</strong> JPG, PNG, and WebP. HEIC files (iPhone Live Photos, newer Apple formats) are not supported — convert them to JPG first using the Convert Image tool.</li>
+      <li><strong>Animated GIFs and WebP:</strong> the tool processes only the first frame and outputs a static image. Animated files should be handled with a dedicated GIF optimiser.</li>
+      <li><strong>Already-compressed images:</strong> if a JPG was already heavily compressed when you received it, compressing it again at the same quality setting will not reduce it further and may increase artifacts. The tool will report the sizes so you can see when re-compression is not worthwhile.</li>
+      <li><strong>PNG compression limits:</strong> as described above, PNG reduction depends on image dimensions. Very small PNGs (under 500 KB) may show minimal size reduction.</li>
+      <li><strong>No hard file size limit:</strong> the practical ceiling is your device's available RAM — 50 MP images and batches of 50+ photos work on most modern devices.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your images</h2>
+    <p>
+      Your images are read into browser memory, re-encoded locally, and downloaded directly to your device. Nothing is sent to a server at any point. The compression happens entirely within the browser tab using the Canvas API.
+    </p>
+    <p>
+      This matters for photos that contain sensitive content — medical images, identity documents, personal photographs shared for work purposes. With keptlocal, those images do not pass through any third-party infrastructure. The tool cannot see them, log them, or store them. When you close the tab, they are gone.
+    </p>
+    <p>
+      Unlike most online image compressors, keptlocal does not require account creation, does not apply watermarks, and does not impose monthly limits. The trade-off is that processing is limited by your device's speed rather than a server's — for the vast majority of use cases, this makes no practical difference.
+    </p>
+  </Fragment>
+</ToolLayout>

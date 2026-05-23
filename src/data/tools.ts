@@ -310,7 +310,51 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "compress-image", name: "Compress Image", shortName: "Compress Image", description: "Shrink JPG, PNG, and WebP files without quality loss.", longDescription: "", category: "Image", icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "compress-image",
+    name: "Compress Image",
+    shortName: "Compress Image",
+    description: "Shrink JPG, PNG, and WebP images in your browser — no uploads, no limits.",
+    longDescription: "Drop one or more images, choose a compression level, and download the smaller files instantly. Nothing is uploaded to a server.",
+    category: "Image",
+    icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4",
+    status: "live",
+    keywords: ["compress image", "reduce image file size", "compress jpg online free", "compress png without upload", "image compressor browser"],
+    faq: [
+      {
+        q: "Are my images uploaded to a server?",
+        a: "No. All compression runs in your browser using the browser-image-compression library. Your images never leave your device — open DevTools → Network while compressing to confirm there are no upload requests.",
+      },
+      {
+        q: "Which image formats are supported?",
+        a: "JPG, JPEG, PNG, and WebP. HEIC files (iPhone photos) need to be converted to JPG first — use our Convert Image tool.",
+      },
+      {
+        q: "How much will the file size be reduced?",
+        a: "It depends on the original image and the compression level chosen. JPG and WebP images often reduce by 50–80% with minimal visible quality loss. PNGs reduce less because the format is already lossless — compressing a PNG mainly reduces resolution for very large images.",
+      },
+      {
+        q: "What is the difference between the compression levels?",
+        a: "Light targets good visual quality at about 85% JPEG quality — suitable for photos you want to keep sharp. Balanced hits 75% quality, cutting file size significantly while remaining hard to distinguish from the original at typical viewing sizes. Aggressive targets 55% quality for the smallest possible files — noticeable on close inspection but fine for thumbnails, previews, and web-optimised images.",
+      },
+      {
+        q: "Can I compress multiple images at once?",
+        a: "Yes — drop or select multiple files in one go. Each image is compressed individually and shown with its before/after size. When more than one image is compressed, a Download ZIP button appears so you can grab them all in one click.",
+      },
+      {
+        q: "Will the output be a different format?",
+        a: "No. The tool preserves the original format — a JPG in, a JPG out; a PNG in, a PNG out. The only change is the file size.",
+      },
+      {
+        q: "Is there a file size or image dimension limit?",
+        a: "No hard limit. Very large images (50 MP+) may take a few seconds to process. The practical ceiling is your device's available RAM.",
+      },
+      {
+        q: "Does this work on mobile?",
+        a: "Yes — Chrome 90+, Safari 15+, and Firefox 90+ on both iOS and Android are supported.",
+      },
+    ],
+  },
   { slug: "resize-image", name: "Resize Image", shortName: "Resize Image", description: "Change image dimensions with aspect lock.", longDescription: "", category: "Image", icon: "M4 4h6v6H4V4zm10 10h6v6h-6v-6zM4 14h6v6H4v-6zm10-10h6v6h-6V4z", status: "soon", keywords: [], faq: [] },
   { slug: "convert-image", name: "Convert Image", shortName: "Convert Image", description: "Convert between HEIC, WebP, AVIF, JPG, PNG.", longDescription: "", category: "Image", icon: "M8 7l4-4m0 0l4 4m-4-4v18", status: "soon", keywords: [], faq: [] },
   { slug: "crop-image", name: "Crop Image", shortName: "Crop Image", description: "Free-form or fixed-ratio image crop.", longDescription: "", category: "Image", icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4", status: "soon", keywords: [], faq: [] },

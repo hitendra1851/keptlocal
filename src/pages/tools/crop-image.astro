@@ -1,0 +1,79 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import CropImage from "../../components/tools/CropImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "crop-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <CropImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to crop an image</h2>
+    <ol>
+      <li>Drop your image into the zone above, or click to browse. JPG, PNG, and WebP files are supported.</li>
+      <li>The image loads in an interactive preview. Click and drag across it to draw the crop region. The corner handles can be dragged to adjust the selection, and the exact pixel dimensions appear below the preview as you drag.</li>
+      <li>Optionally select an aspect ratio preset — 1:1 (square), 4:3, 16:9, 3:2, or 2:3 — to constrain the selection to fixed proportions. Choose <strong>Free</strong> for unconstrained cropping.</li>
+      <li>Choose an output format: keep the original, or convert to JPG, PNG, or WebP at the same time.</li>
+      <li>Click <strong>Crop &amp; download</strong>. The cropped image saves to your device.</li>
+    </ol>
+    <p>
+      All cropping happens in your browser using the Canvas API. No file is sent to a server — open DevTools (<code>F12</code>) → Network while cropping to confirm zero upload requests.
+    </p>
+
+    <h2>When to crop an image</h2>
+    <ul>
+      <li><strong>Preparing a profile photo or avatar</strong> — most platforms display profile photos as squares. Crop your photo to 1:1 first to control which part of the image is shown, rather than letting the platform auto-centre it in a way you did not intend.</li>
+      <li><strong>Removing unwanted edges from a screenshot</strong> — screenshots often include window chrome, taskbar elements, or whitespace that distracts from the content. Cropping to the relevant region makes the screenshot cleaner for documentation, bug reports, or presentations.</li>
+      <li><strong>Creating a thumbnail from a larger photo</strong> — a thumbnail should be a deliberate composition, not a scaled-down version of the full image. Crop to the focal point, then resize with the Resize Image tool.</li>
+      <li><strong>Fitting an image to a required dimension format</strong> — blog cover images, social media posts, and presentation slides often require a specific aspect ratio. Cropping to 16:9 before uploading ensures the image fills the frame as intended.</li>
+      <li><strong>Removing sensitive information from the edge of an image</strong> — a screenshot of a document may include a name, email address, or other personal detail at the margin. Cropping removes it without the need for a blur or redaction tool.</li>
+    </ul>
+
+    <h2>Aspect ratio presets explained</h2>
+    <p>
+      <strong>Free</strong> lets you draw any rectangular selection with no constraint. Use this when you need a specific pixel size rather than a proportional shape.
+    </p>
+    <p>
+      <strong>1:1 (square)</strong> is used for profile photos (Twitter, Instagram, LinkedIn, most forum avatars), product thumbnails, and app icons. Cropping to a square before uploading ensures consistent display across platforms.
+    </p>
+    <p>
+      <strong>4:3</strong> is the classic photo and presentation ratio. Most older digital camera photos and standard-definition video frames use this ratio. Blog post images and slides in 4:3 format use it too.
+    </p>
+    <p>
+      <strong>16:9</strong> is the widescreen standard. YouTube thumbnails, presentation slides in widescreen mode, monitor desktop backgrounds, and video cover images all use 16:9. It is the dominant aspect ratio for any screen-first content.
+    </p>
+    <p>
+      <strong>3:2</strong> is the ratio used by most DSLR and mirrorless cameras. Prints at standard photo sizes (4 × 6 in, 10 × 15 cm) use this ratio. Cropping to 3:2 ensures a photo fills a standard print size without cutting off subjects unexpectedly at the lab.
+    </p>
+    <p>
+      <strong>2:3 (portrait)</strong> is the vertical equivalent of 3:2. Instagram portrait posts, phone wallpapers, and physical prints held in portrait orientation use this ratio.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      When you load an image, it is decoded into a browser <code>&lt;img&gt;</code> element and drawn onto a <code>&lt;canvas&gt;</code> scaled to fit the display area. The canvas tracks mouse and touch events to update the crop selection rectangle in real time.
+    </p>
+    <p>
+      The preview overlay dims the area outside the selection using a semi-transparent fill, then draws the original image pixels back into the crop rectangle — so you always see the actual image content inside the selection, not a colour approximation. A rule-of-thirds grid is drawn over the selection as a composition aid.
+    </p>
+    <p>
+      When you click Crop &amp; download, the tool maps the display-coordinate crop rectangle back to the original image's pixel coordinates (accounting for the display scale factor), creates an off-screen canvas at the exact output size, draws the source image region into it with <code>drawImage()</code>, and encodes it to the chosen format using <code>canvas.toBlob()</code>. The result is a pixel-perfect crop of the original image at full source resolution.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Minimum crop size:</strong> the selection must be at least 4 × 4 pixels on the display canvas. Very small crops on very large images may be difficult to set precisely — use the display scale indicator to gauge the actual output size.</li>
+      <li><strong>No magnification:</strong> you cannot zoom into the preview. For pixel-precise crops on large images, the Resize Image tool can scale down first to make the region easier to select.</li>
+      <li><strong>Transparency:</strong> PNG transparency is preserved in PNG output. Converting a transparent PNG to JPG replaces transparent areas with white.</li>
+      <li><strong>HEIC input:</strong> not supported. Convert HEIC to JPG first using the Convert Image tool.</li>
+      <li><strong>Output quality:</strong> JPG and WebP output use 0.92 quality (visually lossless for most content). PNG output is lossless.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your image</h2>
+    <p>
+      Your image is loaded into browser memory, drawn to a canvas, cropped locally, and downloaded directly to your device. Nothing is transmitted to a server. The entire operation happens within your browser tab — close it and the image data is gone.
+    </p>
+  </Fragment>
+</ToolLayout>

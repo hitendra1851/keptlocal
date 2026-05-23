@@ -433,7 +433,43 @@ export const tools: Tool[] = [
       },
     ],
   },
-  { slug: "crop-image", name: "Crop Image", shortName: "Crop Image", description: "Free-form or fixed-ratio image crop.", longDescription: "", category: "Image", icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4", status: "soon", keywords: [], faq: [] },
+  {
+    slug: "crop-image",
+    name: "Crop Image",
+    shortName: "Crop Image",
+    description: "Crop JPG, PNG, and WebP images with free-form or fixed-ratio selection — entirely in your browser.",
+    longDescription: "Drop an image, drag to select a crop region, and download the cropped result instantly. Includes common aspect ratio presets. Nothing is uploaded.",
+    category: "Image",
+    icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4",
+    status: "live",
+    keywords: ["crop image", "crop image online free", "crop photo browser", "crop jpg without upload", "image cropper no signup"],
+    faq: [
+      {
+        q: "Are my images uploaded to a server?",
+        a: "No. Cropping runs entirely in your browser using the Canvas API. Your image never leaves your device — open DevTools → Network while cropping to confirm there are no upload requests.",
+      },
+      {
+        q: "How do I set the crop region?",
+        a: "Click and drag on the image preview to draw a crop region. Drag the corner handles to resize the selection. The current selection dimensions and position are shown below the canvas.",
+      },
+      {
+        q: "What aspect ratio presets are available?",
+        a: "Free (unconstrained), 1:1 (square), 4:3 (standard photo/screen), 16:9 (widescreen), 3:2 (classic photo), and 2:3 (portrait). Selecting a preset constrains your drag to that ratio.",
+      },
+      {
+        q: "Can I crop to an exact pixel size?",
+        a: "The tool shows the crop dimensions in pixels as you drag. To hit exact pixel values, use the Free ratio and drag until the crop info reads the target dimensions. The output is always the exact pixel size shown.",
+      },
+      {
+        q: "Can I change the output format?",
+        a: "Yes — choose to keep the same format as the input, or convert to JPG, PNG, or WebP at the same time as cropping.",
+      },
+      {
+        q: "Does cropping work on mobile?",
+        a: "Yes. Touch-drag on the preview canvas to set the crop region. Corner handles can be moved with a precise touch.",
+      },
+    ],
+  },
 ];
 
 export const liveTools = tools.filter((t) => t.status === "live");

@@ -1,0 +1,399 @@
+---
+// Crop Image — Canvas API with interactive drag crop, entirely client-side
+---
+
+<div
+  id="crop-image-app"
+  class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]"
+>
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Crop workspace -->
+  <div id="workspace" class="hidden px-4 pb-4 space-y-4">
+    <!-- Aspect ratio presets -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Aspect ratio</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" data-ratio="free"   class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">Free</button>
+        <button type="button" data-ratio="1:1"    class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">1:1</button>
+        <button type="button" data-ratio="4:3"    class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">4:3</button>
+        <button type="button" data-ratio="16:9"   class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">16:9</button>
+        <button type="button" data-ratio="3:2"    class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">3:2</button>
+        <button type="button" data-ratio="2:3"    class="ratio-btn py-1.5 px-3 rounded-lg border text-xs font-medium transition-colors">2:3 (portrait)</button>
+      </div>
+    </div>
+
+    <!-- Canvas crop area -->
+    <div class="relative overflow-hidden rounded-lg bg-[var(--color-paper-dark)] select-none touch-none" id="canvas-container" style="min-height:200px">
+      <canvas id="preview-canvas" class="block max-w-full mx-auto" style="cursor:crosshair"></canvas>
+    </div>
+
+    <!-- Crop info -->
+    <div class="flex items-center gap-4 text-xs text-[var(--color-ink-muted)]">
+      <span>Crop: <strong id="crop-info">—</strong></span>
+      <button type="button" id="change-file-btn" class="ml-auto hover:text-[var(--color-accent)]">Change image</button>
+    </div>
+
+    <!-- Output format -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Output format</p>
+      <div class="flex gap-2">
+        <button type="button" data-fmt="original" class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">Same as input</button>
+        <button type="button" data-fmt="image/jpeg" class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">JPG</button>
+        <button type="button" data-fmt="image/png"  class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">PNG</button>
+        <button type="button" data-fmt="image/webp" class="fmt-btn flex-1 py-2 rounded-lg border text-sm font-medium transition-colors">WebP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Upload an image to get started.</div>
+    <button type="button" id="crop-btn" class="btn-primary" disabled>
+      <span id="crop-label">Crop & download</span>
+    </button>
+  </div>
+</div>
+
+<style>
+  #preview-canvas { user-select: none; -webkit-user-select: none; }
+</style>
+
+<script type="module">
+  const $ = (id) => document.getElementById(id);
+  const dropZone     = $('drop-zone');
+  const fileInput    = $('file-input');
+  const browseBtn    = $('browse-btn');
+  const emptyState   = $('empty-state');
+  const workspace    = $('workspace');
+  const container    = $('canvas-container');
+  const canvas       = $('preview-canvas');
+  const ctx          = canvas.getContext('2d');
+  const changeFileBtn= $('change-file-btn');
+  const cropBtn      = $('crop-btn');
+  const cropLabel    = $('crop-label');
+  const statusMsg    = $('status-msg');
+  const cropInfo     = $('crop-info');
+
+  let imgEl    = null;
+  let fileName = '';
+  let fileType = '';
+  let outFmt   = 'original';
+  let ratio    = 'free';  // 'free' | 'W:H'
+
+  // Display scale: maps canvas display coords to original image pixel coords
+  let displayScale = 1;
+  let imgW = 0, imgH = 0;
+
+  // Crop rectangle in display coords
+  let crop = { x: 0, y: 0, w: 0, h: 0 };
+  let dragging = false;
+  let resizeHandle = null; // null or 'nw','ne','sw','se','n','s','e','w'
+  let dragStart = { x: 0, y: 0, crop: null };
+  const HANDLE_SIZE = 8;
+
+  const fmtSize = (b) =>
+    b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(2)} MB`;
+
+  const setStatus = (msg, isError = false) => {
+    statusMsg.textContent = msg;
+    statusMsg.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  // Ratio buttons
+  const ratioBtns = document.querySelectorAll('.ratio-btn');
+  const setRatio = (r) => {
+    ratio = r;
+    ratioBtns.forEach((btn) => {
+      const active = btn.dataset.ratio === r;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+    if (ratio !== 'free' && crop.w > 0) enforceRatio();
+    redraw();
+  };
+  ratioBtns.forEach((btn) => btn.addEventListener('click', () => setRatio(btn.dataset.ratio)));
+
+  // Format buttons
+  const fmtBtns = document.querySelectorAll('.fmt-btn');
+  const setFmt = (f) => {
+    outFmt = f;
+    fmtBtns.forEach((btn) => {
+      const active = btn.dataset.fmt === f;
+      btn.classList.toggle('border-[var(--color-accent)]', active);
+      btn.classList.toggle('bg-[var(--color-accent-tint)]', active);
+      btn.classList.toggle('text-[var(--color-accent)]', active);
+      btn.classList.toggle('border-[var(--color-rule)]', !active);
+      btn.classList.toggle('text-[var(--color-ink-soft)]', !active);
+    });
+  };
+  fmtBtns.forEach((btn) => btn.addEventListener('click', () => setFmt(btn.dataset.fmt)));
+  setFmt('original');
+
+  const enforceRatio = () => {
+    if (ratio === 'free') return;
+    const [rw, rh] = ratio.split(':').map(Number);
+    const targetH = crop.w * rh / rw;
+    if (crop.y + targetH > canvas.height) {
+      crop.w = (canvas.height - crop.y) * rw / rh;
+    }
+    crop.h = crop.w * rh / rw;
+    clampCrop();
+  };
+
+  const clampCrop = () => {
+    crop.x = Math.max(0, Math.min(crop.x, canvas.width - 1));
+    crop.y = Math.max(0, Math.min(crop.y, canvas.height - 1));
+    crop.w = Math.max(4, Math.min(crop.w, canvas.width - crop.x));
+    crop.h = Math.max(4, Math.min(crop.h, canvas.height - crop.y));
+  };
+
+  const updateCropInfo = () => {
+    const px = Math.round(crop.x / displayScale);
+    const py = Math.round(crop.y / displayScale);
+    const pw = Math.round(crop.w / displayScale);
+    const ph = Math.round(crop.h / displayScale);
+    cropInfo.textContent = `${pw} × ${ph} px at (${px}, ${py})`;
+  };
+
+  const redraw = () => {
+    if (!imgEl) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+
+    // Dimmed overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Clear crop region (show original)
+    ctx.drawImage(
+      imgEl,
+      crop.x / displayScale, crop.y / displayScale,
+      crop.w / displayScale, crop.h / displayScale,
+      crop.x, crop.y, crop.w, crop.h
+    );
+
+    // Crop border
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(crop.x + 0.5, crop.y + 0.5, crop.w - 1, crop.h - 1);
+
+    // Rule-of-thirds grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+    ctx.lineWidth = 0.5;
+    for (let i = 1; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(crop.x + crop.w * i / 3, crop.y);
+      ctx.lineTo(crop.x + crop.w * i / 3, crop.y + crop.h);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(crop.x, crop.y + crop.h * i / 3);
+      ctx.lineTo(crop.x + crop.w, crop.y + crop.h * i / 3);
+      ctx.stroke();
+    }
+
+    // Corner handles
+    ctx.fillStyle = '#fff';
+    const hs = HANDLE_SIZE;
+    [[crop.x, crop.y], [crop.x + crop.w - hs, crop.y],
+     [crop.x, crop.y + crop.h - hs], [crop.x + crop.w - hs, crop.y + crop.h - hs]].forEach(([hx, hy]) => {
+      ctx.fillRect(hx, hy, hs, hs);
+    });
+
+    updateCropInfo();
+  };
+
+  const getHandle = (mx, my) => {
+    const hs = HANDLE_SIZE + 4;
+    const { x, y, w, h } = crop;
+    if (mx >= x - 4 && mx <= x + hs && my >= y - 4 && my <= y + hs) return 'nw';
+    if (mx >= x + w - hs && mx <= x + w + 4 && my >= y - 4 && my <= y + hs) return 'ne';
+    if (mx >= x - 4 && mx <= x + hs && my >= y + h - hs && my <= y + h + 4) return 'sw';
+    if (mx >= x + w - hs && mx <= x + w + 4 && my >= y + h - hs && my <= y + h + 4) return 'se';
+    return null;
+  };
+
+  const getEventPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const src = e.touches ? e.touches[0] : e;
+    return { x: (src.clientX - rect.left) * scaleX, y: (src.clientY - rect.top) * scaleY };
+  };
+
+  const onPointerDown = (e) => {
+    e.preventDefault();
+    const { x, y } = getEventPos(e);
+    resizeHandle = getHandle(x, y);
+    if (resizeHandle) {
+      dragging = true;
+      dragStart = { x, y, crop: { ...crop } };
+      return;
+    }
+    // Start new crop
+    dragging = true;
+    resizeHandle = null;
+    crop = { x, y, w: 0, h: 0 };
+    dragStart = { x, y, crop: { ...crop } };
+  };
+
+  const onPointerMove = (e) => {
+    e.preventDefault();
+    if (!dragging) {
+      const { x, y } = getEventPos(e);
+      const h = getHandle(x, y);
+      canvas.style.cursor = h ? 'nwse-resize' : 'crosshair';
+      return;
+    }
+    const { x, y } = getEventPos(e);
+    const dx = x - dragStart.x, dy = y - dragStart.y;
+    const dc = dragStart.crop;
+
+    if (!resizeHandle) {
+      // Drawing new crop
+      crop.x = Math.min(x, dragStart.x);
+      crop.y = Math.min(y, dragStart.y);
+      crop.w = Math.abs(dx);
+      crop.h = Math.abs(dy);
+      if (ratio !== 'free') {
+        const [rw, rh] = ratio.split(':').map(Number);
+        crop.h = crop.w * rh / rw;
+      }
+    } else {
+      // Resize from handle
+      switch (resizeHandle) {
+        case 'nw': crop.x = dc.x + dx; crop.y = dc.y + dy; crop.w = dc.w - dx; crop.h = dc.h - dy; break;
+        case 'ne': crop.y = dc.y + dy; crop.w = dc.w + dx; crop.h = dc.h - dy; break;
+        case 'sw': crop.x = dc.x + dx; crop.w = dc.w - dx; crop.h = dc.h + dy; break;
+        case 'se': crop.w = dc.w + dx; crop.h = dc.h + dy; break;
+      }
+      if (ratio !== 'free') enforceRatio();
+    }
+    clampCrop();
+    redraw();
+  };
+
+  const onPointerUp = (e) => {
+    dragging = false;
+    if (crop.w < 4 || crop.h < 4) {
+      // Reset to full image if tiny selection
+      crop = { x: 0, y: 0, w: canvas.width, h: canvas.height };
+    }
+    clampCrop();
+    redraw();
+    cropBtn.disabled = false;
+  };
+
+  canvas.addEventListener('mousedown', onPointerDown);
+  canvas.addEventListener('mousemove', onPointerMove);
+  canvas.addEventListener('mouseup', onPointerUp);
+  canvas.addEventListener('mouseleave', onPointerUp);
+  canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+  canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+  canvas.addEventListener('touchend', onPointerUp);
+
+  const loadFile = (file) => {
+    const ok = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)
+      || /\.(jpg|jpeg|png|webp)$/i.test(file.name);
+    if (!ok) { setStatus('Only JPG, PNG, and WebP images are accepted.', true); return; }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        imgEl = img;
+        imgW = img.naturalWidth;
+        imgH = img.naturalHeight;
+        fileName = file.name.replace(/\.[^.]+$/, '');
+        fileType = file.type || 'image/jpeg';
+
+        // Fit canvas inside container (~660px max width)
+        const maxW = Math.min(container.clientWidth || 660, 660);
+        displayScale = imgW > maxW ? maxW / imgW : 1;
+        canvas.width  = Math.round(imgW * displayScale);
+        canvas.height = Math.round(imgH * displayScale);
+
+        // Initial crop = full image
+        crop = { x: 0, y: 0, w: canvas.width, h: canvas.height };
+
+        emptyState.classList.add('hidden');
+        workspace.classList.remove('hidden');
+        setRatio('free');
+        setFmt('original');
+        redraw();
+        cropBtn.disabled = false;
+        setStatus(`${imgW} × ${imgH} px — drag to set the crop region.`);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const reset = () => {
+    imgEl = null;
+    emptyState.classList.remove('hidden');
+    workspace.classList.add('hidden');
+    cropBtn.disabled = true;
+    setStatus('Upload an image to get started.');
+  };
+
+  cropBtn.addEventListener('click', async () => {
+    if (!imgEl) return;
+    // Map display crop back to original pixels
+    const sx = Math.round(crop.x / displayScale);
+    const sy = Math.round(crop.y / displayScale);
+    const sw = Math.round(crop.w / displayScale);
+    const sh = Math.round(crop.h / displayScale);
+
+    const out = document.createElement('canvas');
+    out.width = sw; out.height = sh;
+    out.getContext('2d').drawImage(imgEl, sx, sy, sw, sh, 0, 0, sw, sh);
+
+    const mimeType = outFmt === 'original' ? fileType : outFmt;
+    const quality  = mimeType === 'image/png' ? 1 : 0.92;
+    const ext      = mimeType === 'image/jpeg' ? 'jpg' : mimeType === 'image/webp' ? 'webp' : 'png';
+
+    const blob = await new Promise((res) => out.toBlob(res, mimeType, quality));
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `${fileName}-cropped.${ext}`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    setStatus(`Downloaded — ${sw} × ${sh} px, ${fmtSize(blob.size)}.`);
+  });
+
+  browseBtn?.addEventListener('click', () => fileInput.click());
+  changeFileBtn?.addEventListener('click', () => { reset(); fileInput.click(); });
+  fileInput.addEventListener('change', (e) => {
+    if (e.target.files?.[0]) loadFile(e.target.files[0]);
+    fileInput.value = '';
+  });
+  ['dragenter', 'dragover'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add('dragging'); })
+  );
+  ['dragleave', 'drop'].forEach((ev) =>
+    dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove('dragging'); })
+  );
+  dropZone.addEventListener('drop', (e) => {
+    if (e.dataTransfer?.files?.[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target === emptyState) fileInput.click();
+  });
+</script>

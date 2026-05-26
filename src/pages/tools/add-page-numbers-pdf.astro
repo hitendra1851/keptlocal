@@ -1,0 +1,67 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import AddPageNumbersPdf from "../../components/tools/AddPageNumbersPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "add-page-numbers-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <AddPageNumbersPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to add page numbers to a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse and select it.</li>
+      <li>Choose a <strong>position</strong> — bottom center is standard for most documents; bottom right suits formal reports.</li>
+      <li>Set the <strong>starting number</strong>. Use 1 for a standalone document, or a higher number if this PDF continues a larger work.</li>
+      <li>Click <strong>Add numbers &amp; download</strong>. The numbered PDF saves directly to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>.
+      No file is uploaded — open DevTools (<code>F12</code>) → Network while processing to confirm zero outbound requests.
+    </p>
+
+    <h2>When to add page numbers to a PDF</h2>
+    <ul>
+      <li><strong>Preparing a document for printing</strong> — readers can navigate and reassemble printed pages easily with numbered footers.</li>
+      <li><strong>Formal reports and submissions</strong> — legal filings, academic submissions, and business proposals are expected to have page numbers.</li>
+      <li><strong>Multi-chapter documents</strong> — number each chapter PDF starting from where the previous one ended to create consistent pagination across a series.</li>
+      <li><strong>Scanned documents</strong> — add numbers to a scanned PDF that was produced without them.</li>
+      <li><strong>Contract annexures</strong> — stamp page numbers before sending contracts for signature to prevent page substitution.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      pdf-lib loads your PDF and provides access to each page's content stream. For every page, the tool
+      calculates the position of the page number text based on the page's actual dimensions (which may vary
+      if the PDF has mixed page sizes), then calls <code>page.drawText()</code> to add a Helvetica text
+      element at the correct coordinates.
+    </p>
+    <p>
+      Helvetica is one of the 14 standard PDF fonts — it is available in every PDF viewer without needing
+      to be embedded in the file, which keeps the output file size nearly identical to the input. The text
+      is drawn as a proper PDF text object, so it is selectable and searchable in the output document.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Font and size:</strong> Helvetica at 11pt. These are fixed to keep the tool simple and the output consistent — custom fonts and sizes are not currently available.</li>
+      <li><strong>Margin overlap:</strong> numbers are placed at a fixed margin from the page edge. If your PDF has content running to the very edge (no margin), numbers may overlap the content — check the output before sharing.</li>
+      <li><strong>Mixed page sizes:</strong> the tool handles PDFs with different page dimensions correctly, placing numbers at the same relative position on each page regardless of size.</li>
+      <li><strong>Existing page numbers:</strong> if the PDF already has printed page numbers, this tool adds a second set on top of them. Remove the old numbers first using a PDF editor.</li>
+      <li><strong>Password-protected PDFs:</strong> must be unlocked before use. The tool will fail on PDFs that restrict content editing.</li>
+    </ul>
+
+    <h2>Privacy compared to other page numbering tools</h2>
+    <p>
+      Most online PDF tools upload your document to their server to process it. For reports containing financial
+      projections, legal filings, or client data, that upload is a potential data leak — regardless of what
+      the tool's privacy policy says about deletion windows.
+    </p>
+    <p>
+      keptlocal stamps page numbers entirely inside your browser. Your PDF bytes never leave your device.
+      Open the Network tab in DevTools and run the tool — you will see no upload requests at all.
+    </p>
+  </Fragment>
+</ToolLayout>

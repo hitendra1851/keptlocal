@@ -1,0 +1,186 @@
+---
+---
+
+<div id="compress-pdf-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div class="flex items-center gap-3 p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-rule)]">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-[var(--color-accent)] shrink-0">
+        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-info" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="clear-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] shrink-0">Remove</button>
+    </div>
+
+    <div class="space-y-2">
+      <p class="text-sm font-medium text-[var(--color-ink)]">Optimisation options</p>
+      <label class="flex items-start gap-2.5 cursor-pointer">
+        <input type="checkbox" id="remove-metadata" checked class="mt-0.5 accent-[var(--color-accent)]" />
+        <span class="text-sm text-[var(--color-ink-soft)]">Remove document metadata <span class="text-xs text-[var(--color-ink-muted)]">(title, author, creation date)</span></span>
+      </label>
+      <label class="flex items-start gap-2.5 cursor-pointer">
+        <input type="checkbox" id="remove-annotations" class="mt-0.5 accent-[var(--color-accent)]" />
+        <span class="text-sm text-[var(--color-ink-soft)]">Remove annotations and comments</span>
+      </label>
+    </div>
+
+    <div id="result-stats" class="hidden grid grid-cols-3 gap-3 text-center">
+      <div class="p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-rule)]">
+        <div class="text-xs text-[var(--color-ink-muted)] mb-1">Original</div>
+        <div id="size-before" class="text-sm font-medium text-[var(--color-ink)]"></div>
+      </div>
+      <div class="p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-rule)]">
+        <div class="text-xs text-[var(--color-ink-muted)] mb-1">Compressed</div>
+        <div id="size-after" class="text-sm font-medium text-[var(--color-ink)]"></div>
+      </div>
+      <div class="p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-accent)]/20">
+        <div class="text-xs text-[var(--color-ink-muted)] mb-1">Saved</div>
+        <div id="size-saved" class="text-sm font-medium text-[var(--color-accent)]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Drop a PDF to compress it.
+    </div>
+    <button type="button" id="process-btn" class="btn-primary" disabled>
+      <span id="btn-label">Compress & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
+
+  let pdfBytes = null;
+  let origSize = 0;
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+  const fmtSize = (b) => b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(2)} MB`;
+  const setStatus = (msg, err = false) => {
+    $("status-msg").textContent = msg;
+    $("status-msg").style.color = err ? "var(--color-warn)" : "";
+  };
+
+  const loadFile = async (file) => {
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      setStatus("Only PDF files are accepted.", true); return;
+    }
+    pdfBytes = await file.arrayBuffer();
+    origSize = file.size;
+    $("file-name").textContent = file.name;
+    $("file-info").textContent = `${fmtSize(file.size)} · ${(await PDFDocument.load(pdfBytes, { ignoreEncryption: true })).getPageCount()} pages`;
+    $("empty-state").classList.add("hidden");
+    $("controls").classList.remove("hidden");
+    $("result-stats").classList.add("hidden");
+    $("process-btn").disabled = false;
+    setStatus("Ready. Choose options and click Compress.");
+  };
+
+  $("browse-btn").addEventListener("click", () => $("file-input").click());
+  $("drop-zone").addEventListener("click", (e) => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
+  $("file-input").addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); $("file-input").value = ""; });
+
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e) => { if (e.dataTransfer?.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+  $("clear-btn").addEventListener("click", () => {
+    pdfBytes = null; origSize = 0;
+    $("empty-state").classList.remove("hidden");
+    $("controls").classList.add("hidden");
+    $("result-stats").classList.add("hidden");
+    $("process-btn").disabled = true;
+    setStatus("Drop a PDF to compress it.");
+  });
+
+  $("process-btn").addEventListener("click", async () => {
+    if (!pdfBytes || processing) return;
+    processing = true;
+    $("process-btn").disabled = true;
+    $("spinner").classList.remove("hidden");
+    $("btn-label").textContent = "Compressing...";
+    setStatus("Optimising PDF in your browser...");
+
+    try {
+      const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+
+      if ($("remove-metadata").checked) {
+        doc.setTitle("");
+        doc.setAuthor("");
+        doc.setSubject("");
+        doc.setKeywords([]);
+        doc.setProducer("");
+        doc.setCreator("");
+        doc.setCreationDate(new Date(0));
+        doc.setModificationDate(new Date(0));
+      }
+
+      if ($("remove-annotations").checked) {
+        doc.getPages().forEach((page) => {
+          const dict = page.node;
+          if (dict.has("Annots")) dict.delete("Annots");
+        });
+      }
+
+      const out = await doc.save({ useObjectStreams: true });
+      const outSize = out.byteLength;
+      const saved = origSize - outSize;
+      const savedPct = ((saved / origSize) * 100).toFixed(1);
+
+      $("size-before").textContent = fmtSize(origSize);
+      $("size-after").textContent = fmtSize(outSize);
+      $("size-saved").textContent = saved > 0 ? `${fmtSize(Math.abs(saved))} (${savedPct}%)` : "Minimal";
+      $("result-stats").classList.remove("hidden");
+
+      const blob = new Blob([out], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `compressed-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(saved > 0
+        ? `Done. Reduced by ${fmtSize(saved)} (${savedPct}%).`
+        : "Done. This PDF was already well-optimised — minimal size change.");
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not process the PDF."}`, true);
+    } finally {
+      processing = false;
+      $("spinner").classList.add("hidden");
+      $("btn-label").textContent = "Compress & download";
+      $("process-btn").disabled = false;
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => { if (processing) { e.preventDefault(); e.returnValue = ""; } });
+</script>

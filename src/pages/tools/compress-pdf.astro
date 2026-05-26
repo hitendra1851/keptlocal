@@ -1,0 +1,74 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import CompressPdf from "../../components/tools/CompressPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "compress-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <CompressPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to compress a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse and select it.</li>
+      <li>Choose your optimisation options. <strong>Remove metadata</strong> strips the document title, author, creation date, and other invisible properties. <strong>Remove annotations</strong> removes comments and markup added to the document.</li>
+      <li>Click <strong>Compress &amp; download</strong>. The tool shows the before and after file sizes, and the optimised PDF downloads to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while processing to verify zero upload requests.
+    </p>
+
+    <h2>When to compress a PDF</h2>
+    <ul>
+      <li><strong>Email attachments</strong> — many email providers cap attachments at 10–25 MB. Stripping metadata and unused resources can bring a bloated PDF under the limit.</li>
+      <li><strong>Document portals and upload limits</strong> — government portals, insurance sites, and HR systems often impose strict file size limits on uploads.</li>
+      <li><strong>Removing author metadata before sharing</strong> — a report created in Word carries author name, company, and revision history in the PDF metadata by default. Stripping it before sending removes that information.</li>
+      <li><strong>Cleaning up PDFs exported from design tools</strong> — Illustrator and InDesign exports often include significant metadata overhead that contributes nothing to the document content.</li>
+      <li><strong>Archiving</strong> — removing unused objects and annotations produces a cleaner, more compact file for long-term storage.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      pdf-lib loads the PDF and rewrites it with the <code>useObjectStreams: true</code> option, which compresses
+      the document's cross-reference table — an internal index of all objects in the file. This alone can reduce
+      file size by several percent for PDFs with many objects.
+    </p>
+    <p>
+      Stripping metadata removes the document information dictionary, which stores title, author, subject,
+      keywords, creator, and producer fields. These are invisible to readers but add bytes to every copy of
+      the file. Removing annotations deletes the annotation arrays attached to each page — comments, highlights,
+      and markup left by reviewers.
+    </p>
+    <p>
+      What this tool does not do: re-encode embedded images at lower quality. Image data is the dominant source
+      of file size in most PDFs, and reducing it requires re-rendering images at a lower resolution — a process
+      that can only be done well with tools like Ghostscript. A server-based compression tool is more effective
+      for image-heavy PDFs; we plan to add this as an optional cloud processing feature.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Image-heavy PDFs:</strong> if most of the file size comes from embedded images, this tool will produce minimal reduction. The largest size wins require re-encoding images, which this tool does not do to preserve quality.</li>
+      <li><strong>Already-optimised PDFs:</strong> PDFs exported from modern tools with compression already applied may see little or no size reduction.</li>
+      <li><strong>Password-protected PDFs:</strong> must be unlocked before use.</li>
+      <li><strong>Annotation removal scope:</strong> removes standard annotations (comments, highlights, sticky notes). Interactive form fields are not removed by the annotations option.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy compared to other PDF compressors</h2>
+    <p>
+      Online PDF compressors upload your file to a server, compress it there, and serve it back. The irony is
+      that compressing a sensitive document — a contract, financial report, or patient record — on a third-party
+      server exposes it to the same risks as any other upload. You are trusting a company you have never
+      audited with your most private documents.
+    </p>
+    <p>
+      keptlocal compresses entirely in your browser. The PDF bytes move from your disk to your browser's memory,
+      get optimised, and download back to your disk. No server is involved. Verify it in the Network tab — zero
+      outbound file transfers.
+    </p>
+  </Fragment>
+</ToolLayout>

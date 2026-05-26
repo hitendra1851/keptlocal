@@ -1,0 +1,112 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Remove Pages from a PDF Without Uploading"
+  description="Three ways to delete pages from a PDF — including a fully browser-based method that never uploads your file to any server."
+  publishDate="2026-05-26"
+  readTime={6}
+  tags={["PDF"]}
+>
+
+<p class="lead">
+  Removing a page from a PDF sounds simple. In practice, most tools either require an upload, a subscription, or desktop software that takes ten minutes to install. Here are the real options — and one that works entirely in your browser, with no upload required.
+</p>
+
+<h2>Why you might want to remove pages from a PDF</h2>
+
+<p>
+  The most common scenarios: a scanner picked up a blank page at the end of a duplex scan. A cover page needs to come off before sharing a report. A confidential appendix should be stripped before distributing a document more widely. A merged PDF ended up with duplicate or unwanted pages that need to be removed.
+</p>
+
+<p>
+  In each case, you have the same document but need a trimmed version — and you want the process to be fast, free, and private.
+</p>
+
+<h2>Option 1: Browser-based (no upload, free)</h2>
+
+<p>
+  The <a href="/tools/delete-pages-pdf">Delete PDF Pages tool</a> on keptlocal removes pages entirely in your browser using pdf-lib, a JavaScript library that runs locally. Your file never leaves your device.
+</p>
+
+<p>How it works:</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Enter the pages you want to remove — for example <code>1, 3, 5-8</code> removes pages 1, 3, and 5 through 8.</li>
+  <li>Click <strong>Delete pages &amp; download</strong>. The trimmed PDF downloads to your device instantly.</li>
+</ol>
+
+<p>
+  You can verify it is private: open DevTools (F12), go to the Network tab, and watch while processing. No upload requests appear. The file never touches a server.
+</p>
+
+<h2>Option 2: Adobe Acrobat (desktop, paid)</h2>
+
+<p>
+  Adobe Acrobat Pro has a dedicated <strong>Organize Pages</strong> panel that lets you select and delete individual pages with a thumbnail view. It is the most powerful option and handles complex PDFs reliably. The cost is the limitation — Acrobat Pro is a subscription product.
+</p>
+
+<p>
+  Acrobat Reader (the free version) cannot delete pages. You need the Pro version.
+</p>
+
+<h2>Option 3: Preview on macOS (free, local)</h2>
+
+<p>
+  macOS users have a built-in option that requires no uploads and no additional software:
+</p>
+<ol>
+  <li>Open the PDF in Preview.</li>
+  <li>Show the thumbnails sidebar: View → Thumbnails.</li>
+  <li>Click the page you want to remove, then press <strong>Delete</strong>.</li>
+  <li>File → Export as PDF to save the result.</li>
+</ol>
+<p>
+  This works well for simple deletions. The limitation is macOS-only, and Preview can occasionally alter PDF structure in ways that affect form fields or annotations.
+</p>
+
+<h2>Option 4: Google Chrome's print-to-PDF (free, local)</h2>
+
+<p>
+  A workaround that works on any operating system:
+</p>
+<ol>
+  <li>Open the PDF in Chrome.</li>
+  <li>Press <code>Ctrl+P</code> (or <code>Cmd+P</code> on Mac) to open the print dialog.</li>
+  <li>Set the destination to <strong>Save as PDF</strong>.</li>
+  <li>In the <strong>Pages</strong> field, enter the pages you want to keep — for example <code>2-10</code> to keep pages 2 through 10 (effectively removing page 1).</li>
+  <li>Save the PDF.</li>
+</ol>
+<p>
+  The limitation: this prints the PDF to a new file, which can slightly alter formatting. It also inverts the logic — you specify pages to keep, not pages to remove. For large documents with many pages to delete, this gets awkward.
+</p>
+
+<h2>The privacy consideration</h2>
+
+<p>
+  Most online PDF tools — the ones that come up first in search results — upload your file to their server before processing it. That means your PDF passes through infrastructure you do not control. If the document contains personal data, legal information, or anything sensitive, that upload is a genuine risk regardless of what the tool's privacy policy says about deletion windows.
+</p>
+
+<p>
+  Browser-based tools like keptlocal and native tools like Preview and Chrome's print-to-PDF keep the file on your device throughout. For sensitive documents, use one of these instead.
+</p>
+
+<h2>Choosing the right approach</h2>
+
+<ul>
+  <li><strong>Fast and private, any OS:</strong> <a href="/tools/delete-pages-pdf">keptlocal Delete PDF Pages</a></li>
+  <li><strong>macOS user, simple deletion:</strong> Preview</li>
+  <li><strong>Need to keep specific pages, any OS:</strong> Chrome print-to-PDF</li>
+  <li><strong>Complex PDFs, forms, annotations:</strong> Adobe Acrobat Pro</li>
+</ul>
+
+<p>
+  For most people, the browser-based option is the fastest path: no software to install, no account required, and no file upload.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  keptlocal's <a href="/tools/delete-pages-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Delete PDF Pages tool</a> removes pages entirely in your browser. Also try <a href="/tools/split-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Split PDF</a> to extract specific pages into a new file.
+</p>
+
+</BlogLayout>

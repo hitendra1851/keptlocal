@@ -1,0 +1,150 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Compress a PDF for Email Attachments"
+  description="Most email providers cap attachments at 10–25 MB. Here is how to reduce a PDF's file size — from quick browser-based options to server-side tools for image-heavy documents."
+  publishDate="2026-05-26"
+  readTime={7}
+  tags={["PDF"]}
+>
+
+<p class="lead">
+  Gmail caps attachments at 25 MB. Outlook at 20 MB. Many corporate email systems are stricter — 10 MB or even 5 MB. A PDF that opens fine on your desktop may bounce as an email attachment. Here is how to fix it.
+</p>
+
+<h2>First: understand what is making the PDF large</h2>
+
+<p>
+  Before compressing, it helps to know what is taking up the space. There are three main culprits:
+</p>
+
+<ul>
+  <li><strong>Embedded images:</strong> by far the most common cause of large PDFs. A PDF with scanned pages, product photos, or design graphics can easily reach 50–200 MB because each image is embedded at full resolution.</li>
+  <li><strong>Embedded fonts:</strong> PDF can embed the full font file for every typeface used in the document. A PDF using several custom fonts may include several MB of font data.</li>
+  <li><strong>Metadata and unused resources:</strong> documents exported from design tools (InDesign, Illustrator) often include significant overhead — creation metadata, unused objects, duplicate resources — that contributes nothing visible.</li>
+</ul>
+
+<p>
+  The right compression approach depends on which of these is the primary cause.
+</p>
+
+<h2>Option 1: Browser-based compression (no upload)</h2>
+
+<p>
+  The <a href="/tools/compress-pdf">Compress PDF tool</a> on keptlocal removes metadata and unused objects entirely in your browser. Your file is never uploaded.
+</p>
+
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Choose what to remove: metadata (author, title, creation date) and/or annotations (comments, highlights).</li>
+  <li>Click <strong>Compress &amp; download</strong>. The tool shows the before and after file size.</li>
+</ol>
+
+<p>
+  This approach works best for PDFs where metadata overhead is the issue — exports from Illustrator or InDesign, Word-to-PDF conversions with revision history, or documents with many embedded comments from a review cycle.
+</p>
+
+<p>
+  What it does not do: re-encode images at lower quality. For image-heavy PDFs, see the options below.
+</p>
+
+<h2>Option 2: Print to PDF (any OS, free)</h2>
+
+<p>
+  Printing a PDF to a new PDF file re-renders it through the operating system's PDF engine, which often compresses images and strips metadata in the process:
+</p>
+
+<ol>
+  <li>Open the PDF in your browser or PDF reader.</li>
+  <li>Press <code>Ctrl+P</code> / <code>Cmd+P</code>.</li>
+  <li>Set the destination to <strong>Save as PDF</strong> (Chrome) or <strong>Microsoft Print to PDF</strong> (Windows) or <strong>Save as PDF</strong> (macOS).</li>
+  <li>Save the new file.</li>
+</ol>
+
+<p>
+  The results vary. Chrome's print-to-PDF typically downsamples images and produces noticeably smaller files. The trade-off is that formatting may shift slightly, form fields and annotations are removed, and embedded fonts are re-rendered as bitmaps in some cases.
+</p>
+
+<h2>Option 3: macOS Quartz filter (free, local)</h2>
+
+<p>
+  macOS Preview has a "Reduce File Size" Quartz filter that aggressively compresses images:
+</p>
+<ol>
+  <li>Open the PDF in Preview.</li>
+  <li>File → Export → Format: PDF → Quartz Filter: "Reduce File Size".</li>
+</ol>
+<p>
+  This often produces dramatic size reductions but can degrade image quality significantly. It is fine for documents where the images just need to be readable, not print-quality. Not recommended for design documents, photography, or anything where visual quality matters.
+</p>
+
+<h2>Option 4: Adobe Acrobat Pro (paid)</h2>
+
+<p>
+  Acrobat Pro's <strong>Reduce File Size</strong> and <strong>PDF Optimizer</strong> tools give the most control. You can set image resolution targets separately for colour, grayscale, and monochrome images, choose JPEG compression quality, and control which embedded resources to keep or discard.
+</p>
+
+<p>
+  For regular PDF compression with quality control, Acrobat Pro is the best tool. For a one-off attachment, the free options are usually sufficient.
+</p>
+
+<h2>Option 5: Ghostscript (free, command line)</h2>
+
+<p>
+  Ghostscript is the engine used by many server-side PDF tools under the hood. If you are comfortable with a command line and want maximum control:
+</p>
+
+<pre><code>gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 \
+   -dPDFSETTINGS=/ebook \
+   -dNOPAUSE -dQUIET -dBATCH \
+   -sOutputFile=compressed.pdf input.pdf</code></pre>
+
+<p>
+  The <code>-dPDFSETTINGS</code> flag controls the compression level:
+</p>
+<ul>
+  <li><code>/screen</code> — lowest quality, smallest size (72 DPI images)</li>
+  <li><code>/ebook</code> — good quality, moderate size (150 DPI images) — best for email</li>
+  <li><code>/printer</code> — high quality, larger size (300 DPI images)</li>
+  <li><code>/prepress</code> — maximum quality, minimal compression</li>
+</ul>
+
+<h2>Benchmarks: what actually reduces file size</h2>
+
+<p>
+  For a 15 MB PDF consisting mostly of scanned pages:
+</p>
+
+<ul>
+  <li>Metadata removal only: 14.8 MB (minimal impact — images dominate)</li>
+  <li>Chrome print-to-PDF: ~6 MB (image quality noticeably reduced)</li>
+  <li>Ghostscript <code>/ebook</code>: ~4 MB (good quality for screen viewing)</li>
+  <li>Acrobat Pro Optimiser at 150 DPI: ~3.5 MB (best balance)</li>
+</ul>
+
+<p>
+  For a 15 MB PDF from InDesign with high-resolution graphics:
+</p>
+<ul>
+  <li>Metadata removal: 11 MB (significant — design tools add substantial overhead)</li>
+  <li>Chrome print-to-PDF: ~8 MB (additional reduction from image resampling)</li>
+  <li>Acrobat Optimiser: ~4 MB with quality settings tuned</li>
+</ul>
+
+<h2>The privacy consideration</h2>
+
+<p>
+  When you upload a PDF to a compression tool, the full document — including any sensitive content — travels to a server you do not control. For internal reports, financial documents, contracts, or anything with personal data, that upload is a real privacy risk.
+</p>
+
+<p>
+  Browser-based compression (keptlocal), print-to-PDF, Preview, and Ghostscript all run locally. Your file never leaves your device. For documents where content is sensitive, choose one of these rather than an online upload-and-process service.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  <a href="/tools/compress-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Compress PDF in your browser</a> — removes metadata and unused objects without any upload. For more on PDF file size, see <a href="/blog/compress-pdf-file-size-vs-quality" class="text-[var(--color-accent)] hover:underline underline-offset-4">PDF compression: file size vs. quality explained</a>.
+</p>
+
+</BlogLayout>

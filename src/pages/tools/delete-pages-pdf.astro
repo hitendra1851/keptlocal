@@ -1,0 +1,64 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import DeletePagesPdf from "../../components/tools/DeletePagesPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "delete-pages-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <DeletePagesPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to delete pages from a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse and select it.</li>
+      <li>In the <strong>Pages to delete</strong> field, enter the page numbers you want to remove — for example <code>1, 3, 5-8</code> removes pages 1, 3, 5, 6, 7, and 8.</li>
+      <li>Click <strong>Delete pages &amp; download</strong>. The trimmed PDF saves directly to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while processing to verify zero upload requests.
+    </p>
+
+    <h2>When to remove pages from a PDF</h2>
+    <ul>
+      <li><strong>Removing a cover page before sharing</strong> — strip an internal title page or watermarked cover before forwarding a report.</li>
+      <li><strong>Trimming a scanned document</strong> — a scanner often captures a blank page at the end of a duplex scan; delete it in seconds.</li>
+      <li><strong>Cutting out irrelevant appendices</strong> — share just the body of a contract without the boilerplate exhibits.</li>
+      <li><strong>Cleaning up extracted sections</strong> — after splitting a large PDF, remove any unwanted pages from the extracted chunk.</li>
+      <li><strong>Removing confidential pages before sharing</strong> — strip pages containing sensitive data before distributing a document more widely.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      pdf-lib loads your PDF into memory and represents each page as an object in the document's page tree.
+      When you specify pages to delete, the tool converts your input into a sorted list of zero-based indices
+      and calls <code>doc.removePage(index)</code> for each, working from the last page backwards so that
+      earlier indices stay valid as pages are removed.
+    </p>
+    <p>
+      The remaining pages are saved into a new PDF byte stream and downloaded directly — your original file
+      on disk is never touched. All content on the kept pages (text, images, annotations, fonts) is preserved
+      exactly as it was.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Minimum output:</strong> at least one page must remain. The tool will stop you from deleting all pages.</li>
+      <li><strong>Page numbering:</strong> pages are numbered from 1 regardless of any printed page numbers in the document. A PDF that prints "Page 5" on what is physically the first page is still page 1 in this tool.</li>
+      <li><strong>Password-protected PDFs:</strong> the tool attempts to load encrypted PDFs with <code>ignoreEncryption</code>. PDFs requiring a password to view content will fail — unlock them first.</li>
+      <li><strong>Cross-references:</strong> some PDFs have internal links (table of contents, footnote references) that point to page numbers. Deleting the target page does not update those links — they will become broken in the output.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy compared to other PDF page removers</h2>
+    <p>
+      Server-based PDF tools receive your file, process it, and return the result. Your document — whether it is a contract, a medical record, or financial paperwork — passes through infrastructure you do not control.
+      keptlocal processes everything locally: the PDF is read into browser memory, the pages are removed, and the result downloads. No server receives your file at any point.
+    </p>
+    <p>
+      You can confirm this yourself. Open DevTools (F12), go to the Network tab, and watch while you delete pages. You will see no POST requests, no uploads, and no outbound file transfers.
+    </p>
+  </Fragment>
+</ToolLayout>

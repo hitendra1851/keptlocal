@@ -1,0 +1,105 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Add Page Numbers to a PDF"
+  description="A practical guide to numbering PDF pages — using browser tools, desktop software, and Word — with notes on which approach preserves your file's privacy."
+  publishDate="2026-05-26"
+  readTime={5}
+  tags={["PDF"]}
+>
+
+<p class="lead">
+  A PDF without page numbers is fine for a two-page memo. For a 40-page report, a contract with addenda, or anything that is going to be printed and handled by multiple people, page numbers are essential. Here is how to add them using several different methods.
+</p>
+
+<h2>Option 1: Browser-based (no upload, free)</h2>
+
+<p>
+  The <a href="/tools/add-page-numbers-pdf">Add Page Numbers to PDF tool</a> on keptlocal stamps numbers onto every page of your PDF entirely in your browser. Your file is never uploaded to a server.
+</p>
+
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Choose a position: bottom center, bottom right, bottom left, top center, top right, or top left.</li>
+  <li>Set the starting number — useful if this PDF is a chapter in a larger document and should continue from a previous section's numbering.</li>
+  <li>Click <strong>Add numbers &amp; download</strong>.</li>
+</ol>
+
+<p>
+  The result downloads immediately. Page numbers are added as real PDF text objects — selectable and searchable — using Helvetica, a standard font that needs no embedding.
+</p>
+
+<h2>Option 2: Adobe Acrobat (desktop, paid)</h2>
+
+<p>
+  Acrobat Pro's <strong>Header and Footer</strong> feature (Tools → Edit PDF → Header &amp; Footer → Add) gives the most control: font, size, colour, custom format strings, page ranges, and margins. It is the best option for complex documents where exact placement matters.
+</p>
+
+<p>
+  Acrobat also supports Bates numbering — a legal convention that prefixes each number with a case identifier — useful for legal professionals.
+</p>
+
+<h2>Option 3: Microsoft Word (before creating the PDF)</h2>
+
+<p>
+  If you still have the source Word document, adding page numbers before exporting is the cleanest approach. In Word, go to Insert → Page Number, choose a position and style, then export to PDF (File → Export → Create PDF). The numbers are rendered into the PDF at export time and become part of the page content.
+</p>
+
+<p>
+  This only works if you have the source document. For a PDF you received from someone else, you need a different method.
+</p>
+
+<h2>Option 4: LibreOffice (free, desktop)</h2>
+
+<p>
+  LibreOffice Writer can open many PDFs for editing (via its Draw application). Once open, you can add a text box with a page number field. The output quality varies — LibreOffice's PDF editing is functional but not always pixel-perfect, and complex PDFs can reflow unexpectedly.
+</p>
+
+<p>
+  For simple documents where minor formatting changes are acceptable, LibreOffice is a free desktop alternative.
+</p>
+
+<h2>Placement conventions</h2>
+
+<p>
+  The position of page numbers follows some loose conventions that vary by document type:
+</p>
+
+<ul>
+  <li><strong>Bottom center:</strong> the most common position for general documents, reports, and academic papers. Visible at a glance regardless of where the page is in a stack.</li>
+  <li><strong>Bottom right (odd) / bottom left (even):</strong> the standard for books and double-sided printing, where right-hand pages are odd and left-hand pages are even. Often called "outside margin" placement.</li>
+  <li><strong>Top right:</strong> common in legal filings and formal correspondence in some jurisdictions.</li>
+  <li><strong>Top center:</strong> used in some academic and government document formats.</li>
+</ul>
+
+<p>
+  For most purposes — email attachments, shared reports, printed documents — bottom center is the safe default.
+</p>
+
+<h2>Starting from a number other than 1</h2>
+
+<p>
+  Starting from a number other than 1 is useful when a PDF is one section of a larger document. If chapters 1–3 cover pages 1–48, chapter 4 should start at 49. Set the starting number accordingly before generating the PDF.
+</p>
+
+<p>
+  Roman numerals for front matter (i, ii, iii) require a PDF editor that supports number format strings — Acrobat Pro handles this; browser-based tools typically produce Arabic numerals only.
+</p>
+
+<h2>The privacy consideration</h2>
+
+<p>
+  Online tools that add page numbers do so by uploading your file to a server. For internal reports, contracts, or any document with proprietary content, that upload is a privacy concern.
+</p>
+
+<p>
+  keptlocal adds page numbers entirely in your browser — the file never leaves your device. Open the Network tab in DevTools while the tool runs and you will see no outbound requests. It is the right choice when the content is sensitive.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Add page numbers to any PDF with <a href="/tools/add-page-numbers-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free browser tool</a> — no upload, no signup. Also useful: <a href="/tools/merge-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Merge PDF</a> to combine chapters before numbering.
+</p>
+
+</BlogLayout>

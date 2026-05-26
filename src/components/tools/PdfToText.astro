@@ -1,0 +1,176 @@
+---
+---
+
+<div id="pdf-text-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file from your device
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="result-wrap" class="hidden px-4 pb-4 space-y-3">
+    <div class="flex items-center justify-between">
+      <span id="result-info" class="text-sm text-[var(--color-ink-muted)]"></span>
+      <div class="flex gap-2">
+        <button type="button" id="copy-btn" class="text-xs px-3 py-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+          Copy all
+        </button>
+        <button type="button" id="download-txt-btn" class="text-xs px-3 py-1.5 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+          Download .txt
+        </button>
+        <button type="button" id="clear-btn" class="text-xs px-3 py-1.5 rounded-md text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] transition-colors">
+          Clear
+        </button>
+      </div>
+    </div>
+    <textarea
+      id="text-output"
+      readonly
+      rows="14"
+      class="w-full px-3 py-2.5 text-sm font-mono rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink-soft)] resize-y focus:outline-none"
+      placeholder="Extracted text will appear here..."
+    ></textarea>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Drop a PDF to extract its text.
+    </div>
+    <button type="button" id="process-btn" class="btn-primary" disabled>
+      <span id="btn-label">Extract text</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  const PDFJS_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
+  const WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+
+  let pdfFile = null;
+  let extractedText = "";
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+  const fmtSize = (b) => b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
+  const setStatus = (msg, err = false) => {
+    $("status-msg").textContent = msg;
+    $("status-msg").style.color = err ? "var(--color-warn)" : "";
+  };
+
+  const loadFile = (file) => {
+    if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
+      setStatus("Only PDF files are accepted.", true); return;
+    }
+    pdfFile = file;
+    $("result-wrap").classList.add("hidden");
+    $("text-output").value = "";
+    $("process-btn").disabled = false;
+    setStatus(`${file.name} (${fmtSize(file.size)}) — click Extract text to begin.`);
+  };
+
+  $("browse-btn").addEventListener("click", () => $("file-input").click());
+  $("drop-zone").addEventListener("click", (e) => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
+  $("file-input").addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); $("file-input").value = ""; });
+
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e) => { if (e.dataTransfer?.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+  $("clear-btn").addEventListener("click", () => {
+    pdfFile = null; extractedText = "";
+    $("empty-state").classList.remove("hidden");
+    $("result-wrap").classList.add("hidden");
+    $("process-btn").disabled = true;
+    setStatus("Drop a PDF to extract its text.");
+  });
+
+  $("copy-btn").addEventListener("click", async () => {
+    if (!extractedText) return;
+    try {
+      await navigator.clipboard.writeText(extractedText);
+      $("copy-btn").textContent = "Copied!";
+      setTimeout(() => { $("copy-btn").textContent = "Copy all"; }, 2000);
+    } catch (_) {
+      $("text-output").select();
+      document.execCommand("copy");
+    }
+  });
+
+  $("download-txt-btn").addEventListener("click", () => {
+    if (!extractedText) return;
+    const blob = new Blob([extractedText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${pdfFile?.name.replace(/\.pdf$/i, "") || "extracted"}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+
+  $("process-btn").addEventListener("click", async () => {
+    if (!pdfFile || processing) return;
+    processing = true;
+    $("process-btn").disabled = true;
+    $("spinner").classList.remove("hidden");
+    $("btn-label").textContent = "Extracting...";
+    setStatus("Loading pdf.js...");
+
+    try {
+      if (!window.pdfjsLib) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          s.src = PDFJS_URL;
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_URL;
+
+      const bytes = await pdfFile.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+      const numPages = pdf.numPages;
+      const pageTexts = [];
+
+      for (let i = 1; i <= numPages; i++) {
+        setStatus(`Extracting page ${i} of ${numPages}...`);
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map((item) => item.str).join(" ").replace(/\s+/g, " ").trim();
+        if (pageText) pageTexts.push(`--- Page ${i} ---\n${pageText}`);
+      }
+
+      extractedText = pageTexts.join("\n\n");
+      $("text-output").value = extractedText || "(No text found — this may be a scanned image PDF with no text layer.)";
+      $("result-info").textContent = `${numPages} pages · ${extractedText.length.toLocaleString()} characters`;
+      $("empty-state").classList.add("hidden");
+      $("result-wrap").classList.remove("hidden");
+      setStatus(`Done. Extracted text from ${numPages} page${numPages !== 1 ? "s" : ""}.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not extract text from this PDF."}`, true);
+    } finally {
+      processing = false;
+      $("spinner").classList.add("hidden");
+      $("btn-label").textContent = "Extract text";
+      $("process-btn").disabled = false;
+    }
+  });
+</script>

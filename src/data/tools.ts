@@ -470,6 +470,154 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "delete-pages-pdf",
+    name: "Delete PDF Pages",
+    shortName: "Delete Pages",
+    description: "Remove specific pages from a PDF — entirely in your browser.",
+    longDescription: "Upload a PDF, enter the page numbers you want to remove, and download the cleaned-up file instantly. Nothing is uploaded to a server.",
+    category: "PDF",
+    icon: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
+    status: "live",
+    keywords: ["delete pages from pdf", "remove pages from pdf", "remove pdf pages online free", "delete pdf pages without uploading", "pdf page remover browser"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Page deletion runs entirely in your browser using pdf-lib. Your PDF never leaves your device — open DevTools → Network while processing to confirm no upload requests.",
+      },
+      {
+        q: "How do I specify which pages to delete?",
+        a: "Enter a comma-separated list of page numbers and ranges — for example '1, 3, 5-8' deletes pages 1, 3, 5, 6, 7, and 8. Pages are numbered from 1.",
+      },
+      {
+        q: "Can I delete all pages?",
+        a: "The tool requires at least one page to remain in the output. If you enter all page numbers, processing will stop with an error.",
+      },
+      {
+        q: "Will the remaining pages keep their original quality?",
+        a: "Yes. pdf-lib copies page content byte-for-byte without re-rendering. Text stays selectable, images stay sharp, and annotations are preserved.",
+      },
+      {
+        q: "Is there a file size or page limit?",
+        a: "No hard limit. The practical ceiling is your device's available RAM — most laptops handle hundreds of pages without issue.",
+      },
+      {
+        q: "Can I undo after downloading?",
+        a: "The tool only modifies a copy of the PDF in memory — your original file on disk is untouched. If you want the pages back, simply reload the original.",
+      },
+    ],
+  },
+  {
+    slug: "add-page-numbers-pdf",
+    name: "Add Page Numbers to PDF",
+    shortName: "Add Page Numbers",
+    description: "Stamp page numbers onto every PDF page — entirely in your browser.",
+    longDescription: "Upload a PDF, choose the position and starting number, and download the numbered PDF instantly. Nothing is uploaded to a server.",
+    category: "PDF",
+    icon: "M7 20l4-16m2 16l4-16M6 9h14M4 15h14",
+    status: "live",
+    keywords: ["add page numbers to pdf", "number pdf pages online free", "pdf page numbering without upload", "stamp page numbers pdf browser", "pdf page number tool free"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Page numbering runs entirely in your browser using pdf-lib. Your PDF never leaves your device.",
+      },
+      {
+        q: "Where are the page numbers placed?",
+        a: "Choose from six positions: bottom center, bottom left, bottom right, top center, top left, or top right. Bottom center is the standard for most documents.",
+      },
+      {
+        q: "Can I start numbering from a number other than 1?",
+        a: "Yes — set the starting number to any positive integer. Useful when a document is a chapter or section within a larger work and pages should continue from a prior section's numbering.",
+      },
+      {
+        q: "Will page numbers overlap my existing content?",
+        a: "Page numbers are placed in the margin area at the top or bottom of the page. For standard A4 and Letter PDFs this avoids content. If your PDF has an unusual layout with content running to the very edge, the numbers may overlap — check the output before sharing.",
+      },
+      {
+        q: "What font and size are used?",
+        a: "Helvetica at 11pt — a standard PDF font that needs no embedding, keeping file size small. The size and style are fixed to keep the tool simple and the output clean.",
+      },
+      {
+        q: "Is there a page or file size limit?",
+        a: "No hard limit. Page numbering is fast — it only adds a small text drawing instruction to each page.",
+      },
+    ],
+  },
+  {
+    slug: "pdf-to-text",
+    name: "PDF to Text",
+    shortName: "PDF to Text",
+    description: "Extract all text from a PDF — entirely in your browser.",
+    longDescription: "Upload a PDF and the tool extracts all readable text, page by page. Copy it to the clipboard or download as a .txt file. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
+    status: "live",
+    keywords: ["pdf to text", "extract text from pdf", "pdf text extractor online free", "copy text from pdf browser", "pdf to txt without uploading"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Text extraction runs entirely in your browser using pdf.js. Your PDF never leaves your device — open DevTools → Network while processing to confirm zero upload requests.",
+      },
+      {
+        q: "Why does the extracted text look scrambled or out of order?",
+        a: "PDF does not store text in reading order — it stores it as positioned drawing instructions. pdf.js reconstructs reading order from position data, but complex multi-column layouts, tables, and rotated text can produce unexpected ordering. This is a limitation of the PDF format, not the tool.",
+      },
+      {
+        q: "Can I extract text from a scanned PDF?",
+        a: "Only if the PDF was OCR-processed and contains an embedded text layer. A scanned PDF that is just an image of a page contains no extractable text — the tool will return empty output for those pages.",
+      },
+      {
+        q: "What encoding is the downloaded .txt file?",
+        a: "UTF-8, which supports all languages and special characters present in the source PDF.",
+      },
+      {
+        q: "Is there a page limit?",
+        a: "No hard limit. Large PDFs take a few seconds as each page is processed in turn — you will see the progress update as pages are extracted.",
+      },
+      {
+        q: "Can I extract text from a password-protected PDF?",
+        a: "Only PDFs that can be opened without a password. If the PDF restricts content viewing, extraction will fail — unlock it in your PDF reader first.",
+      },
+    ],
+  },
+  {
+    slug: "compress-pdf",
+    name: "Compress PDF",
+    shortName: "Compress PDF",
+    description: "Reduce PDF file size by removing unused objects and metadata — entirely in your browser.",
+    longDescription: "Upload a PDF, choose what to strip, and download a leaner file instantly. Best for PDFs bloated with metadata or unused resources. Nothing is uploaded.",
+    category: "PDF",
+    icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4",
+    status: "live",
+    keywords: ["compress pdf", "reduce pdf file size", "compress pdf online free", "shrink pdf without uploading", "pdf compressor browser", "compress pdf for email"],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. All processing runs in your browser using pdf-lib. Your PDF never leaves your device.",
+      },
+      {
+        q: "How much will the file size be reduced?",
+        a: "It depends on the PDF. Documents with heavy metadata, form field data, or unused embedded resources can reduce significantly. PDFs that are already well-optimised may see minimal change. For image-heavy PDFs, the biggest size reductions require re-encoding images at lower quality — this tool does not re-encode images to preserve visual quality.",
+      },
+      {
+        q: "What does 'remove metadata' do?",
+        a: "Metadata includes the document title, author, creation date, software that created it, and custom properties. Stripping this removes those fields from the file — useful for privacy and for slightly reducing file size.",
+      },
+      {
+        q: "Why is the size reduction smaller than I expected?",
+        a: "Browser-based PDF compression removes metadata and unused document objects. For more aggressive compression — particularly re-encoding embedded images at lower quality — server-side tools using Ghostscript achieve much higher reductions. We plan to add a cloud-processing option for this in a future update.",
+      },
+      {
+        q: "Will content or quality change?",
+        a: "No visible content changes. Text, images, and formatting are preserved. Only invisible overhead (metadata, unused resources) is removed.",
+      },
+      {
+        q: "Is there a file size limit?",
+        a: "No hard limit. The practical ceiling is your device's available RAM.",
+      },
+    ],
+  },
 ];
 
 export const liveTools = tools.filter((t) => t.status === "live");

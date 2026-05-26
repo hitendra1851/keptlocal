@@ -1,0 +1,63 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PdfToText from "../../components/tools/PdfToText.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "pdf-to-text")!;
+---
+
+<ToolLayout tool={tool}>
+  <PdfToText slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to extract text from a PDF</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse and select it.</li>
+      <li>Click <strong>Extract text</strong>. The tool processes each page in turn — you will see the progress as it works.</li>
+      <li>The text appears in the box above, organised by page. Click <strong>Copy all</strong> to copy it to your clipboard, or <strong>Download .txt</strong> to save it as a plain text file.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a>.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while extracting to confirm zero upload requests.
+    </p>
+
+    <h2>When to extract text from a PDF</h2>
+    <ul>
+      <li><strong>Copying content into another document</strong> — extract the text from a report or article so you can paste it into a Word document, Google Doc, or email.</li>
+      <li><strong>Searching inside a large PDF</strong> — extract and paste into a text editor with better search than your PDF viewer.</li>
+      <li><strong>Feeding text to an AI tool</strong> — extract the content of a PDF so you can paste it into ChatGPT, Claude, or another AI for summarisation or analysis.</li>
+      <li><strong>Data extraction from reports</strong> — pull tables and figures from PDFs for further processing in a spreadsheet.</li>
+      <li><strong>Accessibility</strong> — convert a PDF to plain text for easier reading in a text-to-speech tool or screen reader.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      pdf.js loads the PDF and parses its page content streams. Each page in a PDF contains drawing instructions
+      — text is stored as positioned character sequences, not as flowing paragraphs. pdf.js calls
+      <code>page.getTextContent()</code> to retrieve each text item with its position data, then the tool
+      joins adjacent items into lines and pages.
+    </p>
+    <p>
+      Because PDF does not natively store reading order, the tool reconstructs it from character positions.
+      Simple single-column documents extract cleanly. Complex multi-column layouts, tables, and rotated text
+      may produce text in an unexpected order — this is a structural limitation of the PDF format.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Scanned PDFs:</strong> a PDF that is just a scan (image of a page) contains no text data — only pixels. The tool will return empty output. To extract text from a scanned PDF, you need OCR (optical character recognition) — a feature we plan to add via optional cloud processing.</li>
+      <li><strong>Complex layouts:</strong> multi-column layouts, text in tables, and rotated text may extract in a different order than they visually appear. For clean extraction, straightforward single-column documents work best.</li>
+      <li><strong>Ligatures and special characters:</strong> some fonts use ligatures (like "fi" rendered as a single glyph) that may not extract correctly. This depends on how the font is embedded in the PDF.</li>
+      <li><strong>Password-protected PDFs:</strong> the PDF must be openable without a password. PDFs that restrict content viewing cannot be extracted.</li>
+      <li><strong>Large documents:</strong> each page is processed in sequence. Very large PDFs (100+ pages) take a few seconds — you will see progress as each page completes.</li>
+    </ul>
+
+    <h2>Privacy compared to other PDF-to-text tools</h2>
+    <p>
+      Online PDF-to-text converters upload your document to a server for processing. For PDFs containing sensitive information — client reports, legal documents, financial statements, medical records — that upload is a real risk.
+    </p>
+    <p>
+      keptlocal extracts text entirely inside your browser. Your PDF never leaves your device. The extracted text is displayed in the browser and downloaded as a .txt file — no intermediate server is involved at any point.
+    </p>
+  </Fragment>
+</ToolLayout>

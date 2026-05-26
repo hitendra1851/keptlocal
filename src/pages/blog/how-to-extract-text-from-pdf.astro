@@ -1,0 +1,136 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Extract Text from a PDF"
+  description="Copy, paste, or download text from any PDF — including options that work without uploading your file to a server. Plus why scanned PDFs are different and what to do about them."
+  publishDate="2026-05-26"
+  readTime={6}
+  tags={["PDF"]}
+>
+
+<p class="lead">
+  Extracting text from a PDF is one of those tasks that sounds simple but runs into unexpected complications. Here is what actually works — and why scanned PDFs need a different approach.
+</p>
+
+<h2>The two types of PDF (and why it matters)</h2>
+
+<p>
+  Before choosing an extraction method, it helps to know what kind of PDF you are dealing with:
+</p>
+
+<p>
+  <strong>Text-based PDFs</strong> contain actual text data embedded in the file. When you open such a PDF and can select text with your cursor, the text is extractable. This includes most PDFs created by word processors, design tools, and modern office software.
+</p>
+
+<p>
+  <strong>Image-based (scanned) PDFs</strong> are essentially a sequence of page images with no embedded text. Scanning a paper document produces this type. When you open a scanned PDF, you cannot select text — because there is no text to select, only pixels.
+</p>
+
+<p>
+  For text-based PDFs, the methods below work directly. For scanned PDFs, you need OCR first.
+</p>
+
+<h2>Option 1: Select and copy in your PDF reader</h2>
+
+<p>
+  The simplest method for short extractions:
+</p>
+<ol>
+  <li>Open the PDF in Adobe Reader, Chrome, Preview, or any PDF viewer.</li>
+  <li>Click and drag to select the text you want.</li>
+  <li><code>Ctrl+C</code> / <code>Cmd+C</code> to copy, then paste wherever you need it.</li>
+</ol>
+
+<p>
+  Limitations: this works well for a paragraph or two. For entire documents or multiple pages, it is tedious. Multi-column layouts and tables often paste in the wrong order. And some PDFs have text selection disabled (a PDF permissions flag).
+</p>
+
+<h2>Option 2: Browser-based extraction (no upload)</h2>
+
+<p>
+  The <a href="/tools/pdf-to-text">PDF to Text tool</a> on keptlocal extracts all text from a PDF page by page, entirely in your browser using pdf.js. Your file is never uploaded.
+</p>
+
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Click <strong>Extract text</strong>. The tool processes each page and shows the extracted content.</li>
+  <li>Copy it to your clipboard or download a <code>.txt</code> file.</li>
+</ol>
+
+<p>
+  This works well for text-based PDFs of any length. The output is organised by page, so long documents remain navigable. For sensitive documents — legal filings, medical records, financial statements — the browser-based approach means no data leaves your device.
+</p>
+
+<h2>Option 3: Copy all text with Ctrl+A</h2>
+
+<p>
+  In some PDF viewers, pressing <code>Ctrl+A</code> selects all text in the current document view, which you can then copy in one step. Chrome's built-in PDF viewer supports this. The result can be messy for complex layouts but is fast for simple documents.
+</p>
+
+<h2>Option 4: Save as text from Acrobat</h2>
+
+<p>
+  Adobe Acrobat (including the free Reader, not just Pro) can export a PDF as plain text:
+</p>
+<ol>
+  <li>File → Export To → Text (Plain)</li>
+  <li>Choose a location and save.</li>
+</ol>
+<p>
+  Acrobat's text extraction generally handles multi-column layouts and tables better than browser-based tools, though the results still depend on the PDF's structure.
+</p>
+
+<h2>Why multi-column layouts extract poorly</h2>
+
+<p>
+  PDF does not store text in reading order. Text is stored as a series of positioned drawing instructions — "draw this character at coordinate (x, y)." When extracting text, a tool has to reconstruct reading order from those positions, which works well for single-column documents but breaks down for:
+</p>
+
+<ul>
+  <li><strong>Multi-column layouts</strong> — the columns may extract as alternating lines rather than column by column.</li>
+  <li><strong>Tables</strong> — cells may extract across rather than down, losing the table structure.</li>
+  <li><strong>Rotated text</strong> — sidebars and captions at 90° may appear at random positions in the extracted text.</li>
+  <li><strong>Text in text boxes</strong> — floating text boxes may appear before or after the main body regardless of visual position.</li>
+</ul>
+
+<p>
+  This is not a bug in any particular tool — it is a fundamental limitation of the PDF format for text extraction purposes.
+</p>
+
+<h2>Scanned PDFs: you need OCR</h2>
+
+<p>
+  If your PDF is a scan with no text layer, none of the above will work. You need optical character recognition (OCR) to convert the image into extractable text.
+</p>
+
+<p>
+  Options for OCR:
+</p>
+<ul>
+  <li><strong>Adobe Acrobat Pro</strong> — the most reliable option. Tools → Enhance Scans → Recognize Text. Produces a searchable PDF with an embedded text layer.</li>
+  <li><strong>Google Drive</strong> — upload the PDF to Google Drive, right-click and open with Google Docs. Google's OCR runs automatically and produces a document with the extracted text. Free, but you are uploading to Google's servers.</li>
+  <li><strong>Microsoft OneNote</strong> — insert a PDF page as an image, then right-click and choose "Copy Text from Picture." Works for individual pages.</li>
+  <li><strong>Tesseract</strong> — open-source OCR engine, command-line, free. Handles most languages but requires installation.</li>
+</ul>
+
+<p>
+  keptlocal plans to add browser-based OCR as an optional feature — watch this space.
+</p>
+
+<h2>The privacy consideration</h2>
+
+<p>
+  Online PDF-to-text converters upload your document to process it. For PDFs containing sensitive information — legal documents, medical records, financial reports, personal correspondence — that upload is a real privacy concern.
+</p>
+
+<p>
+  Browser-based extraction (keptlocal), local PDF readers, and Acrobat all keep the file on your device. If the content is sensitive, avoid upload-based tools.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Extract text from any PDF with <a href="/tools/pdf-to-text" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's PDF to Text tool</a> — no upload, instant results. Also useful: <a href="/tools/pdf-to-jpg" class="text-[var(--color-accent)] hover:underline underline-offset-4">PDF to JPG</a> to convert scanned pages to images for processing elsewhere.
+</p>
+
+</BlogLayout>

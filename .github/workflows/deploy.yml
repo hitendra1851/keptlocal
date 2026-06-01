@@ -1,6 +1,7 @@
 name: Deploy to AWS Amplify
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -11,6 +12,7 @@ on:
       - 'package-lock.json'
       - 'tsconfig.json'
       - 'amplify.yml'
+      - '.github/workflows/deploy.yml'
 
 jobs:
   deploy:

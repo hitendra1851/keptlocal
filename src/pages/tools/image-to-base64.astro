@@ -1,0 +1,67 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ImageToBase64 from "../../components/tools/ImageToBase64.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "image-to-base64")!;
+---
+
+<ToolLayout tool={tool}>
+  <ImageToBase64 slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert an image to Base64</h2>
+    <ol>
+      <li>Drop your image into the zone above, or click to browse. JPG, PNG, WebP, GIF, and SVG are all supported.</li>
+      <li>The Base64 string appears immediately in the output box. By default it shows the full <strong>Data URI</strong> (including the <code>data:image/...;base64,</code> prefix), which you can paste directly into HTML or CSS.</li>
+      <li>Switch to <strong>Base64 only</strong> if you need the raw encoded string without the prefix — useful for API payloads and JSON fields that expect plain Base64.</li>
+      <li>Click <strong>Copy</strong> to copy the string to your clipboard, or select and copy manually from the text box.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using the FileReader API.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while converting to verify zero upload requests.
+    </p>
+
+    <h2>When to use Base64-encoded images</h2>
+    <ul>
+      <li><strong>Inline images in HTML email templates</strong> — many email clients block externally referenced images but allow inline data URIs. Embedding logos and decorative elements as Base64 ensures they render for recipients who have remote image loading disabled.</li>
+      <li><strong>CSS background images in component-scoped styles</strong> — inlining a small icon as a Base64 data URI in CSS eliminates an HTTP request. This is particularly useful for repeating patterns and small UI icons where request overhead exceeds the encoded size overhead.</li>
+      <li><strong>Sending images via REST APIs and JSON payloads</strong> — some API endpoints expect image data as a Base64 string in a JSON field rather than a multipart form upload. Image recognition and OCR APIs (including Azure AI Vision, OpenAI, and Anthropic's vision models) accept Base64-encoded images directly.</li>
+      <li><strong>Embedding images in SVG files</strong> — SVG supports <code>&lt;image&gt;</code> elements with Base64 data URIs as the <code>href</code> attribute. This produces a single self-contained SVG file with no external dependencies.</li>
+      <li><strong>Prototyping without a static file server</strong> — when building HTML prototypes locally, data URIs let you reference images without setting up a server or dealing with file path issues.</li>
+    </ul>
+
+    <h2>Data URI vs. raw Base64: when to use each</h2>
+    <p>
+      A <strong>data URI</strong> includes the MIME type prefix: <code>data:image/png;base64,iVBORw0KGgo...</code>. This is the format required by HTML <code>src</code> and <code>href</code> attributes, and by CSS <code>url()</code> values. Paste it directly without modification.
+    </p>
+    <p>
+      <strong>Raw Base64</strong> is just the encoded string without the prefix: <code>iVBORw0KGgo...</code>. Use this when an API or system expects the string and handles the MIME type separately — for example, the image field in an OpenAI or Anthropic API request body, or a database column that stores binary data as text.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The browser's <code>FileReader.readAsDataURL(file)</code> method reads the file's binary content and returns a data URI synchronously in its <code>onload</code> callback. The encoding is performed by the browser's native Base64 implementation — no JavaScript library is involved.
+    </p>
+    <p>
+      Base64 encoding works by grouping the file's bytes into sets of three (24 bits) and representing each group as four ASCII characters chosen from a 64-character alphabet (A–Z, a–z, 0–9, +, /). This increases data size by roughly 33% — a 100 KB image becomes approximately 133 KB as a Base64 string. Padding characters (<code>=</code>) are appended when the byte count is not divisible by three.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Size overhead:</strong> Base64 adds approximately 33% to the original file size. A 500 KB image produces a ~665 KB string. For images larger than 50–100 KB, the size overhead makes Base64 embedding impractical for production web pages — the HTTP request saved is outweighed by the bloated HTML/CSS file.</li>
+      <li><strong>Browser rendering:</strong> browsers handle data URIs for images well up to a few megabytes. Very large data URIs (10+ MB) can cause memory pressure in some browsers.</li>
+      <li><strong>MIME type accuracy:</strong> the MIME type in the data URI (<code>image/jpeg</code>, <code>image/png</code>, etc.) comes from the file the browser reports. Renamed files with incorrect extensions may produce a mismatched MIME type — a PNG renamed to <code>.jpg</code> would report <code>image/jpeg</code> in the URI.</li>
+      <li><strong>SVG and text-based formats:</strong> SVG files encode cleanly to Base64, but they can also be referenced as inline SVG or URL-encoded in CSS. Base64 is slightly larger than URL encoding for SVG.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your image is read into browser memory using the FileReader API and encoded locally. Nothing is sent to a server. The Base64 string is displayed in your browser and copied to your clipboard — the data never leaves your device.
+    </p>
+    <p>
+      For confidential images — proprietary product photos, medical imaging, or any image you would prefer not to expose to a third-party server — this architecture provides complete local processing.
+    </p>
+  </Fragment>
+</ToolLayout>

@@ -1,0 +1,62 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import RotateImage from "../../components/tools/RotateImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "rotate-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <RotateImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to rotate an image</h2>
+    <ol>
+      <li>Drop your image into the zone above, or click to browse. JPG, PNG, and WebP are supported.</li>
+      <li>Choose a preset rotation: <strong>90° Left</strong> (counter-clockwise), <strong>180°</strong> (upside down), or <strong>90° Right</strong> (clockwise). Or enter a custom angle between 0 and 360 degrees.</li>
+      <li>Select an output format — leave it on <strong>Same as input</strong> to keep the original format, or switch to JPG, PNG, or WebP.</li>
+      <li>Click <strong>Rotate &amp; download</strong>. The rotated image saves directly to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using the Canvas API.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while rotating to verify zero upload requests.
+    </p>
+
+    <h2>When to rotate an image</h2>
+    <ul>
+      <li><strong>Correcting phone camera orientation</strong> — phones sometimes write EXIF orientation metadata that some apps ignore, displaying a portrait photo as landscape or upside down. Rotating the canvas data corrects this at the pixel level rather than relying on metadata that may be stripped.</li>
+      <li><strong>Fixing a scanned document</strong> — flatbed scanners often produce landscape images of portrait pages. A quick 90° rotation corrects the reading direction.</li>
+      <li><strong>Preparing images for a template</strong> — email templates, social media post editors, and document builders sometimes only accept images in a specific orientation. Rotate before importing.</li>
+      <li><strong>Creating artistic compositions</strong> — a slight custom-angle tilt (3°–5°) on a product photo or portrait adds a dynamic, editorial feel used in magazine and poster layouts.</li>
+      <li><strong>Correcting aerial and drone images</strong> — aerial shots from drones frequently have a heading offset. A custom angle corrects this for maps and orthophoto composites.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The browser decodes the image file using <code>createImageBitmap()</code>, which produces an uncompressed pixel grid. For 90°/180°/270° preset rotations, the canvas dimensions swap width and height as needed, then a CSS transform-equivalent canvas context transform is applied before drawing.
+    </p>
+    <p>
+      For custom angles, the output canvas must be larger than the original to avoid clipping the rotated corners. The required dimensions are computed with trigonometry: the new width is <code>originalWidth × |cos θ| + originalHeight × |sin θ|</code>, and the new height is <code>originalWidth × |sin θ| + originalHeight × |cos θ|</code>. The canvas context is then translated to the new centre, rotated, and the image drawn centred at the origin.
+    </p>
+    <p>
+      The result is encoded back to the chosen format using <code>canvas.toBlob()</code>. For PNG output, the encoding is lossless. For JPG and WebP, a quality of 0.92 is used — high enough to preserve all visible detail while avoiding unnecessary file size inflation.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Custom angles and PNG transparency:</strong> areas outside the original image bounds (the "corners" that appear after a non-right-angle rotation) are transparent on PNG output. On JPG output, those areas are white, since JPG does not support transparency.</li>
+      <li><strong>Quality with custom angles:</strong> 90°/180°/270° rotations on PNG are mathematically lossless — every pixel maps exactly. Custom angles require bilinear resampling (the browser fills rotated pixels by blending neighbours), which introduces minor softness at the pixel level, invisible at normal viewing sizes.</li>
+      <li><strong>EXIF metadata:</strong> the output image does not carry EXIF metadata, including the orientation tag. This is intentional — the rotation is baked into the pixel data, so no metadata hint is needed.</li>
+      <li><strong>Large images:</strong> very large images (20+ megapixels) may take a moment to process on older devices. The canvas limits on most browsers are 16,384 × 16,384 pixels.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your image is decoded in browser memory and rotated locally. Nothing is sent to a server. The rotated file is created from the canvas and downloaded directly to your device.
+    </p>
+    <p>
+      For personal or confidential photos — medical images, identity documents, private photos — this architecture means there is no third-party server involved at any step. Open the Network tab in DevTools while rotating to confirm zero outbound file transfers.
+    </p>
+  </Fragment>
+</ToolLayout>

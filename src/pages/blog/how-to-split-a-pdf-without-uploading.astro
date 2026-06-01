@@ -1,0 +1,137 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Split a PDF Without Uploading It"
+  description="Four ways to split a PDF into separate files or extract specific pages — including a browser-based method that never sends your file to a server."
+  publishDate="2026-06-01"
+  readTime={7}
+  tags={["PDF", "Privacy"]}
+>
+
+<p class="lead">
+  Splitting a PDF sounds trivial. In practice, the first tools that come up in search all require you to upload your file to a third-party server — one you have no control over and no way to audit. Here are the real options, including one that never moves your file off your device.
+</p>
+
+<h2>Why splitting a PDF matters</h2>
+
+<p>
+  The most common reasons to split a PDF: you received a multi-hundred-page document and only need one chapter. You have a combined report and need to send individual sections to different recipients. A scanned batch was merged automatically and needs to be separated by form. A contract needs its appendices extracted for separate review.
+</p>
+
+<p>
+  In every case, the source document may contain information that should not be handled carelessly. Uploading it to a random online tool — even one that promises deletion within a few hours — is a choice worth thinking about.
+</p>
+
+<h2>Option 1: Browser-based splitting (no upload, free)</h2>
+
+<p>
+  The <a href="/tools/split-pdf">Split PDF tool</a> on keptlocal runs entirely in your browser using pdf-lib, a JavaScript library that processes the file locally. Nothing leaves your device.
+</p>
+
+<p>Two modes are available:</p>
+
+<ul>
+  <li><strong>Extract pages:</strong> Enter a comma-separated list of pages and ranges — for example <code>1, 3, 5-8</code> — and the tool produces a single new PDF containing just those pages.</li>
+  <li><strong>Split all pages:</strong> Each page becomes its own PDF file. For multi-page documents, these are bundled into a ZIP archive that downloads automatically.</li>
+</ul>
+
+<p>The steps:</p>
+<ol>
+  <li>Drop your PDF onto the tool or click to select it.</li>
+  <li>Choose a mode and enter your page selection if using Extract.</li>
+  <li>Click <strong>Split &amp; download</strong>. The result appears immediately in your browser.</li>
+</ol>
+
+<p>
+  To verify: open DevTools (F12) → Network tab before you begin. You will see the initial page load requests stop, and then nothing further while the split runs. Zero uploads.
+</p>
+
+<h2>Option 2: Adobe Acrobat (desktop, paid)</h2>
+
+<p>
+  Adobe Acrobat Pro has an <strong>Organize Pages</strong> panel that gives you thumbnail-level control over splitting. You can drag to create page ranges, right-click to extract a selection, or use the split tool to break a document into equal-length chunks.
+</p>
+
+<p>
+  Acrobat is the best option for complex PDFs — those with form fields, interactive elements, or digital signatures — because it handles PDF structure more comprehensively than JavaScript libraries. The downside is cost: Acrobat Pro is subscription-only.
+</p>
+
+<p>
+  The free Acrobat Reader cannot split PDFs. This is a deliberate limitation to push users toward Acrobat Pro.
+</p>
+
+<h2>Option 3: Preview on macOS (free, local)</h2>
+
+<p>
+  macOS users can split PDFs without any additional software using Preview:
+</p>
+
+<ol>
+  <li>Open the PDF in Preview.</li>
+  <li>Show the thumbnails sidebar: View → Thumbnails (or Shift+Cmd+D).</li>
+  <li>Select the pages you want to extract — Command-click for non-consecutive pages.</li>
+  <li>Drag the selected thumbnails out of the thumbnails panel onto your desktop or into a Finder window. macOS creates a new PDF containing just those pages.</li>
+</ol>
+
+<p>
+  Alternatively, use File → Export as PDF with specific pages selected. Preview handles most standard PDFs well; complex interactive forms may be simplified in the output.
+</p>
+
+<h2>Option 4: Chrome print-to-PDF (free, any OS, limited)</h2>
+
+<p>
+  Chrome's built-in PDF viewer combined with its print-to-PDF destination can extract a page range:
+</p>
+
+<ol>
+  <li>Open the PDF in Chrome.</li>
+  <li>Press Ctrl+P (Cmd+P on Mac) to open the print dialog.</li>
+  <li>Set Destination to <strong>Save as PDF</strong>.</li>
+  <li>Enter the pages you want to keep in the Pages field — for example <code>5-12</code> keeps pages 5 through 12.</li>
+  <li>Save the file.</li>
+</ol>
+
+<p>
+  This approach is useful for a quick extraction on any operating system. The limitations: Chrome re-renders the PDF when saving, which can subtly change formatting. You specify pages to keep, not pages to split on, which is awkward when you want to split a large document into several chunks. And it produces one output file, not multiple separate files.
+</p>
+
+<h2>When splitting is not the right tool</h2>
+
+<p>
+  If you want to <strong>remove</strong> specific pages from a document rather than extract them into a new file, the <a href="/tools/delete-pages-pdf">Delete PDF Pages</a> tool is a better fit — it keeps everything except the pages you specify.
+</p>
+
+<p>
+  If you want to <strong>reorganise</strong> a document without splitting it, the <a href="/tools/reorder-pdf">Reorder PDF Pages</a> tool lets you drag page thumbnails into the order you need and download a rearranged PDF.
+</p>
+
+<h2>The privacy angle</h2>
+
+<p>
+  Online PDF tools that require uploads are not automatically unsafe — most run legitimate services with reasonable data handling practices. The risk is structural: your document passes through infrastructure you did not set up, run by a company whose internal data handling you cannot audit, under a privacy policy that may permit uses you have not considered.
+</p>
+
+<p>
+  For documents containing tax information, legal content, health records, or anything covered by confidentiality agreements, the default should be local processing. Splitting a PDF in a browser is not slower or more difficult than uploading it. The only difference is where the work happens.
+</p>
+
+<h2>Which option to use</h2>
+
+<ul>
+  <li><strong>Fast, private, any device:</strong> <a href="/tools/split-pdf">keptlocal Split PDF</a></li>
+  <li><strong>macOS, built-in option:</strong> Preview drag-to-export</li>
+  <li><strong>Quick extraction, any OS, no software:</strong> Chrome print-to-PDF</li>
+  <li><strong>Complex PDFs, interactive forms:</strong> Adobe Acrobat Pro</li>
+</ul>
+
+<p>
+  For most common splitting tasks — extracting a chapter, separating a multi-form scan, sending one section of a document — the browser-based option is the fastest path: no installation, no account, and no file leaves your device.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Split your PDF using keptlocal's <a href="/tools/split-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Split PDF tool</a> — no upload required. Also useful: <a href="/tools/delete-pages-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Delete PDF Pages</a> and <a href="/tools/reorder-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">Reorder PDF Pages</a>.
+</p>
+
+</BlogLayout>

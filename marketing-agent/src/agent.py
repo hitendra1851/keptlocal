@@ -16,7 +16,6 @@ from tools.directory_submitter import find_and_submit_directories
 from tools.serp_tracker import track_keyword_rankings
 from tools.backlink_checker import check_submitted_backlinks
 from tools.github_writer import write_report_to_github
-from tools.email_sender import send_report_email
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,9 +45,7 @@ async def run(config: Config) -> None:
 
     log.info("Writing report to GitHub...")
     write_report_to_github(config, today, report)
-
-    log.info("Sending email...")
-    send_report_email(config, today, report)
+    # GitHub Actions emails the report when the commit lands on main
 
     log.info("Done.")
 

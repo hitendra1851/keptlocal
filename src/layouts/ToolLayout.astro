@@ -28,7 +28,7 @@ const schema: Record<string, unknown>[] = [
     name: tool.name,
     description,
     url: `https://keptlocal.com/tools/${tool.slug}`,
-    applicationCategory: tool.category === "PDF" ? "UtilitiesApplication" : "MultimediaApplication",
+    applicationCategory: tool.category === "PDF" || tool.category === "Utility" ? "UtilitiesApplication" : "MultimediaApplication",
     operatingSystem: "Any (Web Browser)",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
     browserRequirements: "Requires JavaScript and WebAssembly support.",

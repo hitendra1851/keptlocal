@@ -69,6 +69,9 @@ def _md_to_html(text: str) -> str:
         elif line.startswith("- [ ] "):
             if not in_list: out.append('<ul style="list-style:none;padding-left:0">'); in_list = True
             out.append(f'<li style="padding:4px 0;color:#c0392b">&#9744; <strong>{line[6:]}</strong></li>')
+        elif line.startswith("- [x] ") or line.startswith("- [X] "):
+            if not in_list: out.append('<ul style="list-style:none;padding-left:0">'); in_list = True
+            out.append(f'<li style="padding:4px 0;color:#27ae60">&#9745; {line[6:]}</li>')
         elif line.startswith("- "):
             if not in_list: out.append('<ul style="padding-left:20px">'); in_list = True
             out.append(f'<li style="padding:2px 0">{line[2:]}</li>')

@@ -1,0 +1,113 @@
+---
+---
+
+<div id="gray-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 010 18" fill="currentColor" opacity=".15" stroke="none" /><circle cx="12" cy="12" r="9" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop images here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose files from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="results" class="hidden px-4 pb-4 space-y-2"></div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Drop images to convert to grayscale.</div>
+    <div class="flex gap-2 flex-wrap justify-end">
+      <button type="button" id="zip-btn" class="btn-secondary hidden">Download ZIP</button>
+      <button type="button" id="process-btn" class="btn-primary" disabled>
+        <span id="btn-label">Convert to grayscale</span>
+        <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  let files = [];
+  let resultBlobs = [];
+  const $ = id => document.getElementById(id);
+  const setStatus = (msg, err=false) => { $("status-msg").textContent = msg; $("status-msg").style.color = err ? "var(--color-warn)" : ""; };
+  const fmtSize = b => b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+
+  const addFiles = newFiles => {
+    const imgs = Array.from(newFiles).filter(f => f.type.startsWith("image/"));
+    if (!imgs.length) { setStatus("Only image files are accepted.", true); return; }
+    files = [...files, ...imgs];
+    $("empty-state").classList.add("hidden"); $("process-btn").disabled = false;
+    setStatus(`${files.length} image${files.length>1?"s":""} ready — click Convert to grayscale.`);
+  };
+
+  $("browse-btn").addEventListener("click", () => $("file-input").click());
+  $("drop-zone").addEventListener("click", e => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
+  $("file-input").addEventListener("change", e => { if (e.target.files.length) addFiles(e.target.files); $("file-input").value = ""; });
+  const dz = $("drop-zone");
+  ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", e => { if (e.dataTransfer?.files.length) addFiles(e.dataTransfer.files); });
+
+  $("process-btn").addEventListener("click", async () => {
+    if (!files.length) return;
+    $("process-btn").disabled = true; $("spinner").classList.remove("hidden"); $("btn-label").textContent = "Converting...";
+    resultBlobs = [];
+    const list = $("results");
+    list.innerHTML = ""; list.classList.remove("hidden");
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      setStatus(`Converting ${i+1} of ${files.length}: ${file.name}`);
+      try {
+        const bitmap = await createImageBitmap(file);
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width; canvas.height = bitmap.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let j = 0; j < data.length; j += 4) {
+          const gray = Math.round(0.299 * data[j] + 0.587 * data[j+1] + 0.114 * data[j+2]);
+          data[j] = data[j+1] = data[j+2] = gray;
+        }
+        ctx.putImageData(imageData, 0, 0);
+        const fmt = file.type === "image/png" ? "image/png" : file.type === "image/webp" ? "image/webp" : "image/jpeg";
+        const ext = fmt === "image/png" ? "png" : fmt === "image/webp" ? "webp" : "jpg";
+        const blob = await new Promise(res => canvas.toBlob(res, fmt, 0.92));
+        const base = file.name.replace(/\.[^.]+$/, "");
+        const outName = `${base}-grayscale.${ext}`;
+        resultBlobs.push({ blob, name: outName });
+
+        const url = URL.createObjectURL(blob);
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between gap-3 px-3 py-2 bg-[var(--color-paper-dark)] rounded-md border border-[var(--color-rule)]";
+        row.innerHTML = `<span class="text-sm text-[var(--color-ink)] truncate">${file.name} <span class="text-xs text-[var(--color-ink-muted)]">→ ${fmtSize(blob.size)}</span></span><a href="${url}" download="${outName}" class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4 shrink-0">Save</a>`;
+        list.appendChild(row);
+      } catch (err) {
+        console.error(err);
+        const row = document.createElement("div");
+        row.className = "flex items-center gap-3 px-3 py-2 bg-[var(--color-paper-dark)] rounded-md border border-[var(--color-rule)]";
+        row.innerHTML = `<span class="text-sm text-[var(--color-warn)] truncate">${file.name} — failed</span>`;
+        list.appendChild(row);
+      }
+    }
+
+    if (resultBlobs.length > 1) {
+      const { default: JSZip } = await import("https://esm.sh/jszip@3.10.1");
+      const zip = new JSZip();
+      resultBlobs.forEach(({ blob, name }) => zip.file(name, blob));
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const zipUrl = URL.createObjectURL(zipBlob);
+      const btn = $("zip-btn");
+      btn.classList.remove("hidden");
+      btn.onclick = () => { const a = document.createElement("a"); a.href = zipUrl; a.download = `grayscale-${new Date().toISOString().slice(0,10)}.zip`; document.body.appendChild(a); a.click(); a.remove(); };
+    } else if (resultBlobs.length === 1) {
+      const a = document.createElement("a"); a.href = URL.createObjectURL(resultBlobs[0].blob); a.download = resultBlobs[0].name; document.body.appendChild(a); a.click(); a.remove();
+    }
+    setStatus(`Done. ${resultBlobs.length} image${resultBlobs.length>1?"s":""} converted.`);
+    $("spinner").classList.add("hidden"); $("btn-label").textContent = "Convert to grayscale"; $("process-btn").disabled = false;
+  });
+</script>

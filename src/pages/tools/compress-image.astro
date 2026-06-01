@@ -56,6 +56,17 @@ const tool = tools.find((t) => t.slug === "compress-image")!;
       The compression runs on the browser's main thread (not a Web Worker) to ensure compatibility across browsers when loading the library from a CDN. For typical images up to 20 MB, this takes under two seconds. Larger images or batches of many files will take proportionally longer — the status indicator updates as each file completes.
     </p>
 
+    <h2>Compressing images for email attachments</h2>
+    <p>
+      Email has a practical attachment size limit — most services cap messages at 10–25 MB total, and large images consistently trigger bounce-backs or get stripped by the recipient's mail server. The sweet spot for an emailed photo is under 1 MB; for a batch of photos, under 5 MB total.
+    </p>
+    <p>
+      For a typical 12 MP smartphone photo saved as JPG (3–6 MB), the Balanced compression level produces a result under 1 MB in most cases — small enough for any email client with no perceptible quality loss at normal viewing sizes. Drop in all the photos you need to send, click Compress, then use the Download ZIP button to grab them all at once.
+    </p>
+    <p>
+      A quick workflow: compress your images here, download the ZIP, unzip into a folder, then attach the folder contents to your email. The whole process takes under a minute for a set of 10–15 photos.
+    </p>
+
     <h2>Limits and what to expect</h2>
     <ul>
       <li><strong>Format support:</strong> JPG, PNG, and WebP. HEIC files (iPhone Live Photos, newer Apple formats) are not supported — convert them to JPG first using the Convert Image tool.</li>

@@ -1,0 +1,145 @@
+---
+---
+
+<div id="rotate-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div class="flex items-center gap-3 p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-rule)]">
+      <img id="preview-thumb" src="" alt="preview" class="w-12 h-12 object-cover rounded border border-[var(--color-rule)] shrink-0" />
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-info" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="clear-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] shrink-0">Remove</button>
+    </div>
+
+    <div class="space-y-3">
+      <p class="text-sm font-medium text-[var(--color-ink)]">Rotation</p>
+      <div class="flex flex-wrap gap-2">
+        {[["90° Left","−90"],["180°","180"],["90° Right","90"]].map(([label, val]) => (
+          <button type="button" data-angle={val}
+            class="preset-btn px-4 py-2 rounded-md border border-[var(--color-rule)] text-sm text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors">
+            {label}
+          </button>
+        ))}
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="text-sm text-[var(--color-ink-soft)] shrink-0">Custom angle</label>
+        <input type="number" id="custom-angle" value="0" min="0" max="360" step="1"
+          class="w-24 px-3 py-1.5 text-sm rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]" />
+        <span class="text-sm text-[var(--color-ink-muted)]">degrees</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <label class="text-sm text-[var(--color-ink-soft)] shrink-0">Output format</label>
+      <select id="format-select" class="px-3 py-1.5 text-sm rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+        <option value="same">Same as input</option>
+        <option value="image/jpeg">JPG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Drop an image to rotate it.</div>
+    <button type="button" id="process-btn" class="btn-primary" disabled>
+      <span id="btn-label">Rotate & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  let imgFile = null;
+  let imgMime = "image/jpeg";
+  let angle = 0;
+  const $ = id => document.getElementById(id);
+  const setStatus = (msg, err=false) => { $("status-msg").textContent = msg; $("status-msg").style.color = err ? "var(--color-warn)" : ""; };
+  const fmtSize = b => b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+
+  const loadFile = file => {
+    if (!file.type.startsWith("image/")) { setStatus("Only image files are accepted.", true); return; }
+    imgFile = file; imgMime = file.type;
+    $("file-name").textContent = file.name;
+    $("file-info").textContent = fmtSize(file.size);
+    const url = URL.createObjectURL(file);
+    $("preview-thumb").src = url;
+    $("empty-state").classList.add("hidden"); $("controls").classList.remove("hidden");
+    $("process-btn").disabled = false;
+    setStatus("Choose a rotation and click Rotate & download.");
+  };
+
+  $("browse-btn").addEventListener("click", () => $("file-input").click());
+  $("drop-zone").addEventListener("click", e => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
+  $("file-input").addEventListener("change", e => { if (e.target.files[0]) loadFile(e.target.files[0]); $("file-input").value = ""; });
+  const dz = $("drop-zone");
+  ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", e => { if (e.dataTransfer?.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+  $("clear-btn").addEventListener("click", () => {
+    imgFile = null; angle = 0; $("custom-angle").value = 0;
+    $("empty-state").classList.remove("hidden"); $("controls").classList.add("hidden");
+    $("process-btn").disabled = true; setStatus("Drop an image to rotate it.");
+  });
+
+  document.querySelectorAll(".preset-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      angle = parseFloat(btn.dataset.angle);
+      $("custom-angle").value = ((angle % 360) + 360) % 360;
+      document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("border-[var(--color-accent)]","text-[var(--color-accent)]"));
+      btn.classList.add("border-[var(--color-accent)]","text-[var(--color-accent)]");
+    });
+  });
+
+  $("custom-angle").addEventListener("input", () => {
+    angle = parseFloat($("custom-angle").value) || 0;
+    document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("border-[var(--color-accent)]","text-[var(--color-accent)]"));
+  });
+
+  $("process-btn").addEventListener("click", async () => {
+    if (!imgFile) return;
+    $("process-btn").disabled = true; $("spinner").classList.remove("hidden"); $("btn-label").textContent = "Rotating...";
+    setStatus("Rotating image in your browser...");
+    try {
+      const deg = ((angle % 360) + 360) % 360;
+      const bitmap = await createImageBitmap(imgFile);
+      const rad = (deg * Math.PI) / 180;
+      const cos = Math.abs(Math.cos(rad)), sin = Math.abs(Math.sin(rad));
+      const w = Math.round(bitmap.width * cos + bitmap.height * sin);
+      const h = Math.round(bitmap.width * sin + bitmap.height * cos);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.translate(w/2, h/2);
+      ctx.rotate(rad);
+      ctx.drawImage(bitmap, -bitmap.width/2, -bitmap.height/2);
+      const fmt = $("format-select").value === "same" ? imgMime : $("format-select").value;
+      const ext = fmt === "image/png" ? "png" : fmt === "image/webp" ? "webp" : "jpg";
+      const blob = await new Promise(res => canvas.toBlob(res, fmt, 0.92));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const base = imgFile.name.replace(/\.[^.]+$/, "");
+      a.href = url; a.download = `${base}-rotated.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      setStatus(`Done. Rotated ${deg}° and downloaded.`);
+    } catch (err) {
+      console.error(err); setStatus(`Error: ${err?.message || "could not rotate the image."}`, true);
+    } finally {
+      $("spinner").classList.add("hidden"); $("btn-label").textContent = "Rotate & download"; $("process-btn").disabled = false;
+    }
+  });
+</script>

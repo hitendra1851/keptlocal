@@ -1,0 +1,61 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import QrCodeGenerator from "../../components/tools/QrCodeGenerator.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "qr-code-generator")!;
+---
+
+<ToolLayout tool={tool}>
+  <QrCodeGenerator slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to generate a QR code</h2>
+    <ol>
+      <li>Type or paste the text you want to encode — a URL, a plain text message, an email address, a phone number, or Wi-Fi credentials. The QR code updates automatically as you type.</li>
+      <li>Choose a size. For digital use (presentations, emails), 300px is sufficient. For print (posters, business cards), choose 400px or 600px — more pixels mean sharper output at larger print sizes.</li>
+      <li>Select an error correction level. Medium (M) works for most cases. Use High (H) if the QR code will be printed on a surface that might be scratched, worn, or if you plan to overlay a logo.</li>
+      <li>Click <strong>Download PNG</strong> to save the QR code to your device.</li>
+    </ol>
+    <p>
+      Everything runs locally in your browser using qrcode.js. The text you enter is never sent to a server — open DevTools → Network while generating to confirm zero outbound requests.
+    </p>
+
+    <h2>When to use a QR code</h2>
+    <ul>
+      <li><strong>Sharing a website URL:</strong> The most common use. Instead of asking people to type a long URL, a QR code lets them scan and open it instantly. Works on printed materials, presentations, posters, and packaging.</li>
+      <li><strong>Business cards:</strong> Encode your website, LinkedIn profile, or vCard contact information. A single scan saves a contact or opens a profile — more reliable than typing a URL by hand.</li>
+      <li><strong>Wi-Fi sharing:</strong> Encode Wi-Fi credentials in the format <code>WIFI:T:WPA;S:YourNetworkName;P:YourPassword;;</code> so guests can scan to connect without reading out the password.</li>
+      <li><strong>Product packaging:</strong> Link to user manuals, warranty registration, or promotional pages without cluttering the packaging with a long URL.</li>
+      <li><strong>Event check-in:</strong> Each ticket or attendee gets a unique QR code that a scanner app reads at the door — faster and more reliable than typing reference numbers.</li>
+      <li><strong>Restaurant menus:</strong> Post-2020, QR codes linking to digital menus became standard in hospitality. They reduce printing costs and allow menu updates without reprinting.</li>
+    </ul>
+
+    <h2>Understanding error correction levels</h2>
+    <p>
+      QR codes are designed to be readable even when partially damaged. The error correction level controls how much redundancy is built in — higher redundancy means the code can scan even if part of it is obscured or damaged, but at the cost of a denser, more complex pattern.
+    </p>
+    <ul>
+      <li><strong>Low (L, 7%):</strong> The code can be read even if 7% of it is damaged. Produces the simplest pattern — use for clean digital displays where the code will always appear intact.</li>
+      <li><strong>Medium (M, 15%):</strong> The default. Good balance of density and resilience. Works for most print and digital uses.</li>
+      <li><strong>Quartile (Q, 25%):</strong> Use when printing on materials that may wear — outdoor signs, product labels, stickers.</li>
+      <li><strong>High (H, 30%):</strong> Up to 30% of the code can be damaged and it will still scan. Required if you plan to overlay a logo in the center of the code, since the logo covers part of the pattern.</li>
+    </ul>
+
+    <h2>How QR codes work</h2>
+    <p>
+      A QR code (Quick Response code) encodes data as a matrix of black and white squares. A scanner reads the pattern and decodes it back to text. The three large square markers in the corners orient the scanner — it reads the code from any angle and at any rotation. Error correction data is distributed across the pattern, allowing partial reconstruction if some squares are unreadable.
+    </p>
+    <p>
+      The maximum data capacity varies by error correction level and version (size of the matrix). A Version 1 QR code (21×21 squares) can encode up to 41 alphanumeric characters at Low error correction. A Version 40 code (177×177 squares) can encode up to 4,296 alphanumeric characters at Low — though QR codes this dense require a high-quality scanner to read reliably. For URLs, staying under 200 characters produces reliable scans in all conditions.
+    </p>
+
+    <h2>Privacy: what happens to your text</h2>
+    <p>
+      The text you enter into this tool is processed entirely in your browser using qrcode.js. It is not sent to a server, not logged, and not stored. The QR code is generated locally and the PNG downloads to your device directly from browser memory.
+    </p>
+    <p>
+      This matters if you are encoding sensitive information — a private URL, an internal document link, or Wi-Fi credentials. The generation process is local and verifiable: open the Network tab in DevTools while generating to confirm zero outbound requests.
+    </p>
+  </Fragment>
+</ToolLayout>

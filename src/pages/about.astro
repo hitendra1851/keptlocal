@@ -4,7 +4,7 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
 const title = "About keptlocal — Private browser-only file tools";
-const description = "keptlocal is built by Hiten Mahalwar, a Healthcare IT engineer with 15+ years of experience. Every tool runs entirely in your browser — no uploads, no accounts, no tracking.";
+const description = "keptlocal is built by Hitendra Patel, a Senior Technical Lead in Healthcare IT with 15+ years of experience. Every tool runs entirely in your browser — no uploads, no accounts, no tracking.";
 
 const schema = {
   "@context": "https://schema.org",
@@ -14,8 +14,8 @@ const schema = {
   url: "https://keptlocal.com/about",
   mainEntity: {
     "@type": "Person",
-    name: "Hiten Mahalwar",
-    jobTitle: "Technical Lead",
+    name: "Hitendra Patel",
+    jobTitle: "Senior Technical Lead",
     worksFor: {
       "@type": "Organization",
       name: "Vohra Wound Physicians",
@@ -25,10 +25,19 @@ const schema = {
       "Browser-based file tools",
       "Healthcare IT",
       "Azure AI",
-      ".NET development",
-      "Data engineering",
+      "AWS",
+      "C#/.NET",
+      "ASP.NET Core",
+      "Python",
+      "Machine learning",
+      "FHIR / HL7",
+      "Microservices",
     ],
     url: "https://keptlocal.com/about",
+    sameAs: [
+      "https://www.linkedin.com/in/hitendrapatel2",
+      "https://geektechinsider.blogspot.com",
+    ],
   },
 };
 ---
@@ -52,17 +61,21 @@ const schema = {
     <!-- Author card -->
     <div class="flex items-start gap-5 p-6 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-dark)] mb-12">
       <div class="w-16 h-16 rounded-full bg-[var(--color-accent-tint)] border-2 border-[var(--color-accent)] flex items-center justify-center shrink-0">
-        <span class="font-display text-2xl text-[var(--color-accent)] tracking-tight">HM</span>
+        <span class="font-display text-2xl text-[var(--color-accent)] tracking-tight">HP</span>
       </div>
-      <div>
-        <div class="font-medium text-[var(--color-ink)] text-lg leading-tight">Hiten Mahalwar</div>
-        <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">Technical Lead · Vohra Wound Physicians</div>
+      <div class="flex-1">
+        <div class="font-medium text-[var(--color-ink)] text-lg leading-tight">Hitendra Patel</div>
+        <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">Senior Technical Lead · Vohra Wound Physicians</div>
         <div class="text-sm text-[var(--color-ink-muted)]">Ahmedabad, India · 15+ years in Healthcare IT</div>
         <div class="flex flex-wrap gap-2 mt-3">
-          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">.NET / Azure AI</span>
-          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Data engineering</span>
-          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Healthcare IT</span>
-          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Browser tools</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">C#/.NET &amp; Python</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Azure &amp; AWS AI</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Healthcare IT / FHIR</span>
+          <span class="text-xs px-2 py-1 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)]">Microservices</span>
+        </div>
+        <div class="flex gap-4 mt-3">
+          <a href="https://www.linkedin.com/in/hitendrapatel2" class="text-xs text-[var(--color-accent)] hover:underline" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://geektechinsider.blogspot.com" class="text-xs text-[var(--color-accent)] hover:underline" target="_blank" rel="noopener">Tech Blog</a>
         </div>
       </div>
     </div>
@@ -87,10 +100,12 @@ const schema = {
 
       <h2>Who built this</h2>
       <p>
-        keptlocal is built and maintained by Hiten Mahalwar. I have spent fifteen years in
-        Healthcare IT — building data pipelines, integrating Azure AI Document Intelligence,
-        and working with the kind of sensitive documents (clinical notes, insurance records,
-        patient data) that should never casually leave a controlled environment.
+        keptlocal is built and maintained by Hitendra Patel. I am a Senior Technical Lead
+        at Vohra Wound Physicians in Ahmedabad, India, with fifteen years in Healthcare IT.
+        My day-to-day work involves building data pipelines, integrating Azure AI Document
+        Intelligence, working with FHIR and HL7 healthcare data standards, and handling the
+        kind of sensitive documents — clinical notes, insurance records, patient data — that
+        should never casually leave a controlled environment.
       </p>
       <p>
         The site started after one too many conversations where a friend or colleague asked
@@ -104,21 +119,35 @@ const schema = {
 
       <h2>What is available today</h2>
       <p>
-        keptlocal currently has <strong>12 tools across two categories</strong>, all fully client-side:
+        keptlocal currently has <strong>22 tools across two categories</strong>, all fully client-side:
       </p>
+      <p><strong>PDF tools</strong></p>
       <ul>
         <li><a href="/tools/merge-pdf">Merge PDF</a> — combine multiple PDFs into one</li>
-        <li><a href="/tools/split-pdf">Split PDF</a> — extract pages or split all pages</li>
-        <li><a href="/tools/pdf-to-jpg">PDF to JPG</a> — render PDF pages as images</li>
-        <li><a href="/tools/jpg-to-pdf">JPG to PDF</a> — combine images into a PDF</li>
+        <li><a href="/tools/split-pdf">Split PDF</a> — extract pages or split into separate files</li>
         <li><a href="/tools/rotate-pdf">Rotate PDF</a> — fix page orientation</li>
         <li><a href="/tools/reorder-pdf">Reorder PDF Pages</a> — drag-to-reorder thumbnails</li>
+        <li><a href="/tools/delete-pages-pdf">Delete PDF Pages</a> — remove specific pages</li>
+        <li><a href="/tools/add-page-numbers-pdf">Add Page Numbers to PDF</a> — stamp numbered footers</li>
         <li><a href="/tools/watermark-pdf">Watermark PDF</a> — stamp diagonal text on every page</li>
-        <li><a href="/tools/pdf-page-count">PDF Info Viewer</a> — page count, size, metadata</li>
-        <li><a href="/tools/compress-image">Compress Image</a> — shrink JPG, PNG, WebP</li>
+        <li><a href="/tools/compress-pdf">Compress PDF</a> — strip metadata and unused objects</li>
+        <li><a href="/tools/unlock-pdf">Unlock PDF</a> — remove password protection</li>
+        <li><a href="/tools/pdf-to-jpg">PDF to JPG</a> — render pages as JPG images</li>
+        <li><a href="/tools/pdf-to-png">PDF to PNG</a> — render pages as lossless PNG images</li>
+        <li><a href="/tools/pdf-to-text">PDF to Text</a> — extract readable text from any PDF</li>
+        <li><a href="/tools/jpg-to-pdf">JPG to PDF</a> — combine images into a PDF</li>
+        <li><a href="/tools/pdf-page-count">PDF Info Viewer</a> — page count, dimensions, metadata</li>
+      </ul>
+      <p><strong>Image tools</strong></p>
+      <ul>
+        <li><a href="/tools/compress-image">Compress Image</a> — shrink JPG, PNG, WebP for web or email</li>
         <li><a href="/tools/resize-image">Resize Image</a> — dimensions, percentage, or longest side</li>
         <li><a href="/tools/convert-image">Convert Image</a> — HEIC, JPG, PNG, WebP, AVIF</li>
         <li><a href="/tools/crop-image">Crop Image</a> — free-form or fixed-ratio crop</li>
+        <li><a href="/tools/rotate-image">Rotate Image</a> — 90°/180°/270° or any custom angle</li>
+        <li><a href="/tools/flip-image">Flip Image</a> — horizontal or vertical mirror</li>
+        <li><a href="/tools/grayscale-image">Grayscale Image</a> — convert colour photos to black and white</li>
+        <li><a href="/tools/image-to-base64">Image to Base64</a> — generate data URIs for HTML/CSS/JSON</li>
       </ul>
       <p>
         The <a href="/blog">blog</a> covers practical guides on PDF workflows, image formats,

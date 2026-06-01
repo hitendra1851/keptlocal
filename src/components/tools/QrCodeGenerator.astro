@@ -1,0 +1,124 @@
+---
+---
+
+<div id="qr-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5 space-y-4">
+    <!-- Input -->
+    <div>
+      <label for="qr-input" class="block text-sm font-medium text-[var(--color-ink)] mb-1.5">URL or text</label>
+      <textarea
+        id="qr-input"
+        rows="3"
+        placeholder="https://example.com"
+        class="w-full px-3 py-2 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)] resize-none"
+      ></textarea>
+    </div>
+
+    <!-- Options -->
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="qr-size" class="block text-xs text-[var(--color-ink-muted)] mb-1">Size (px)</label>
+        <select id="qr-size" class="w-full px-2 py-1.5 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="200">200 × 200</option>
+          <option value="300" selected>300 × 300</option>
+          <option value="400">400 × 400</option>
+          <option value="600">600 × 600</option>
+        </select>
+      </div>
+      <div>
+        <label for="qr-ecl" class="block text-xs text-[var(--color-ink-muted)] mb-1">Error correction</label>
+        <select id="qr-ecl" class="w-full px-2 py-1.5 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-sm text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="L">Low (7%)</option>
+          <option value="M" selected>Medium (15%)</option>
+          <option value="Q">Quartile (25%)</option>
+          <option value="H">High (30%)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div id="qr-preview" class="hidden px-5 pb-4 flex flex-col items-center">
+    <canvas id="qr-canvas" class="rounded-lg border border-[var(--color-rule)] bg-white"></canvas>
+    <p id="qr-char-count" class="text-xs text-[var(--color-ink-muted)] mt-2"></p>
+  </div>
+
+  <div id="qr-empty" class="px-5 pb-5 flex justify-center">
+    <div class="w-[300px] h-[300px] rounded-lg border-2 border-dashed border-[var(--color-rule)] flex items-center justify-center">
+      <p class="text-sm text-[var(--color-ink-muted)]">QR code preview</p>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Type or paste text above to generate a QR code.</div>
+    <button type="button" id="download-btn" class="btn-primary" disabled>Download PNG</button>
+  </div>
+</div>
+
+<script type="module">
+  const $ = id => document.getElementById(id);
+  let qrModule = null;
+  let debounceTimer = null;
+
+  const setStatus = (msg, err = false) => {
+    $('status-msg').textContent = msg;
+    $('status-msg').style.color = err ? 'var(--color-warn)' : '';
+  };
+
+  const generate = async () => {
+    const text = $('qr-input').value.trim();
+    if (!text) {
+      $('qr-preview').classList.add('hidden');
+      $('qr-empty').classList.remove('hidden');
+      $('download-btn').disabled = true;
+      setStatus('Type or paste text above to generate a QR code.');
+      return;
+    }
+
+    if (!qrModule) {
+      setStatus('Loading…');
+      qrModule = await import('https://esm.sh/qrcode@1.5.4');
+    }
+
+    const size = parseInt($('qr-size').value);
+    const ecl = $('qr-ecl').value;
+    const canvas = $('qr-canvas');
+
+    try {
+      await qrModule.default.toCanvas(canvas, text, {
+        width: size,
+        errorCorrectionLevel: ecl,
+        margin: 2,
+        color: { dark: '#1a1815', light: '#ffffff' },
+      });
+      $('qr-empty').classList.add('hidden');
+      $('qr-preview').classList.remove('hidden');
+      $('download-btn').disabled = false;
+      $('qr-char-count').textContent = `${text.length} character${text.length !== 1 ? 's' : ''} encoded`;
+      setStatus('QR code ready — click Download PNG to save.');
+    } catch (err) {
+      setStatus(err.message.includes('too long') ? 'Text is too long for this error correction level. Try Low (7%) or shorten the text.' : 'Could not generate QR code.', true);
+      $('download-btn').disabled = true;
+    }
+  };
+
+  const debouncedGenerate = () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(generate, 300);
+  };
+
+  $('qr-input').addEventListener('input', debouncedGenerate);
+  $('qr-size').addEventListener('change', generate);
+  $('qr-ecl').addEventListener('change', generate);
+
+  $('download-btn').addEventListener('click', () => {
+    const canvas = $('qr-canvas');
+    const text = $('qr-input').value.trim().slice(0, 30).replace(/[^a-zA-Z0-9]/g, '-') || 'qrcode';
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = `qrcode-${text}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+</script>

@@ -1,0 +1,68 @@
+name: Deploy to AWS Amplify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - 'amplify.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site (fail fast before triggering deploy)
+        run: npm run build
+
+      - name: Trigger Amplify deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          APP_ID="d1u3vfqwnwnnqk"
+          BRANCH="main"
+
+          JOB_ID=$(aws amplify start-job \
+            --app-id "$APP_ID" \
+            --branch-name "$BRANCH" \
+            --job-type RELEASE \
+            --output json | jq -r '.jobSummary.jobId')
+
+          echo "Amplify job started: $JOB_ID"
+
+          # Poll until SUCCEED / FAILED / CANCELLED
+          for i in $(seq 1 30); do
+            sleep 30
+            STATUS=$(aws amplify get-job \
+              --app-id "$APP_ID" \
+              --branch-name "$BRANCH" \
+              --job-id "$JOB_ID" \
+              --output json | jq -r '.job.summary.status')
+            echo "  [$((i * 30))s] $STATUS"
+            if [ "$STATUS" = "SUCCEED" ]; then
+              echo "Deployed: https://keptlocal.com"
+              exit 0
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "CANCELLED" ]; then
+              echo "Deployment $STATUS."
+              exit 1
+            fi
+          done
+
+          echo "Timed out — check Amplify console."
+          exit 1

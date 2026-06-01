@@ -1,0 +1,73 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import WordCounter from "../../components/tools/WordCounter.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "word-counter")!;
+---
+
+<ToolLayout tool={tool}>
+  <WordCounter slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to count words and characters</h2>
+    <ol>
+      <li>Paste or type your text into the input area. The counts update instantly as you type — there is no button to click.</li>
+      <li>Read the six counts in the grid below the text area: words, characters (total), characters without spaces, sentences, paragraphs, and estimated reading time.</li>
+      <li>If you have entered any text, the character limit panel appears below the grid showing your current character count against common social media limits (Twitter/X, LinkedIn, Instagram, Facebook), with a progress bar for each.</li>
+      <li>Click <strong>Clear</strong> to reset the text area and all counts.</li>
+    </ol>
+    <p>
+      Your text never leaves your browser. Counting is done entirely in JavaScript as you type — no server request is made at any point. Paste confidential documents without concern.
+    </p>
+
+    <h2>When to use a word counter</h2>
+    <ul>
+      <li><strong>Social media posts:</strong> Twitter/X has a 280-character limit. LinkedIn posts can be up to 3,000 characters before they get truncated. Instagram captions are capped at 2,200 characters. Knowing your character count before you post prevents the frustration of hitting a limit mid-edit in the platform's own composer.</li>
+      <li><strong>Academic writing:</strong> Essays, dissertations, and submission requirements often specify word counts. A 2,000-word essay means 2,000 words — checking in a word counter during drafting is faster than waiting for your word processor to update its count after large pastes.</li>
+      <li><strong>Content writing and SEO:</strong> Search engines favor comprehensive content. A word count target — typically 1,200–2,500 words for a competitive article — ensures you have written enough to cover the topic thoroughly.</li>
+      <li><strong>Email copy:</strong> Marketing email subject lines should stay under 50 characters for mobile clients. Body copy has no hard limit, but studies consistently show that shorter emails have higher click-through rates. A character counter keeps you disciplined.</li>
+      <li><strong>Reading time estimation:</strong> If you are writing a blog post, newsletter, or report, knowing the reading time helps you set reader expectations. Posts that say "5 min read" at the top have higher completion rates than those that don't.</li>
+      <li><strong>Developer tool use:</strong> Many APIs impose character limits on inputs — GPT prompts, SMS messages (160 characters per segment), database fields. A quick character count prevents truncation errors.</li>
+    </ul>
+
+    <h2>How words, sentences, and paragraphs are counted</h2>
+    <p>
+      <strong>Words:</strong> The text is trimmed of leading and trailing whitespace, then split on any sequence of whitespace (spaces, tabs, line breaks). Each resulting token is one word. Hyphenated words like "well-known" count as one word. Punctuation attached to a word (trailing comma, period) stays with the word and does not create a separate token.
+    </p>
+    <p>
+      <strong>Characters:</strong> The raw string length — every character, including spaces, tabs, and line breaks. The "without spaces" count removes all whitespace characters before measuring.
+    </p>
+    <p>
+      <strong>Sentences:</strong> Counted by finding sequences ending in a period, exclamation mark, or question mark followed by whitespace or end of string. This is an approximation — abbreviations like "Dr." and "e.g." can produce false positives. For formal sentence-count requirements, a grammar checker is more reliable.
+    </p>
+    <p>
+      <strong>Paragraphs:</strong> Counted by splitting on one or more blank lines (two consecutive newlines). Single line breaks within a paragraph are not treated as paragraph breaks — which matches how most writing tools define paragraphs. A block of text with no blank lines anywhere counts as one paragraph.
+    </p>
+    <p>
+      <strong>Reading time:</strong> Calculated at 238 words per minute, which is the commonly cited average for adult silent reading of general prose. Academic text, technical documentation, or dense legal writing reads slower; light fiction reads faster. Use the estimate as a guide, not a guarantee.
+    </p>
+
+    <h2>Social media character limits explained</h2>
+    <p>
+      Character limits vary significantly across platforms, and the platforms themselves count characters differently from what you might expect:
+    </p>
+    <ul>
+      <li><strong>Twitter/X — 280 characters:</strong> Doubled from the original 140-character limit in 2017. URLs are always counted as 23 characters regardless of actual length (Twitter wraps them via t.co). Emojis count as 2 characters in Twitter's counting.</li>
+      <li><strong>LinkedIn — 3,000 characters for posts:</strong> After approximately 210 characters, a "see more" truncation is added and readers must click to expand. Write your hook in the first 200 characters. Comments are limited to 1,250 characters.</li>
+      <li><strong>Instagram — 2,200 characters for captions:</strong> The caption is truncated to approximately 125 characters in the feed view, with a "more" link to expand. Hashtags count toward the character limit. Instagram also limits 30 hashtags per post.</li>
+      <li><strong>Facebook — 63,206 characters for posts:</strong> Effectively unlimited for practical purposes. Facebook's limit is rarely a concern for organic posts, but paid ads have much tighter limits: headline 40 characters, description 30 characters.</li>
+    </ul>
+    <p>
+      Note that this tool counts raw characters. Platform-specific encoding rules (like Twitter's URL shortening or emoji counting) are not applied — use the platform's composer for a final character count before publishing.
+    </p>
+
+    <h2>Privacy: what happens to your text</h2>
+    <p>
+      The text you paste into this tool is processed entirely in your browser. No network request is made. Nothing is stored in a database, logged for analytics, or transmitted to any server. You can paste a confidential legal document, a draft contract, or a private message and the contents remain on your device.
+    </p>
+    <p>
+      This is the structural advantage of a client-side tool: the code that counts your words runs in the same browser tab you are reading this in, with no connection to any external service.
+    </p>
+  </Fragment>
+</ToolLayout>

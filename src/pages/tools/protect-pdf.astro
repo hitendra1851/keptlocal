@@ -1,0 +1,69 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ProtectPdf from "../../components/tools/ProtectPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "protect-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <ProtectPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to add a password to a PDF</h2>
+    <ol>
+      <li>Drop your PDF onto the drop zone, or click "choose a file from your device" to open the file picker. Only PDF files are accepted.</li>
+      <li>Enter a password in the Password field. Choose something you will remember or store in a password manager — there is no way to recover or remove the password without knowing it.</li>
+      <li>Confirm the password in the second field. The Protect PDF button activates only when both passwords match and a file is loaded.</li>
+      <li>Click <strong>Protect PDF</strong>. The encrypted file downloads automatically with "-protected" appended to the original filename.</li>
+    </ol>
+    <p>
+      The entire operation runs in your browser using pdf-lib. Your PDF is never uploaded to a server — open DevTools → Network while protecting to confirm zero outbound requests.
+    </p>
+
+    <h2>When to password-protect a PDF</h2>
+    <ul>
+      <li><strong>Emailing sensitive documents:</strong> A PDF containing personal information, financial data, or contract terms sent by email can be intercepted or forwarded. Password-protecting the document means the recipient needs the password to open it — send the password through a separate channel (phone, SMS, a different email account) for reasonable security.</li>
+      <li><strong>Sharing documents in cloud storage:</strong> Even with a view-only sharing link, a determined recipient can often download the file. Adding a password to the PDF itself provides a second layer of protection that persists even if the link is forwarded or the storage account is compromised.</li>
+      <li><strong>Distributing confidential reports:</strong> Businesses routinely send quarterly reports, board documents, and due diligence packages to multiple parties. A password ensures only the intended recipients can read the content.</li>
+      <li><strong>Protecting personal records:</strong> Tax returns, medical records, ID scans, and similar documents are high-value targets for identity theft. Encrypting them before storing in cloud backup or emailing to an accountant reduces the risk if those systems are later breached.</li>
+      <li><strong>Restricting printing or copying:</strong> The tool sets permissions that prevent text copying and printing by default (while allowing form filling). This is useful for distributing documents where the content should be readable but not easily reused.</li>
+    </ul>
+
+    <h2>How PDF password encryption works</h2>
+    <p>
+      PDF encryption uses a combination of a password and an encryption algorithm to scramble the document's content. Without the correct password, a PDF viewer sees only encrypted data it cannot render. This tool uses <strong>AES-128-bit encryption</strong>, which is the standard encryption mode for PDF 1.6 and later documents and is supported by every modern PDF viewer.
+    </p>
+    <p>
+      The PDF specification defines two passwords: the <strong>user password</strong> (also called the open password) and the <strong>owner password</strong>. The user password is required to open and read the document. The owner password unlocks the document's permission restrictions — things like printing, text extraction, and editing. This tool sets both: your chosen password as the user password, and a derived string as the owner password. In practice, this means anyone who knows your password can open and read the document, but cannot override the permissions restrictions without the owner password.
+    </p>
+    <p>
+      AES-128-bit encryption is considered secure against brute-force attacks when a strong password is used. The password itself is the weak link — a short or common password can be guessed quickly by purpose-built PDF cracking tools. Use a password of at least 12 characters, ideally generated randomly using the Password Generator tool.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <p>
+      <strong>Already encrypted PDFs:</strong> If a PDF is already password-protected, the tool attempts to load it with encryption ignored. This works for documents where only owner-level restrictions are set. If a user password is required to open the file, you need to unlock it first using the Unlock PDF tool.
+    </p>
+    <p>
+      <strong>File size:</strong> There is no enforced file size limit. The practical ceiling is your device's available RAM — a 200 MB PDF on a device with 4 GB of RAM should process without issue.
+    </p>
+    <p>
+      <strong>Compatibility:</strong> The encrypted PDF will open in Adobe Acrobat, Adobe Reader, Preview (macOS), Chrome's built-in PDF viewer, Edge, Firefox, and all major mobile PDF apps (iOS Files, Android PDF viewers). If a viewer shows "Encrypted" and prompts for a password, enter your chosen password to open it.
+    </p>
+    <p>
+      <strong>What this does not protect against:</strong> Screenshot and screen recording. A user who can open the PDF can always capture what is on screen. If your threat model includes preventing any reproduction of content, physical access controls or DRM systems (which PDF encryption does not provide) are required.
+    </p>
+
+    <h2>Privacy: what happens to your PDF</h2>
+    <p>
+      Your PDF file is processed entirely within your browser using the pdf-lib JavaScript library. It is loaded into browser memory, encrypted in memory, and the encrypted copy is written to your device via the browser's download API. The original and encrypted files never leave your device.
+    </p>
+    <p>
+      Your password is also never transmitted. It is used only as input to the encryption algorithm running in your browser's JavaScript engine, then discarded when the page is closed.
+    </p>
+    <p>
+      This is a structural privacy guarantee — not a policy promise. Server-based PDF tools must necessarily receive your file to process it. keptlocal's client-side architecture makes sending your file technically impossible.
+    </p>
+  </Fragment>
+</ToolLayout>

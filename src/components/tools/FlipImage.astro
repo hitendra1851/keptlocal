@@ -1,0 +1,130 @@
+---
+---
+
+<div id="flip-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 9H4m0 0l4 4m-4-4l4-4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div class="flex items-center gap-3 p-3 bg-[var(--color-paper-dark)] rounded-lg border border-[var(--color-rule)]">
+      <img id="preview-thumb" src="" alt="preview" class="w-12 h-12 object-cover rounded border border-[var(--color-rule)] shrink-0" />
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-info" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="clear-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] shrink-0">Remove</button>
+    </div>
+
+    <div class="space-y-3">
+      <p class="text-sm font-medium text-[var(--color-ink)]">Flip direction</p>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="flex items-center gap-2.5 cursor-pointer p-3 rounded-md border border-[var(--color-rule)] hover:border-[var(--color-accent)] has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-accent-tint)] transition-colors">
+          <input type="radio" name="flip" value="horizontal" checked class="accent-[var(--color-accent)]" />
+          <div>
+            <div class="text-sm text-[var(--color-ink)] font-medium">Horizontal</div>
+            <div class="text-xs text-[var(--color-ink-muted)]">Mirror left ↔ right</div>
+          </div>
+        </label>
+        <label class="flex items-center gap-2.5 cursor-pointer p-3 rounded-md border border-[var(--color-rule)] hover:border-[var(--color-accent)] has-[:checked]:border-[var(--color-accent)] has-[:checked]:bg-[var(--color-accent-tint)] transition-colors">
+          <input type="radio" name="flip" value="vertical" class="accent-[var(--color-accent)]" />
+          <div>
+            <div class="text-sm text-[var(--color-ink)] font-medium">Vertical</div>
+            <div class="text-xs text-[var(--color-ink-muted)]">Flip top ↕ bottom</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <label class="text-sm text-[var(--color-ink-soft)] shrink-0">Output format</label>
+      <select id="format-select" class="px-3 py-1.5 text-sm rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+        <option value="same">Same as input</option>
+        <option value="image/jpeg">JPG</option>
+        <option value="image/png">PNG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">Drop an image to flip it.</div>
+    <button type="button" id="process-btn" class="btn-primary" disabled>
+      <span id="btn-label">Flip & download</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  let imgFile = null;
+  let imgMime = "image/jpeg";
+  const $ = id => document.getElementById(id);
+  const setStatus = (msg, err=false) => { $("status-msg").textContent = msg; $("status-msg").style.color = err ? "var(--color-warn)" : ""; };
+  const fmtSize = b => b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
+
+  const loadFile = file => {
+    if (!file.type.startsWith("image/")) { setStatus("Only image files are accepted.", true); return; }
+    imgFile = file; imgMime = file.type;
+    $("file-name").textContent = file.name;
+    $("file-info").textContent = fmtSize(file.size);
+    $("preview-thumb").src = URL.createObjectURL(file);
+    $("empty-state").classList.add("hidden"); $("controls").classList.remove("hidden");
+    $("process-btn").disabled = false;
+    setStatus("Choose flip direction and click Flip & download.");
+  };
+
+  $("browse-btn").addEventListener("click", () => $("file-input").click());
+  $("drop-zone").addEventListener("click", e => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
+  $("file-input").addEventListener("change", e => { if (e.target.files[0]) loadFile(e.target.files[0]); $("file-input").value = ""; });
+  const dz = $("drop-zone");
+  ["dragenter","dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", e => { if (e.dataTransfer?.files[0]) loadFile(e.dataTransfer.files[0]); });
+
+  $("clear-btn").addEventListener("click", () => {
+    imgFile = null;
+    $("empty-state").classList.remove("hidden"); $("controls").classList.add("hidden");
+    $("process-btn").disabled = true; setStatus("Drop an image to flip it.");
+  });
+
+  $("process-btn").addEventListener("click", async () => {
+    if (!imgFile) return;
+    $("process-btn").disabled = true; $("spinner").classList.remove("hidden"); $("btn-label").textContent = "Flipping...";
+    setStatus("Flipping image in your browser...");
+    try {
+      const direction = document.querySelector('input[name="flip"]:checked')?.value || "horizontal";
+      const bitmap = await createImageBitmap(imgFile);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width; canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      if (direction === "horizontal") {
+        ctx.translate(bitmap.width, 0); ctx.scale(-1, 1);
+      } else {
+        ctx.translate(0, bitmap.height); ctx.scale(1, -1);
+      }
+      ctx.drawImage(bitmap, 0, 0);
+      const fmt = $("format-select").value === "same" ? imgMime : $("format-select").value;
+      const ext = fmt === "image/png" ? "png" : fmt === "image/webp" ? "webp" : "jpg";
+      const blob = await new Promise(res => canvas.toBlob(res, fmt, 0.92));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const base = imgFile.name.replace(/\.[^.]+$/, "");
+      a.href = url; a.download = `${base}-flipped.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+      setStatus(`Done. Flipped ${direction}ly and downloaded.`);
+    } catch (err) {
+      console.error(err); setStatus(`Error: ${err?.message || "could not flip the image."}`, true);
+    } finally {
+      $("spinner").classList.add("hidden"); $("btn-label").textContent = "Flip & download"; $("process-btn").disabled = false;
+    }
+  });
+</script>

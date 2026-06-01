@@ -1,0 +1,61 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import UnlockPdf from "../../components/tools/UnlockPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "unlock-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <UnlockPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to remove a PDF password</h2>
+    <ol>
+      <li>Drop your password-protected PDF into the zone above, or click to browse.</li>
+      <li>Type the PDF's current password into the field that appears.</li>
+      <li>Click <strong>Unlock & download</strong>. The unlocked PDF saves directly to your device — you can now open it freely without ever entering a password again.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while unlocking to verify zero upload requests.
+    </p>
+
+    <h2>When to unlock a PDF</h2>
+    <ul>
+      <li><strong>Removing a document you password-protected yourself</strong> — a PDF you encrypted months ago no longer needs a password now that it is being shared internally. Unlock it to eliminate the prompt for every recipient.</li>
+      <li><strong>Preparing a file for further processing</strong> — many PDF tools (merge, split, compress, add page numbers) cannot process password-protected files. Unlock first, then use any other tool.</li>
+      <li><strong>Archiving secured documents</strong> — long-term archives benefit from being in plain, unencrypted PDF so they can be opened by any future PDF viewer without relying on password management.</li>
+      <li><strong>Printing or editing a restricted file</strong> — some PDFs carry owner passwords that restrict printing or text selection even when there is no open password. Removing these restrictions restores full access.</li>
+      <li><strong>Converting to other formats</strong> — PDF-to-Word and PDF-to-image tools frequently reject encrypted inputs. Unlocking unblocks the conversion pipeline.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      PDF encryption is defined in the PDF specification. An encrypted PDF stores its content (text, images, fonts) encrypted with a symmetric key derived from the user password. When you open such a file in a PDF viewer, you supply the password, the viewer derives the key, and decrypts the content on the fly.
+    </p>
+    <p>
+      pdf-lib loads the encrypted document with the password you provide: <code>PDFDocument.load(bytes, &#123; password &#125;)</code>. Once loaded successfully, the library has decrypted all content into memory. Calling <code>doc.save()</code> without any encryption options writes the content back to bytes without re-applying encryption — producing a plain, password-free PDF.
+    </p>
+    <p>
+      This means the tool works only for PDFs where you know the password. It is not a brute-force cracker — it does not try combinations, it does not use GPU acceleration, and it is not designed to bypass access controls you do not own. It is simply a convenience tool for documents you legitimately have access to.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>You must know the password:</strong> this tool decrypts a PDF you already have access to. If you have forgotten the password, this tool cannot help.</li>
+      <li><strong>AES-256 encrypted PDFs (PDF 2.0):</strong> pdf-lib fully supports RC4 and AES-128 encryption (the most common types). Some AES-256 features introduced in PDF 2.0 may not be supported — if the tool reports an error despite a correct password, try Adobe Acrobat's Save As instead.</li>
+      <li><strong>Owner password vs. user password:</strong> PDFs can have two passwords. The user password gates opening the file. The owner password gates editing and printing. This tool handles both — loading with either password removes the restriction layer from the saved output.</li>
+      <li><strong>Scanned PDFs inside an encrypted wrapper:</strong> if the PDF contains scanned images (not real text), unlocking still works — the scan is preserved. Text search and copy will still not work because there is no embedded text layer, which is a property of the scan, not the encryption.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your PDF and your password are processed entirely in browser memory. Nothing is sent to a server. The decrypted file is assembled locally and downloaded directly to your device.
+    </p>
+    <p>
+      For sensitive documents where the password itself is confidential — legal contracts, financial records, medical files — this architecture means the password is never transmitted over a network. Open the Network tab in DevTools while unlocking to see zero outbound requests.
+    </p>
+  </Fragment>
+</ToolLayout>

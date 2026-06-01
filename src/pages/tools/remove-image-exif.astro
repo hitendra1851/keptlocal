@@ -1,0 +1,76 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import RemoveImageExif from "../../components/tools/RemoveImageExif.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "remove-image-exif")!;
+---
+
+<ToolLayout tool={tool}>
+  <RemoveImageExif slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to remove EXIF metadata from photos</h2>
+    <ol>
+      <li>Drop one or more JPG or PNG files onto the drop zone, or click "choose files from your device." You can process multiple photos at once.</li>
+      <li>Click <strong>Strip metadata</strong>. Each photo is processed in sequence. The tool reads the EXIF data first so it can show you what was found, then re-draws the image through the Canvas API to produce a clean copy.</li>
+      <li>For each photo, a result row appears showing the original filename, file size before and after, and a summary of what metadata was stripped — GPS coordinates, camera model, date taken, or other fields found.</li>
+      <li>For a single photo, the cleaned file downloads automatically. For multiple photos, individual Save links appear, plus a Download ZIP button to get all cleaned images at once.</li>
+    </ol>
+    <p>
+      Your images never leave your browser. Open DevTools → Network while processing to confirm zero outbound requests.
+    </p>
+
+    <h2>Why your photos contain location data</h2>
+    <p>
+      Modern smartphones embed precise GPS coordinates in every photo by default. The data is stored in the EXIF (Exchangeable Image File Format) metadata that travels inside the image file itself — invisible when you look at the photo, but readable by anyone who opens the file in a tool that displays metadata.
+    </p>
+    <p>
+      This means a photo taken at your home and posted on social media, sent by email, or uploaded to a forum includes your home's GPS coordinates embedded in the file. Someone who knows how to read EXIF data can extract the coordinates and look up the address in a map service. Most social media platforms strip EXIF on upload, but not all do, and metadata survives completely intact when photos are shared by email, messaging apps, or direct file transfer.
+    </p>
+    <p>
+      Beyond location, EXIF data includes: the make and model of your camera or phone (which can identify your device), the exact date and time the photo was taken, the camera's serial number in some cases, and sometimes the name set in the camera's owner settings. For journalists, activists, or anyone who needs to share photos without revealing their location or identity, stripping this data before sharing is an important privacy step.
+    </p>
+
+    <h2>What metadata this tool removes</h2>
+    <p>
+      The tool strips all EXIF, TIFF, and camera-specific metadata embedded in JPG files. For PNG files, it removes any embedded metadata chunks. Specifically:
+    </p>
+    <ul>
+      <li><strong>GPS data:</strong> Latitude, longitude, altitude, GPS timestamp, and direction of travel if present.</li>
+      <li><strong>Camera information:</strong> Make (e.g. Apple, Samsung, Canon), model, lens model, serial number, and firmware version.</li>
+      <li><strong>Capture settings:</strong> Aperture, shutter speed, ISO, focal length, flash status, exposure program, and white balance.</li>
+      <li><strong>Timestamps:</strong> Date and time the photo was taken, date and time it was digitized, and date it was last modified.</li>
+      <li><strong>Software:</strong> The application that last processed or saved the file (e.g. Lightroom, Photoshop, Instagram).</li>
+      <li><strong>Copyright and credit:</strong> Photographer name, copyright string, and image description fields.</li>
+    </ul>
+    <p>
+      The stripping method — re-drawing the image through the HTML5 Canvas API — removes metadata by design: Canvas only outputs pixel data, not the original file structure with its metadata containers. Any data not encoded in the pixels themselves is gone from the output.
+    </p>
+
+    <h2>How the stripping works technically</h2>
+    <p>
+      EXIF metadata lives in dedicated segments of a JPEG file (APP1 markers) and in chunk headers of PNG files, separate from the actual pixel data. Removing it without affecting the image requires either parsing the file format and surgically removing those segments, or re-encoding the image from pixel data without including the metadata containers.
+    </p>
+    <p>
+      This tool uses the second approach: the image is decoded into a bitmap using <code>createImageBitmap</code>, drawn onto an HTML5 Canvas element, and then exported via <code>canvas.toBlob</code>. The Canvas API's export path has no mechanism to carry through EXIF data — it only encodes the pixel values. The result is a clean file with identical visual content but no metadata.
+    </p>
+    <p>
+      For JPG output, the tool uses 95% quality — high enough to be visually lossless for photographic content, with a small reduction in file size compared to the original. If pixel-perfect, bit-for-bit identical output is required (rare in practice), use a desktop EXIF editor like ExifTool that strips metadata in-place without re-encoding.
+    </p>
+
+    <h2>When to use this tool vs. alternatives</h2>
+    <ul>
+      <li><strong>Before posting photos publicly:</strong> Social media platforms strip EXIF on upload, but not all platforms do. Stripping before upload eliminates the risk.</li>
+      <li><strong>Before emailing photos:</strong> Email carries the full, unmodified file. EXIF data survives completely. Strip before attaching.</li>
+      <li><strong>Before sharing via messaging apps:</strong> WhatsApp and Signal compress images and may strip metadata; iMessage and most SMS gateways do not. When in doubt, strip first.</li>
+      <li><strong>Before submitting to online forms or portals:</strong> Insurance claims, legal submissions, and media portals often accept image uploads without stripping metadata. Strip first to avoid leaking device or location information.</li>
+      <li><strong>If you need lossless stripping:</strong> Use ExifTool (command-line, free, open source). It removes metadata without re-encoding, preserving the original pixel data exactly. Use this tool for quick browser-based stripping where the slight quality trade-off is acceptable.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your photos</h2>
+    <p>
+      Your photos are loaded into browser memory, processed entirely in JavaScript, and the cleaned copies are written to your device via the browser download API. Neither the original file nor the cleaned copy is sent to any server. The GPS coordinates, camera data, and other metadata that the tool reads and displays on screen exist only in your browser's memory during the session and are discarded when you close the tab.
+    </p>
+  </Fragment>
+</ToolLayout>

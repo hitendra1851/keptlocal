@@ -1,0 +1,70 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import FlipImage from "../../components/tools/FlipImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "flip-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <FlipImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to flip an image</h2>
+    <ol>
+      <li>Drop your image into the zone above, or click to browse. JPG, PNG, and WebP are supported.</li>
+      <li>Choose <strong>Horizontal</strong> to mirror left-to-right (as if reflected in a vertical mirror), or <strong>Vertical</strong> to flip top-to-bottom (as if reflected in a horizontal mirror).</li>
+      <li>Select an output format — leave on <strong>Same as input</strong> or switch to JPG, PNG, or WebP.</li>
+      <li>Click <strong>Flip &amp; download</strong>. The flipped image saves directly to your device.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using the Canvas API.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while flipping to verify zero upload requests.
+    </p>
+
+    <h2>When to flip an image</h2>
+    <ul>
+      <li><strong>Mirroring a logo or icon</strong> — design systems sometimes need both a left-facing and right-facing version of a directional icon (arrows, characters, creatures). Horizontal flip produces the mirror variant instantly.</li>
+      <li><strong>Correcting a mirrored selfie</strong> — front-facing phone cameras often produce a mirror image (as you see yourself in a mirror, not as others see you). A horizontal flip corrects text in the background and produces the "true" orientation.</li>
+      <li><strong>Layout balance in graphic design</strong> — a portrait or product shot that faces one direction can be flipped to balance a two-column layout, direct attention toward text, or match a template's composition requirements.</li>
+      <li><strong>Watermarking symmetry</strong> — watermarks applied diagonally sometimes need a mirrored version for opposite corners. Flip the watermark image rather than recreating it.</li>
+      <li><strong>Testing layout mirroring for RTL languages</strong> — UIs for Arabic, Hebrew, and other right-to-left languages often mirror their layouts. Flipping screenshots helps verify that mirrored designs look balanced.</li>
+    </ul>
+
+    <h2>Horizontal vs. vertical flip explained</h2>
+    <p>
+      A <strong>horizontal flip</strong> (also called a mirror or left-right flip) maps every pixel at position (x, y) to position (width − 1 − x, y). The image appears as its own reflection in a vertical mirror — text becomes backwards, faces appear as their mirror image.
+    </p>
+    <p>
+      A <strong>vertical flip</strong> (also called an upside-down or top-bottom flip) maps every pixel at (x, y) to position (x, height − 1 − y). The image appears upside down — as if you held the printed photo by its bottom edge and flipped it away from you.
+    </p>
+    <p>
+      Applying both a horizontal and a vertical flip is mathematically equivalent to a 180° rotation — you end up with an image that is both mirrored and inverted, which is the same as rotating it half a turn.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The browser decodes the image using <code>createImageBitmap()</code>. A canvas is created with the same dimensions as the source image. For a horizontal flip, the canvas context is translated by the image width along the x-axis and scaled by −1 in x (<code>ctx.translate(width, 0); ctx.scale(-1, 1)</code>). For a vertical flip, the equivalent is applied on the y-axis. The image is then drawn normally — the transform makes it appear mirrored.
+    </p>
+    <p>
+      This approach is mathematically exact — every pixel maps to its correct mirror position with no rounding, no blending, and no quality loss. The result is encoded to the chosen format via <code>canvas.toBlob()</code>.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>PNG flips are lossless:</strong> every pixel in the output corresponds exactly to its mirror counterpart in the input. No quality degradation occurs.</li>
+      <li><strong>JPG and WebP re-encode at 0.92 quality:</strong> the output is visually indistinguishable from the input for typical images, but the file is re-encoded rather than being a bitwise transformation.</li>
+      <li><strong>EXIF metadata is not preserved:</strong> EXIF data (camera model, GPS, orientation) is stripped. If you need to preserve metadata, a dedicated EXIF editor tool is appropriate after flipping.</li>
+      <li><strong>Animated GIF and AVIF:</strong> only the first frame of animated formats is processed — the tool outputs a static image. For animated formats, frame-by-frame processing is not supported.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your image is decoded and flipped entirely in browser memory. Nothing is sent to a server. The flipped file is generated from the canvas and downloaded directly to your device.
+    </p>
+    <p>
+      For private photos, identity documents, or any image you would prefer not to share with a third party, this architecture provides complete local processing with no external data transfer.
+    </p>
+  </Fragment>
+</ToolLayout>

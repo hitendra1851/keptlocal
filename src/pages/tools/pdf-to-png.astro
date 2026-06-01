@@ -1,0 +1,69 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PdfToPng from "../../components/tools/PdfToPng.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "pdf-to-png")!;
+---
+
+<ToolLayout tool={tool}>
+  <PdfToPng slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert PDF to PNG</h2>
+    <ol>
+      <li>Drop your PDF into the zone above, or click to browse.</li>
+      <li>Choose a quality setting: <strong>Standard (1.5×)</strong> for screen viewing and quick sharing, <strong>High (2×)</strong> for presentations and general print preparation, <strong>Best (3×)</strong> for maximum sharpness and archival use.</li>
+      <li>Click <strong>Convert to PNG</strong>. Pages render one by one — each gets its own Save link. For multi-page PDFs a <strong>Download ZIP</strong> button also appears so you can grab all pages in one click.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the Canvas API.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while converting to verify zero upload requests.
+    </p>
+
+    <h2>When to convert PDF to PNG</h2>
+    <ul>
+      <li><strong>Embedding a PDF page in a document or slide deck</strong> — slide software like PowerPoint, Keynote, and Google Slides cannot import PDF pages directly. Export as PNG and insert the image instead.</li>
+      <li><strong>Sharing a single-page document as an image</strong> — invoices, certificates, and flyers convert cleanly to PNG for sharing in messaging apps, email, or social media without requiring the recipient to have a PDF viewer.</li>
+      <li><strong>Creating thumbnails and previews</strong> — web apps and document management systems often display PDF thumbnails by converting the first page to an image. PNG output is ideal here because it is lossless.</li>
+      <li><strong>Archiving a scanned document as an image</strong> — for long-term storage, PNG captures every pixel exactly as the scanner captured it, with no generational quality loss.</li>
+      <li><strong>Preparing PDF content for image editing</strong> — when you need to annotate, retouch, or composite a PDF page in Photoshop or GIMP, importing as PNG gives you a pixel-perfect starting canvas.</li>
+    </ul>
+
+    <h2>PNG vs JPG for PDF export: which to choose</h2>
+    <p>
+      PNG uses lossless compression — every pixel in the output exactly matches the corresponding pixel rendered from the PDF. There are no compression artefacts, no blurry edges around text, and no colour shifts. This makes PNG the right choice for documents that contain text, diagrams, line art, charts, and screenshots.
+    </p>
+    <p>
+      JPG uses lossy compression — it achieves smaller files by discarding some colour detail. For photographic PDFs (a portfolio, a photo book), JPG is fine and produces much smaller files. For anything with crisp text or precise linework, JPG introduces visible ringing and blurring at character edges, which PNG avoids entirely.
+    </p>
+    <p>
+      As a rule of thumb: if you would be embarrassed to print the output and hand it to someone, use PNG. If the output is for screen sharing only and file size matters, JPG is acceptable.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      pdf.js — the same library Firefox uses internally to display PDFs — loads the file and renders each page to an off-screen HTML <code>&lt;canvas&gt;</code> element. The scale factor controls how many pixels per PDF point are rendered: at 1× a 72 dpi page renders at 72 pixels per inch; at 2× that doubles to 144 ppi; at 3× you get 216 ppi, which is indistinguishable from the original on any modern screen.
+    </p>
+    <p>
+      Once a page is painted on the canvas, <code>canvas.toBlob(callback, "image/png")</code> encodes it as a lossless PNG. The Blob is wrapped in an object URL for the download link and, for multi-page documents, added to a JSZip archive for the bulk download.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Memory:</strong> high-resolution canvases consume significant RAM. A large A3 page at 3× scale can require 200–400 MB of RAM. If the browser tab crashes on a large PDF, reduce the scale to Standard or High.</li>
+      <li><strong>Fonts:</strong> pdf.js embeds and renders fonts from the PDF. PDFs that reference system fonts not embedded in the file may render with substituted fonts, which can change text layout slightly. This is a pdf.js limitation, not a keptlocal limitation.</li>
+      <li><strong>Password-protected PDFs:</strong> only PDFs openable without a password. Use the <a href="/tools/unlock-pdf">Unlock PDF</a> tool first.</li>
+      <li><strong>Very long documents:</strong> processing is sequential — each page renders before the next begins. A 100-page document at Best quality may take 30–60 seconds depending on your device's CPU speed.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your file</h2>
+    <p>
+      Your PDF is loaded into browser memory and rendered locally. Nothing is sent to a server. PNG files are generated from the canvas and downloaded directly to your device.
+    </p>
+    <p>
+      For sensitive PDFs — financial statements, medical records, legal documents — this architecture means there is no third-party server to trust. Open the Network tab in DevTools while converting to confirm zero file transfers.
+    </p>
+  </Fragment>
+</ToolLayout>

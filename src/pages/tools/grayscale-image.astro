@@ -1,0 +1,61 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import GrayscaleImage from "../../components/tools/GrayscaleImage.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "grayscale-image")!;
+---
+
+<ToolLayout tool={tool}>
+  <GrayscaleImage slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert an image to grayscale</h2>
+    <ol>
+      <li>Drop one or more images into the zone above, or click to browse. JPG, PNG, and WebP are all supported. You can add multiple files at once.</li>
+      <li>Click <strong>Convert to grayscale</strong>. Each image is processed and a download button appears for each result.</li>
+      <li>For multiple images, a <strong>Download ZIP</strong> button also appears — click it to download all grayscale images in a single archive.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using the Canvas API.
+      No file is sent to a server — open DevTools (<code>F12</code>) → Network while converting to verify zero upload requests.
+    </p>
+
+    <h2>When to convert images to grayscale</h2>
+    <ul>
+      <li><strong>Printing to a monochrome printer</strong> — sending a colour image to a black-and-white printer forces the printer driver to handle colour conversion, often producing muddy results. Pre-converting to grayscale gives you control over the tonal values and ensures consistent output.</li>
+      <li><strong>Reducing file size</strong> — a grayscale JPG stores one channel of colour data instead of three. For archival purposes or bandwidth-constrained environments, this can reduce file size meaningfully.</li>
+      <li><strong>Consistent visual style</strong> — editorial photography, academic publications, and certain design styles call for uniformly grayscale imagery. Batch-converting a set of photos ensures they all use the same conversion method, producing a cohesive look.</li>
+      <li><strong>Accessibility and contrast analysis</strong> — converting a design mockup to grayscale reveals whether contrast ratios will hold for users with colour-vision deficiencies (colour blindness affects roughly 8% of males). If the design looks flat or unreadable in grayscale, colour alone is carrying too much of the information hierarchy.</li>
+      <li><strong>Preparing images for OCR</strong> — optical character recognition engines often perform better on grayscale inputs because colour variation around text edges can confuse edge-detection algorithms.</li>
+    </ul>
+
+    <h2>The science of grayscale conversion</h2>
+    <p>
+      There are several ways to compute a grayscale value from an RGB pixel. The simplest is averaging: (R + G + B) / 3. This treats all three channels as equally contributing to perceived brightness, which is wrong — human vision is far more sensitive to green light than red, and far less sensitive to blue.
+    </p>
+    <p>
+      This tool uses <strong>luminosity weighting</strong> (ITU-R BT.601 standard): <code>gray = 0.299 × R + 0.587 × G + 0.114 × B</code>. The weights reflect the relative sensitivity of the human eye's cone cells to each wavelength. Green carries 59% of perceived luminance; red contributes 30%; blue contributes only 11%.
+    </p>
+    <p>
+      The practical difference: a bright red pixel and a bright blue pixel at equal RGB intensity look very different in luminosity weighting (red appears brighter) but identical with simple averaging. Luminosity weighting produces grayscale images where tonal relationships match what you perceive in the colour original.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Output format matches input:</strong> a JPG input produces a JPG output; PNG in, PNG out. The converted file is named with a <code>-grayscale</code> suffix.</li>
+      <li><strong>No colour profile conversion:</strong> the tool converts sRGB pixel values. Images with embedded ICC colour profiles (Adobe RGB, ProPhoto RGB) are treated as sRGB. For professional colour-managed workflows, a dedicated photo editor is more appropriate.</li>
+      <li><strong>Animated formats:</strong> only the first frame of animated images is processed. Animated GIF and APNG full-animation conversion is not supported.</li>
+      <li><strong>File size:</strong> JPG grayscale files are often smaller than their colour originals because the JPEG encoder can more efficiently compress single-channel data. PNG grayscale files may also be smaller, depending on content.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your files</h2>
+    <p>
+      All images are processed entirely in browser memory. Nothing is sent to a server. Grayscale files are created from canvas pixel data and downloaded directly to your device.
+    </p>
+    <p>
+      For sensitive images — medical imaging, identity documents, private photos — this architecture means the files never leave your device. Open the Network tab in DevTools while converting to confirm zero outbound file transfers.
+    </p>
+  </Fragment>
+</ToolLayout>

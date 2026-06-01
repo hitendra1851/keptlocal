@@ -1,0 +1,128 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Convert JPG to PDF for Free"
+  description="Three ways to combine images into a PDF document — including a browser-based method that works without uploading your photos to any server."
+  publishDate="2026-06-01"
+  readTime={6}
+  tags={["PDF", "Images"]}
+>
+
+<p class="lead">
+  Converting a JPG (or a folder of JPGs) into a PDF is one of the most common file tasks people search for every day. The options range from free browser tools to built-in operating system features — and most of them do not require you to upload anything.
+</p>
+
+<h2>When you need to convert images to PDF</h2>
+
+<p>
+  The typical scenarios: you photographed several pages of a document with your phone and need to send them as a single PDF. A client asked for a signed form and you have it as a scanned JPG. You have a set of product images that need to be bundled into a catalogue. You want to archive a batch of photos in a format that is easier to share and print.
+</p>
+
+<p>
+  In most cases, the images contain something meaningful — a signature, a document, private photos — which makes it worth thinking about which tool handles them.
+</p>
+
+<h2>Option 1: Browser-based conversion (no upload, free)</h2>
+
+<p>
+  The <a href="/tools/jpg-to-pdf">JPG to PDF tool</a> on keptlocal runs entirely in your browser using pdf-lib. Your images never leave your device.
+</p>
+
+<p>How it works:</p>
+<ol>
+  <li>Drop one or more JPG, PNG, or WebP images onto the tool. You can drag multiple files at once.</li>
+  <li>Drag rows in the list to reorder the images — the PDF pages follow this order.</li>
+  <li>Choose a page size: A4 and Letter centre and scale the image to fill a standard page with a small margin. <strong>Original</strong> sizes each page exactly to the image dimensions.</li>
+  <li>Click <strong>Create PDF &amp; download</strong>. The PDF appears in your browser immediately.</li>
+</ol>
+
+<p>
+  The tool supports JPG, JPEG, PNG, and WebP. HEIC files (iPhone photos) need to be converted to JPG first — use the <a href="/tools/convert-image">Convert Image</a> tool for that step.
+</p>
+
+<h2>Option 2: Windows (built-in, free)</h2>
+
+<p>
+  Windows 10 and 11 include a print-to-PDF driver that can combine images:
+</p>
+
+<ol>
+  <li>Select all the images you want to combine in File Explorer.</li>
+  <li>Right-click → Print.</li>
+  <li>In the Print Pictures dialog, set the printer to <strong>Microsoft Print to PDF</strong>.</li>
+  <li>Choose a paper size and layout, then click Print.</li>
+  <li>Name the output file and save.</li>
+</ol>
+
+<p>
+  The limitation: Windows places each image on its own page at fixed dimensions without reordering control, and you cannot arrange multiple images per page without a third-party tool. For a straightforward "one image, one page" conversion it works fine. For precise layout control, use a browser tool or the macOS approach below.
+</p>
+
+<h2>Option 3: macOS (built-in, free)</h2>
+
+<p>
+  macOS has a powerful built-in PDF workflow through Preview and the print system:
+</p>
+
+<ol>
+  <li>Select all your images in Finder.</li>
+  <li>Open them in Preview (double-click or right-click → Open with → Preview).</li>
+  <li>Preview opens all images as a multi-page document in the sidebar.</li>
+  <li>Drag thumbnails in the sidebar to reorder them.</li>
+  <li>File → Print → PDF (bottom-left) → Save as PDF.</li>
+</ol>
+
+<p>
+  This approach is clean, local, and produces a standard PDF. Each image becomes one page. Preview handles JPG, PNG, HEIC, TIFF, and most image formats natively.
+</p>
+
+<h2>Choosing the right page size</h2>
+
+<p>
+  The page size choice matters depending on how the PDF will be used:
+</p>
+
+<ul>
+  <li><strong>A4 or Letter:</strong> Use these for documents you plan to print or share formally. The image is scaled to fill the page with a small margin, giving it a clean document appearance.</li>
+  <li><strong>Original image size:</strong> Use this for archives, portfolios, or when you want the PDF page to match the image's exact pixel dimensions. Viewers zoom to fit automatically.</li>
+</ul>
+
+<p>
+  For typical phone-photographed documents, A4 or Letter produces a more professional result. For photo archives where pixel accuracy matters, original size is better.
+</p>
+
+<h2>Multiple images vs. one image per PDF</h2>
+
+<p>
+  If you want each image as a separate PDF file rather than all combined into one, the fastest approach is to process them one at a time. Most tools — including keptlocal's — default to combining all selected images into a single PDF. If you need one PDF per image, batch processing through a desktop tool or Automator on macOS is more efficient.
+</p>
+
+<h2>Quality and file size</h2>
+
+<p>
+  JPG images embedded in a PDF retain their original quality — pdf-lib embeds the JPEG bytes directly without re-encoding, so no additional compression artefacts are introduced. PNG and WebP images are converted to PNG losslessly before embedding. The resulting PDF file size is approximately the sum of the original image file sizes plus a small overhead for PDF structure.
+</p>
+
+<p>
+  If the resulting PDF is too large for email (most providers cap at 10–25 MB), use the <a href="/tools/compress-image">Compress Image</a> tool on the source images before converting, or run the PDF through the <a href="/tools/compress-pdf">Compress PDF</a> tool afterwards. For image-heavy PDFs, compressing the images at source produces the most significant size reduction.
+</p>
+
+<h2>Which option to use</h2>
+
+<ul>
+  <li><strong>Any device, fast, private:</strong> <a href="/tools/jpg-to-pdf">keptlocal JPG to PDF</a></li>
+  <li><strong>macOS, multiple formats, preview control:</strong> Preview → Print → Save as PDF</li>
+  <li><strong>Windows, simple one-page-per-image:</strong> Right-click → Print → Microsoft Print to PDF</li>
+</ul>
+
+<p>
+  For most tasks — combining a few scanned pages or phone photos into a document to send — the browser tool is the fastest path. No installation, no account, and your images stay on your device throughout.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Combine your images into a PDF using keptlocal's <a href="/tools/jpg-to-pdf" class="text-[var(--color-accent)] hover:underline underline-offset-4">JPG to PDF tool</a> — no upload required. If your images are HEIC (iPhone), convert them first with the <a href="/tools/convert-image" class="text-[var(--color-accent)] hover:underline underline-offset-4">Convert Image tool</a>.
+</p>
+
+</BlogLayout>

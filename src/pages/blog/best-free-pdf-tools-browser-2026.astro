@@ -1,0 +1,124 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="The Best Free PDF Tools in 2026 That Work Entirely in Your Browser"
+  description="A practical guide to browser-based PDF tools that never upload your files — with honest comparisons against iLovePDF, Smallpdf, and PDF24."
+  publishDate="2026-06-01"
+  readTime={8}
+  tags={["PDF", "Privacy"]}
+>
+  <p>
+    Most "free" PDF tools have a catch: they upload your files to a server, process them there, and send the result back. The privacy policy says files are deleted after an hour. You have no way to verify that. For a personal photo, this trade-off is fine. For a contract, a medical record, or an HR document — it is a real risk you should at least be aware of before hitting upload.
+  </p>
+  <p>
+    Browser-based PDF tools are different. They run the processing code directly in your browser tab using JavaScript and WebAssembly. Your file never travels across the network. The computation happens on your own CPU. You can verify this yourself: open DevTools → Network tab, then run the tool. The tab stays quiet.
+  </p>
+  <p>
+    This article covers what browser-based PDF tools can genuinely do in 2026, which tools do it well, and where the limits are.
+  </p>
+
+  <h2>What browser-based PDF tools can do today</h2>
+  <p>
+    The assumption that serious PDF work requires a server was true in 2015. It is no longer true. Modern browsers expose a full set of APIs that make client-side PDF processing practical:
+  </p>
+  <ul>
+    <li><strong>pdf-lib</strong> — a pure JavaScript library that reads and writes PDF documents. Handles merging, splitting, rotating, reordering, watermarking, adding page numbers, deleting pages, and PDF compression. Runs entirely in the browser with no server needed.</li>
+    <li><strong>pdf.js</strong> — Mozilla's PDF rendering engine, the same one inside Firefox. Renders PDF pages to canvas at any resolution. Powers PDF-to-JPG and PDF-to-PNG conversion. Also extracts text content for PDF-to-text tools.</li>
+    <li><strong>WebAssembly</strong> — lets compiled C/C++ code run in the browser at near-native speed. This is how browser-side image compression, HEIC decoding, and future Ghostscript-level PDF work becomes possible.</li>
+    <li><strong>Canvas API + FileReader</strong> — handles all image processing: resize, crop, rotate, flip, grayscale, format conversion, Base64 encoding.</li>
+  </ul>
+  <p>
+    The result: about 80% of what people need from a PDF tool can now run entirely client-side. The remaining 20% — aggressive PDF compression using Ghostscript, PDF-to-Word conversion, and OCR — genuinely requires server-side processing for quality results.
+  </p>
+
+  <h2>The best browser-based PDF tools in 2026</h2>
+
+  <h3>keptlocal.com — built privacy-first from the ground up</h3>
+  <p>
+    <a href="https://keptlocal.com">keptlocal.com</a> is a purpose-built collection of 22 browser-only tools for PDF and image work. Every tool in the collection runs client-side — no tool in the PDF or image category uploads your file to a server.
+  </p>
+  <p>What it covers:</p>
+  <ul>
+    <li><strong>PDF:</strong> Merge, Split, Rotate, Reorder Pages, Watermark, Delete Pages, Add Page Numbers, PDF to JPG, PDF to PNG, PDF to Text, Compress PDF, Unlock PDF, JPG to PDF, and PDF Info Viewer</li>
+    <li><strong>Image:</strong> Compress Image, Resize Image, Crop Image, Convert Image (HEIC → JPG, PNG → WebP, and more), Rotate Image, Flip Image, Grayscale Image, Image to Base64</li>
+  </ul>
+  <p>
+    The site is free, requires no account, and has no watermark on any output. The design is straightforward — no upsell banners, no "upgrade to Pro" interruptions, no daily limits.
+  </p>
+
+  <h3>Smallpdf.com — strong tool depth, aggressive upsell</h3>
+  <p>
+    Smallpdf has the broadest feature set of any PDF tool online, including PDF-to-Word and OCR. The catch: the free tier limits you to two tasks per hour, and many operations (including PDF-to-Word) require a paid account. Files are processed server-side. The privacy policy states files are held for 1 hour, but this is a policy claim, not a verifiable technical guarantee.
+  </p>
+  <p>
+    Good choice if you need PDF-to-Word or OCR and are comfortable with server-side processing. Poor choice for frequent use on the free tier — the two-task-per-hour limit is intentionally frustrating.
+  </p>
+
+  <h3>iLovePDF.com — large-scale, upload-based</h3>
+  <p>
+    iLovePDF is the market leader by traffic (roughly 300M visits/month). It covers almost everything. Files are uploaded to their servers. The free tier is generous but carries a file size limit of 15 MB on some operations and shows ads throughout the interface. The paid tier is cheap ($4–7/month).
+  </p>
+  <p>
+    Good choice if you need heavy-duty operations (true PDF compression, PDF → Office conversion) and you are comfortable with server-side processing. The 15 MB limit on free tier can be frustrating for large documents.
+  </p>
+
+  <h3>PDF24.org — comprehensive, but cluttered</h3>
+  <p>
+    PDF24 is entirely free with no file size limits, which is genuinely rare. It processes server-side. The interface is cluttered and the mobile experience is poor, but the tool coverage is deep. It is the best choice if you need server-side processing and want free-forever without a tier system.
+  </p>
+
+  <h3>Squoosh (images only) — Google's browser-based image compressor</h3>
+  <p>
+    Squoosh is the gold standard for browser-based image compression. It runs entirely in your browser (Google-built, open-source), supports AVIF and WebP encoding, and lets you compare the compressed result side-by-side with the original before downloading. It does one thing — compress images — but it does it exceptionally well.
+  </p>
+
+  <h2>How to verify a tool is genuinely browser-only</h2>
+  <p>
+    Do not take the marketing copy at face value. The verification takes 30 seconds:
+  </p>
+  <ol>
+    <li>Open the tool page in your browser.</li>
+    <li>Open DevTools: press <code>F12</code> (Windows/Linux) or <code>Cmd+Option+I</code> (Mac).</li>
+    <li>Switch to the <strong>Network</strong> tab.</li>
+    <li>Drop a file into the tool and run the operation.</li>
+    <li>Watch the Network tab. A genuine browser-only tool shows no POST request with your file data. You may see requests for CDN scripts or fonts (those are fine) — but the tool's operation should not send your file bytes anywhere.</li>
+  </ol>
+  <p>
+    This test is definitive. A tool cannot upload your file without that upload appearing in the Network tab.
+  </p>
+
+  <h2>When browser-side processing is not enough</h2>
+  <p>
+    There are operations that genuinely require server-side processing for quality results:
+  </p>
+  <ul>
+    <li><strong>Aggressive PDF compression:</strong> reducing a 50 MB scanned PDF to 2 MB requires re-encoding the embedded images at lower quality, and often Ghostscript-level PDF optimization. JavaScript libraries like pdf-lib can remove metadata and compress the cross-reference table, but they cannot re-encode embedded images. For truly small file sizes, server-side tools using Ghostscript are necessary.</li>
+    <li><strong>PDF to Word (.docx) conversion:</strong> this requires understanding the PDF's layout geometry and reconstructing a Word-compatible document structure — a hard problem that no current client-side library handles well. Tools that claim to do this in the browser typically produce poor results on anything other than simple text PDFs.</li>
+    <li><strong>OCR (optical character recognition):</strong> recognizing text in a scanned PDF image requires a heavyweight model. Tesseract.js can run in the browser but is slow and less accurate than server-side alternatives for multi-page documents.</li>
+    <li><strong>Sophisticated redaction:</strong> properly removing sensitive text from a PDF requires understanding the PDF content stream — not just drawing a black rectangle over it (a naive approach that leaves the underlying text selectable). This is a solved problem on the server with tools like pikepdf; it is not yet solved client-side.</li>
+  </ul>
+  <p>
+    For these operations, a server-side tool is the appropriate choice. The honest framing is: use browser-only tools for the 80% of PDF work that benefits from privacy guarantees, and use server-side tools deliberately for the 20% that genuinely requires them.
+  </p>
+
+  <h2>Performance: does browser-based processing feel slow?</h2>
+  <p>
+    Modern laptops and phones are fast. For typical document work — a 10-page contract, a 20-image photo PDF, a set of receipts — browser-based processing is essentially instant. You will not notice a difference compared to a tool that uploads, processes on a fast server, and sends the result back.
+  </p>
+  <p>
+    The performance difference appears at extremes: a 500-page scanned PDF with high-resolution images, or a batch of 100 photos. For those cases, a server with more RAM and a GPU-accelerated encoder will outperform a laptop browser. For the work most people actually do most of the time, local processing is fast enough to be unremarkable.
+  </p>
+
+  <h2>The verdict</h2>
+  <p>
+    For everyday PDF and image work — merging, splitting, rotating, converting, compressing, cropping — browser-based tools are the right choice in 2026. They are as fast as server-based tools for typical document sizes, free to use, and structurally safer for sensitive documents because there is no third-party server in the processing loop.
+  </p>
+  <p>
+    Keep a server-side tool bookmarked for the operations that genuinely require it. Use a browser-only tool for everything else.
+  </p>
+  <p>
+    <a href="https://keptlocal.com">keptlocal.com</a> covers the browser-only operations. For heavy compression or PDF-to-Word conversions, PDF24 (free, server-side) or Smallpdf (paid, server-side) are the best complements.
+  </p>
+</BlogLayout>

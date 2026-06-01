@@ -1,0 +1,109 @@
+---
+---
+
+<div id="wc-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5">
+    <textarea
+      id="wc-input"
+      rows="10"
+      placeholder="Paste or type your text here…"
+      class="w-full px-3 py-2.5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)] resize-y leading-relaxed"
+    ></textarea>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-px bg-[var(--color-rule)] border-t border-[var(--color-rule)]">
+    {[
+      { id: 'stat-words', label: 'Words' },
+      { id: 'stat-chars', label: 'Characters' },
+      { id: 'stat-chars-no-space', label: 'Chars (no spaces)' },
+      { id: 'stat-sentences', label: 'Sentences' },
+      { id: 'stat-paragraphs', label: 'Paragraphs' },
+      { id: 'stat-read-time', label: 'Reading time' },
+    ].map(({ id, label }) => (
+      <div class="bg-[var(--color-paper)] px-4 py-3 text-center">
+        <div id={id} class="font-display text-2xl tracking-tight text-[var(--color-ink)]">0</div>
+        <div class="text-xs text-[var(--color-ink-muted)] mt-0.5">{label}</div>
+      </div>
+    ))}
+  </div>
+
+  <!-- Platform limits -->
+  <div id="limits-section" class="hidden border-t border-[var(--color-rule)] px-5 py-4 bg-[var(--color-paper-dark)]">
+    <p class="text-xs text-[var(--color-ink-muted)] mb-2 font-medium">Character limits</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {[
+        { label: 'Twitter/X', max: 280 },
+        { label: 'LinkedIn', max: 3000 },
+        { label: 'Instagram', max: 2200 },
+        { label: 'Facebook', max: 63206 },
+      ].map(({ label, max }) => (
+        <div class="text-center">
+          <div class="text-xs text-[var(--color-ink-muted)] mb-0.5">{label}</div>
+          <div id={`limit-${label.replace(/\W/g, '').toLowerCase()}`} class="text-xs font-mono font-medium text-[var(--color-ink)]">— / {max}</div>
+          <div class="mt-1 h-1 bg-[var(--color-paper)] rounded-full overflow-hidden">
+            <div id={`bar-${label.replace(/\W/g, '').toLowerCase()}`} class="h-full rounded-full transition-all duration-200 bg-[var(--color-accent)]" style="width:0%"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex items-center justify-between">
+    <div class="text-xs text-[var(--color-ink-muted)]">Text never leaves your browser.</div>
+    <button type="button" id="clear-btn" class="btn-secondary text-xs py-1.5 px-3">Clear</button>
+  </div>
+</div>
+
+<script type="module">
+  const $ = id => document.getElementById(id);
+
+  const fmtReadTime = words => {
+    const mins = words / 238;
+    if (mins < 1) return '< 1 min';
+    if (mins < 60) return `${Math.ceil(mins)} min`;
+    const h = Math.floor(mins / 60);
+    const m = Math.ceil(mins % 60);
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  };
+
+  const LIMITS = [
+    { label: 'Twitter/X', max: 280, idSuffix: 'twitterx' },
+    { label: 'LinkedIn', max: 3000, idSuffix: 'linkedin' },
+    { label: 'Instagram', max: 2200, idSuffix: 'instagram' },
+    { label: 'Facebook', max: 63206, idSuffix: 'facebook' },
+  ];
+
+  const update = () => {
+    const text = $('wc-input').value;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    const chars = text.length;
+    const charsNoSpace = text.replace(/\s/g, '').length;
+    const sentences = text.trim() === '' ? 0 : (text.match(/[.!?]+(\s|$)/g) || []).length;
+    const paragraphs = text.trim() === '' ? 0 : text.trim().split(/\n\s*\n/).filter(p => p.trim()).length || (text.trim() ? 1 : 0);
+
+    $('stat-words').textContent = words.toLocaleString();
+    $('stat-chars').textContent = chars.toLocaleString();
+    $('stat-chars-no-space').textContent = charsNoSpace.toLocaleString();
+    $('stat-sentences').textContent = sentences.toLocaleString();
+    $('stat-paragraphs').textContent = paragraphs.toLocaleString();
+    $('stat-read-time').textContent = fmtReadTime(words);
+
+    if (chars > 0) {
+      $('limits-section').classList.remove('hidden');
+      LIMITS.forEach(({ max, idSuffix }) => {
+        const pct = Math.min((chars / max) * 100, 100);
+        const over = chars > max;
+        $(`limit-${idSuffix}`).textContent = `${chars.toLocaleString()} / ${max.toLocaleString()}`;
+        $(`limit-${idSuffix}`).style.color = over ? 'var(--color-warn)' : 'var(--color-ink)';
+        $(`bar-${idSuffix}`).style.width = pct + '%';
+        $(`bar-${idSuffix}`).style.background = over ? 'var(--color-warn)' : 'var(--color-accent)';
+      });
+    } else {
+      $('limits-section').classList.add('hidden');
+    }
+  };
+
+  $('wc-input').addEventListener('input', update);
+  $('clear-btn').addEventListener('click', () => { $('wc-input').value = ''; update(); $('wc-input').focus(); });
+</script>

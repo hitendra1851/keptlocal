@@ -8,6 +8,8 @@ import { tools } from "../data/tools";
 
 const pdfTools = tools.filter((t) => t.category === "PDF");
 const imageTools = tools.filter((t) => t.category === "Image");
+const utilityTools = tools.filter((t) => t.category === "Utility");
+const liveCount = tools.filter((t) => t.status === "live").length;
 
 const title = "keptlocal — Private PDF & image tools that run in your browser";
 const description =
@@ -19,56 +21,157 @@ const description =
 
   <main>
     <!-- Hero -->
-    <section class="max-w-5xl mx-auto px-6 pt-16 pb-12 md:pt-24 md:pb-16">
-      <div class="reveal">
-        <PrivacyBadge variant="block" />
-      </div>
-      <h1 class="font-display text-5xl md:text-7xl tracking-tighter text-[var(--color-ink)] mt-6 mb-6 max-w-3xl leading-[0.98] reveal" style="animation-delay: 0.05s">
-        Your files.<br />
-        <span class="text-[var(--color-accent)] italic">Kept local.</span>
-      </h1>
-      <p class="text-lg md:text-xl text-[var(--color-ink-soft)] max-w-2xl leading-relaxed reveal" style="animation-delay: 0.1s">
-        Free PDF and image tools that run entirely in your browser.
-        No uploads. No accounts. No tracking. Open one, do your thing, close the tab.
-      </p>
+    <section class="relative overflow-hidden border-b border-[var(--color-rule)]">
+      <div class="absolute inset-0 paper-grain pointer-events-none"></div>
 
-      <div class="mt-10 flex flex-wrap gap-3 reveal" style="animation-delay: 0.15s">
-        <a href="/tools/merge-pdf" class="btn-primary">
-          Try Merge PDF
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </a>
-        <a href="#tools" class="btn-secondary">All tools</a>
+      <div class="relative max-w-5xl mx-auto px-6 py-14 md:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+
+        <!-- Left: copy -->
+        <div>
+          <div class="reveal">
+            <PrivacyBadge variant="block" />
+          </div>
+          <h1 class="font-display text-5xl md:text-6xl tracking-tighter text-[var(--color-ink)] mt-5 mb-5 leading-[0.96] reveal" style="animation-delay: 0.05s">
+            Your files.<br />
+            <span class="text-[var(--color-accent)] italic">Kept local.</span>
+          </h1>
+          <p class="text-lg text-[var(--color-ink-soft)] leading-relaxed max-w-md reveal" style="animation-delay: 0.1s">
+            Free PDF and image tools that run entirely in your browser.
+            No uploads. No accounts. No tracking.
+          </p>
+
+          <div class="mt-6 flex flex-wrap gap-x-7 gap-y-1.5 text-sm reveal" style="animation-delay: 0.13s">
+            <span class="text-[var(--color-ink-muted)]"><strong class="text-[var(--color-ink)] font-semibold">{liveCount}</strong> free tools</span>
+            <span class="text-[var(--color-ink-muted)]"><strong class="text-[var(--color-ink)] font-semibold">Zero</strong> file uploads</span>
+            <span class="text-[var(--color-ink-muted)]"><strong class="text-[var(--color-ink)] font-semibold">100%</strong> client-side</span>
+          </div>
+
+          <div class="mt-8 flex flex-wrap gap-3 reveal" style="animation-delay: 0.16s">
+            <a href="/tools/merge-pdf" class="btn-primary">
+              Try Merge PDF
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+            <a href="#tools" class="btn-secondary">Browse all tools</a>
+          </div>
+        </div>
+
+        <!-- Right: mock tool UI -->
+        <div class="reveal" style="animation-delay: 0.2s">
+          <div class="bg-[var(--color-paper)] rounded-2xl border border-[var(--color-rule)] shadow-xl shadow-[rgba(26,24,21,0.08)] overflow-hidden">
+            <!-- Browser chrome bar -->
+            <div class="bg-[var(--color-paper-dark)] border-b border-[var(--color-rule)] px-4 py-3 flex items-center gap-2.5">
+              <div class="flex gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-rule)]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-rule)]"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-[var(--color-rule)]"></div>
+              </div>
+              <div class="flex-1 bg-[var(--color-paper)] rounded-md px-3 py-1 text-xs text-[var(--color-ink-muted)] text-center border border-[var(--color-rule)]">
+                keptlocal.com/merge-pdf
+              </div>
+            </div>
+
+            <!-- Tool content -->
+            <div class="p-5">
+              <!-- Drop zone with files -->
+              <div class="border-2 border-dashed border-[var(--color-accent)] rounded-xl p-4 bg-[var(--color-accent-tint)] mb-4 opacity-90">
+                <p class="text-xs font-medium text-[var(--color-accent)] mb-3 text-center">3 files added</p>
+                <div class="space-y-2">
+                  {[["contract.pdf", "1.2 MB"], ["nda-signed.pdf", "340 KB"], ["appendix.pdf", "890 KB"]].map(([name, size]) => (
+                    <div class="flex items-center gap-2.5 bg-[var(--color-paper)] px-3 py-2 rounded-lg border border-[var(--color-rule)]">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
+                        <path d="M9 12h6m-6 4h6m-7-8h.01M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <span class="text-xs text-[var(--color-ink-soft)] flex-1 font-medium">{name}</span>
+                      <span class="text-xs text-[var(--color-ink-muted)]">{size}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="mb-4">
+                <div class="flex justify-between text-xs mb-1.5">
+                  <span class="text-[var(--color-ink-muted)]">Merging in your browser…</span>
+                  <span class="text-[var(--color-accent)] font-semibold">Done</span>
+                </div>
+                <div class="h-1.5 bg-[var(--color-paper-dark)] rounded-full overflow-hidden">
+                  <div class="h-full bg-[var(--color-accent)] rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <!-- Result row -->
+              <div class="flex items-center gap-2.5 bg-[var(--color-accent-tint)] border border-[var(--color-accent)] px-3 py-2.5 rounded-lg mb-3" style="border-opacity: 0.4">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[var(--color-accent)] shrink-0">
+                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="text-xs font-medium text-[var(--color-accent)] flex-1">merged-document.pdf · 2.4 MB</span>
+                <span class="text-xs text-[var(--color-accent)] underline underline-offset-2">Save</span>
+              </div>
+
+              <!-- Privacy footer -->
+              <div class="flex items-center gap-1.5 pt-1 border-t border-[var(--color-rule)]">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
+                  <rect x="4" y="11" width="16" height="10" rx="2" stroke-linecap="round"/>
+                  <path d="M8 11V7a4 4 0 118 0v4" stroke-linecap="round"/>
+                  <circle cx="12" cy="16" r="1.25" fill="currentColor"/>
+                </svg>
+                <span class="text-xs text-[var(--color-ink-muted)]">0 bytes sent to any server · verified via Network tab</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
     <!-- Trust strip -->
-    <section class="border-y border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-      <div class="max-w-5xl mx-auto px-6 py-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-        <div class="flex items-center gap-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-          <span class="text-[var(--color-ink-soft)]">No file uploads</span>
+    <section class="bg-[var(--color-paper-dark)] border-b border-[var(--color-rule)]">
+      <div class="max-w-5xl mx-auto px-6 py-7 grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)]">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-[var(--color-ink)]">No uploads</div>
+            <div class="text-xs text-[var(--color-ink-muted)] mt-0.5">Files never leave your device</div>
+          </div>
         </div>
-        <div class="flex items-center gap-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-          <span class="text-[var(--color-ink-soft)]">No accounts</span>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)]">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-[var(--color-ink)]">No accounts</div>
+            <div class="text-xs text-[var(--color-ink-muted)] mt-0.5">Open a tool, use it, done</div>
+          </div>
         </div>
-        <div class="flex items-center gap-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-          <span class="text-[var(--color-ink-soft)]">Works offline</span>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)]">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-[var(--color-ink)]">Instant results</div>
+            <div class="text-xs text-[var(--color-ink-muted)] mt-0.5">Runs locally on your CPU</div>
+          </div>
         </div>
-        <div class="flex items-center gap-2.5">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)] shrink-0">
-            <path d="M5 13l4 4L19 7" />
-          </svg>
-          <span class="text-[var(--color-ink-soft)]">100% free</span>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 rounded-lg bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" class="text-[var(--color-accent)]">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-sm font-medium text-[var(--color-ink)]">Always free</div>
+            <div class="text-xs text-[var(--color-ink-muted)] mt-0.5">No paywalls, no watermarks</div>
+          </div>
         </div>
       </div>
     </section>
@@ -76,26 +179,41 @@ const description =
     <!-- Tools -->
     <section id="tools" class="max-w-5xl mx-auto px-6 py-20">
       <div id="pdf" class="scroll-mt-20">
-        <div class="flex items-end justify-between mb-6">
-          <div>
+        <div class="mb-7">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
             <h2 class="font-display text-3xl tracking-tighter text-[var(--color-ink)]">PDF tools</h2>
-            <p class="text-sm text-[var(--color-ink-muted)] mt-1">{pdfTools.length} tools — merge, split, convert, edit</p>
           </div>
+          <p class="text-sm text-[var(--color-ink-muted)] ml-3">{pdfTools.filter(t => t.status === "live").length} tools — merge, split, convert, edit</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 reveal-stagger">
           {pdfTools.map((t) => <ToolCard tool={t} />)}
         </div>
       </div>
 
-      <div id="image" class="scroll-mt-20 mt-16">
-        <div class="flex items-end justify-between mb-6">
-          <div>
+      <div id="image" class="scroll-mt-20 mt-20">
+        <div class="mb-7">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
             <h2 class="font-display text-3xl tracking-tighter text-[var(--color-ink)]">Image tools</h2>
-            <p class="text-sm text-[var(--color-ink-muted)] mt-1">{imageTools.length} tools — compress, resize, convert</p>
           </div>
+          <p class="text-sm text-[var(--color-ink-muted)] ml-3">{imageTools.filter(t => t.status === "live").length} tools — compress, resize, convert</p>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 reveal-stagger">
           {imageTools.map((t) => <ToolCard tool={t} />)}
+        </div>
+      </div>
+
+      <div id="utility" class="scroll-mt-20 mt-20">
+        <div class="mb-7">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
+            <h2 class="font-display text-3xl tracking-tighter text-[var(--color-ink)]">Utility tools</h2>
+          </div>
+          <p class="text-sm text-[var(--color-ink-muted)] ml-3">{utilityTools.filter(t => t.status === "live").length} tools — generate, count, convert</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 reveal-stagger">
+          {utilityTools.map((t) => <ToolCard tool={t} />)}
         </div>
       </div>
     </section>
@@ -104,11 +222,41 @@ const description =
     <section class="border-t border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
       <div class="max-w-5xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-start">
         <div>
+          <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full mb-4"></div>
           <h2 class="font-display text-4xl tracking-tighter text-[var(--color-ink)] leading-tight">
-            Why "kept local" matters
+            Why "kept local"<br />matters
           </h2>
+          <div class="mt-8 space-y-4">
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-md bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[var(--color-accent)]"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-[var(--color-ink)]">Verify it yourself</div>
+                <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">Open DevTools → Network tab, run any tool, watch zero requests fire.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-md bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[var(--color-accent)]"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-[var(--color-ink)]">Works offline</div>
+                <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">After the page loads, disconnect your internet. Tools still work.</div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-8 h-8 rounded-md bg-[var(--color-accent-tint)] flex items-center justify-center shrink-0 mt-0.5">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-[var(--color-accent)]"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="text-sm font-medium text-[var(--color-ink)]">Sensitive documents stay private</div>
+                <div class="text-sm text-[var(--color-ink-muted)] mt-0.5">Contracts, tax returns, medical scans — none of it hits a server.</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="space-y-6 text-[var(--color-ink-soft)] leading-relaxed">
+        <div class="space-y-5 text-[var(--color-ink-soft)] leading-relaxed md:pt-10">
           <p>
             Most online PDF tools upload your file to their server, process it, and send it back.
             Your contract, your tax return, your medical scan — all of it travels through
@@ -119,10 +267,6 @@ const description =
             Your file enters memory, gets modified, and the result downloads —
             <em class="font-display not-italic text-[var(--color-ink)]">without
             a single byte ever leaving your device</em>.
-          </p>
-          <p>
-            You can verify this yourself. Open your browser's Network tab while using any tool.
-            You'll see no POST requests, no uploads, no traffic at all once the page is loaded.
           </p>
           <div class="pt-2">
             <PrivacyBadge variant="inline" />
@@ -135,26 +279,29 @@ const description =
     <section class="max-w-5xl mx-auto px-6 py-20">
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h2 class="font-display text-3xl tracking-tighter text-[var(--color-ink)]">From the blog</h2>
-          <p class="text-sm text-[var(--color-ink-muted)] mt-1">Guides on PDF privacy, image formats, and browser security</p>
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
+            <h2 class="font-display text-3xl tracking-tighter text-[var(--color-ink)]">From the blog</h2>
+          </div>
+          <p class="text-sm text-[var(--color-ink-muted)] ml-3">Guides on PDF privacy, image formats, and browser security</p>
         </div>
         <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4 shrink-0 hidden sm:block">All posts →</a>
       </div>
       <div class="grid sm:grid-cols-3 gap-5">
-        <a href="/blog/merge-pdf-without-uploading" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] transition-colors">
-          <div class="text-xs text-[var(--color-ink-muted)] mb-2">PDF · 8 min read</div>
+        <a href="/blog/merge-pdf-without-uploading" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+          <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">PDF · 8 min read</div>
           <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">How to Merge PDFs Without Uploading Them</h3>
           <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">Why uploading to a PDF tool is riskier than you think — and how to do it entirely in your browser.</p>
         </a>
-        <a href="/blog/heic-to-jpg-iphone-photo-problem" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] transition-colors">
-          <div class="text-xs text-[var(--color-ink-muted)] mb-2">Images · 6 min read</div>
+        <a href="/blog/heic-to-jpg-iphone-photo-problem" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+          <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">Images · 6 min read</div>
           <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">HEIC to JPG: The iPhone Photo Problem</h3>
           <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">iPhones save photos as HEIC. Windows can't open them. Here is the fix.</p>
         </a>
-        <a href="/blog/pdf-privacy-what-happens-to-files-on-free-online-tools" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] transition-colors">
-          <div class="text-xs text-[var(--color-ink-muted)] mb-2">Privacy · 7 min read</div>
-          <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">PDF Privacy: What Happens to Your Files</h3>
-          <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">Where your file goes, how long it's kept, and who can access it on free PDF tools.</p>
+        <a href="/blog/best-free-pdf-tools-browser-2026" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+          <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">PDF · Privacy · 8 min read</div>
+          <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">Best Free PDF Tools in 2026 That Work in Your Browser</h3>
+          <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">Honest comparison of browser-only tools vs iLovePDF, Smallpdf, and PDF24.</p>
         </a>
       </div>
       <div class="mt-5 sm:hidden">

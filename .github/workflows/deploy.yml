@@ -30,7 +30,9 @@ jobs:
         run: npm run build
 
       - name: Create deployment zip
-        run: cd dist && zip -r ../site.zip . && cd .. && echo "Zip: $(du -sh site.zip | cut -f1)"
+        run: |
+          cd dist && zip -r ../site.zip . && cd ..
+          echo "Zip size: $(du -sh site.zip | cut -f1)"
 
       - name: Deploy to AWS Amplify
         env:

@@ -26,10 +26,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build site (fail fast before triggering deploy)
+      - name: Build site
         run: npm run build
 
-      - name: Trigger Amplify deployment
+      - name: Create deployment zip
+        run: cd dist && zip -r ../site.zip . && cd .. && echo "Zip: $(du -sh site.zip | cut -f1)"
+
+      - name: Deploy to AWS Amplify
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -38,15 +41,26 @@ jobs:
           APP_ID="d1u3vfqwnwnnqk"
           BRANCH="main"
 
-          JOB_ID=$(aws amplify start-job \
+          # Create deployment slot — returns jobId + pre-signed S3 upload URL
+          DEPLOYMENT=$(aws amplify create-deployment \
             --app-id "$APP_ID" \
             --branch-name "$BRANCH" \
-            --job-type RELEASE \
-            --output json | jq -r '.jobSummary.jobId')
+            --output json)
 
-          echo "Amplify job started: $JOB_ID"
+          JOB_ID=$(echo "$DEPLOYMENT" | jq -r '.jobId')
+          UPLOAD_URL=$(echo "$DEPLOYMENT" | jq -r '.zipUploadUrl')
+          echo "Job ID: $JOB_ID"
 
-          # Poll until SUCCEED / FAILED / CANCELLED
+          # Upload zip to pre-signed URL (no auth header — it's already signed)
+          curl --silent --fail -T site.zip "$UPLOAD_URL"
+
+          # Start the deployment
+          aws amplify start-deployment \
+            --app-id "$APP_ID" \
+            --branch-name "$BRANCH" \
+            --job-id "$JOB_ID"
+
+          # Poll every 30s, 15-minute ceiling
           for i in $(seq 1 30); do
             sleep 30
             STATUS=$(aws amplify get-job \

@@ -1,34 +1,28 @@
-"""Send the daily report email via Resend."""
+"""Send the daily report email via Gmail SMTP."""
 from __future__ import annotations
 
-import json
-import urllib.error
-import urllib.request
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from config import Config
 
 
 def send_report_email(config: Config, date: str, content: str) -> None:
-    payload = {
-        "from": "keptlocal Marketing <onboarding@resend.dev>",
-        "to": [config.recipient_email],
-        "subject": f"keptlocal Marketing Report — {date}",
-        "html": _wrap_html(date, _md_to_html(content)),
-        "text": content,
-    }
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"keptlocal Marketing Report — {date}"
+    msg["From"] = f"keptlocal Marketing <{config.gmail_from}>"
+    msg["To"] = config.recipient_email
 
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=json.dumps(payload).encode(),
-        headers={
-            "Authorization": f"Bearer {config.resend_api_key}",
-            "Content-Type": "application/json",
-        },
-    )
+    msg.attach(MIMEText(content, "plain"))
+    msg.attach(MIMEText(_wrap_html(date, _md_to_html(content)), "html"))
 
-    with urllib.request.urlopen(req) as resp:
-        result = json.loads(resp.read())
-        print(f"Email sent: {result.get('id')}")
+    with smtplib.SMTP("smtp.gmail.com", 587) as smtp:
+        smtp.ehlo()
+        smtp.starttls()
+        smtp.login(config.gmail_from, config.gmail_app_password)
+        smtp.sendmail(config.gmail_from, config.recipient_email, msg.as_string())
+        print(f"Email sent to {config.recipient_email}")
 
 
 def _wrap_html(date: str, body: str) -> str:

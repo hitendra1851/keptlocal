@@ -49,8 +49,8 @@ resource "aws_secretsmanager_secret" "github_token" {
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret" "resend_api_key" {
-  name                    = "keptlocal/marketing-agent/resend-api-key"
+resource "aws_secretsmanager_secret" "gmail_app_password" {
+  name                    = "keptlocal/marketing-agent/gmail-app-password"
   recovery_window_in_days = 0
 }
 
@@ -85,7 +85,7 @@ resource "aws_iam_role_policy" "execution_secrets" {
       Action = ["secretsmanager:GetSecretValue"]
       Resource = [
         aws_secretsmanager_secret.github_token.arn,
-        aws_secretsmanager_secret.resend_api_key.arn,
+        aws_secretsmanager_secret.gmail_app_password.arn,
       ]
     }]
   })
@@ -168,8 +168,8 @@ resource "aws_ecs_task_definition" "agent" {
     ]
 
     secrets = [
-      { name = "GITHUB_TOKEN",    valueFrom = aws_secretsmanager_secret.github_token.arn },
-      { name = "RESEND_API_KEY",  valueFrom = aws_secretsmanager_secret.resend_api_key.arn },
+      { name = "GITHUB_TOKEN",       valueFrom = aws_secretsmanager_secret.github_token.arn },
+      { name = "GMAIL_APP_PASSWORD", valueFrom = aws_secretsmanager_secret.gmail_app_password.arn },
     ]
 
     logConfiguration = {

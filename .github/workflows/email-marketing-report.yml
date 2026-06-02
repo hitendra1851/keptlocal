@@ -12,14 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Send report email via Resend
+      - name: Send report email via Gmail SMTP
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          GMAIL_FROM: "hitendra.patel2986@gmail.com"
         run: |
           python3 << 'PYEOF'
-          import os, json, glob, urllib.request, urllib.error
+          import os, glob, smtplib
+          from email.mime.multipart import MIMEMultipart
+          from email.mime.text import MIMEText
 
-          # Find the latest report
           reports = sorted(glob.glob('marketing/reports/*.md'))
           if not reports:
               print("No reports found — skipping email.")
@@ -27,7 +29,6 @@ jobs:
 
           latest = reports[-1]
           date = os.path.basename(latest).replace('.md', '')
-
           with open(latest) as f:
               content = f.read()
 
@@ -62,7 +63,6 @@ jobs:
                       html.append('<hr style="border:none;border-top:1px solid #e0e0e0;margin:16px 0">')
                   elif line.strip() == '':
                       if in_list: html.append('</ul>'); in_list = False
-                      html.append('')
                   else:
                       if in_list: html.append('</ul>'); in_list = False
                       html.append(f'<p style="margin:6px 0;line-height:1.5">{line}</p>')
@@ -70,48 +70,38 @@ jobs:
                   html.append('</ul>')
               return '\n'.join(html)
 
+          gmail_from = os.environ['GMAIL_FROM']
+          recipient  = 'hitendra.patel2986@gmail.com'
+
           html_body = f"""<!DOCTYPE html>
-          <html><body style="margin:0;padding:0;background:#f9f7f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-          <div style="max-width:680px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
-            <div style="background:#1a3d2b;padding:24px 32px">
-              <p style="color:#a8c5b2;margin:0;font-size:13px;letter-spacing:0.5px">KEPTLOCAL.COM</p>
-              <h1 style="color:#fff;margin:4px 0 0;font-size:22px;font-weight:600">Marketing Report</h1>
-              <p style="color:#a8c5b2;margin:4px 0 0;font-size:14px">{date}</p>
-            </div>
-            <div style="padding:24px 32px 32px">
-              {md_to_html(content)}
-            </div>
-            <div style="background:#f9f7f4;padding:16px 32px;border-top:1px solid #eee">
-              <p style="color:#999;font-size:12px;margin:0">
-                Sent automatically by your keptlocal marketing agent &middot;
-                <a href="https://github.com/hitendra1851/keptlocal/tree/main/marketing/reports" style="color:#1a3d2b">View all reports</a>
-              </p>
-            </div>
-          </div>
-          </body></html>"""
+<html><body style="margin:0;padding:0;background:#f9f7f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<div style="max-width:680px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
+  <div style="background:#1a3d2b;padding:24px 32px">
+    <p style="color:#a8c5b2;margin:0;font-size:13px;letter-spacing:0.5px">KEPTLOCAL.COM</p>
+    <h1 style="color:#fff;margin:4px 0 0;font-size:22px;font-weight:600">Marketing Report</h1>
+    <p style="color:#a8c5b2;margin:4px 0 0;font-size:14px">{date}</p>
+  </div>
+  <div style="padding:24px 32px 32px">{md_to_html(content)}</div>
+  <div style="background:#f9f7f4;padding:16px 32px;border-top:1px solid #eee">
+    <p style="color:#999;font-size:12px;margin:0">
+      Sent automatically by your keptlocal marketing agent &middot;
+      <a href="https://github.com/hitendra1851/keptlocal/tree/main/marketing/reports" style="color:#1a3d2b">View all reports</a>
+    </p>
+  </div>
+</div>
+</body></html>"""
 
-          payload = {
-              "from": "keptlocal Marketing <onboarding@resend.dev>",
-              "to": ["hitendra.patel2986@gmail.com"],
-              "subject": f"keptlocal Marketing Report — {date}",
-              "html": html_body,
-              "text": content
-          }
+          msg = MIMEMultipart('alternative')
+          msg['Subject'] = f'keptlocal Marketing Report — {date}'
+          msg['From']    = f'keptlocal Marketing <{gmail_from}>'
+          msg['To']      = recipient
+          msg.attach(MIMEText(content, 'plain'))
+          msg.attach(MIMEText(html_body, 'html'))
 
-          req = urllib.request.Request(
-              'https://api.resend.com/emails',
-              data=json.dumps(payload).encode(),
-              headers={
-                  'Authorization': f'Bearer {os.environ["RESEND_API_KEY"]}',
-                  'Content-Type': 'application/json'
-              }
-          )
-
-          try:
-              with urllib.request.urlopen(req) as resp:
-                  result = json.loads(resp.read())
-                  print(f"Email sent successfully. ID: {result.get('id')}")
-          except urllib.error.HTTPError as e:
-              print(f"Failed to send email: {e.code} {e.read().decode()}")
-              exit(1)
+          with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
+              smtp.ehlo()
+              smtp.starttls()
+              smtp.login(gmail_from, os.environ['GMAIL_APP_PASSWORD'])
+              smtp.sendmail(gmail_from, recipient, msg.as_string())
+              print(f'Email sent to {recipient}')
           PYEOF

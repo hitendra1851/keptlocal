@@ -9,7 +9,8 @@ load_dotenv()
 @dataclass
 class Config:
     github_token: str
-    resend_api_key: str
+    gmail_app_password: str
+    gmail_from: str = "hitendra.patel2986@gmail.com"
     github_repo: str = "hitendra1851/keptlocal"
     recipient_email: str = "hitendra.patel2986@gmail.com"
     site_url: str = "https://keptlocal.com"
@@ -18,7 +19,8 @@ class Config:
     def from_env(cls) -> "Config":
         return cls(
             github_token=os.environ["GITHUB_TOKEN"],
-            resend_api_key=os.environ["RESEND_API_KEY"],
+            gmail_app_password=os.environ["GMAIL_APP_PASSWORD"],
+            gmail_from=os.environ.get("GMAIL_FROM", "hitendra.patel2986@gmail.com"),
             github_repo=os.environ.get("GITHUB_REPO", "hitendra1851/keptlocal"),
             recipient_email=os.environ.get("RECIPIENT_EMAIL", "hitendra.patel2986@gmail.com"),
         )

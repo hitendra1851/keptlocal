@@ -39,7 +39,7 @@ async def run(config: Config) -> None:
     backlinks = await check_submitted_backlinks()
 
     log.info("[4/4] Submitting to directories...")
-    directories = await find_and_submit_directories()
+    directories = await find_and_submit_directories(config.github_token, config.github_repo)
 
     report = _build_report(today, rankings, competitors, backlinks, directories)
 

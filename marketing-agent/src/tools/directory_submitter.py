@@ -1,15 +1,18 @@
 """
 Auto-submit keptlocal.com to tool directories using Playwright.
 
-DRY_RUN=true (default) fills forms and screenshots them without clicking Submit.
-Set DRY_RUN=false in env to enable live submission.
+Each directory is submitted only once — submissions are tracked in
+marketing/submitted-directories.json in the GitHub repo.
 """
 from __future__ import annotations
 
 import asyncio
 import base64
 import datetime
+import json
 import os
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -17,17 +20,14 @@ from playwright.async_api import Page, async_playwright
 
 from config import KNOWN_DIRECTORIES, SITE_DESCRIPTION
 
-# ── Constants ─────────────────────────────────────────────────────────────────
-
 SITE_URL = "https://keptlocal.com"
 SITE_NAME = "keptlocal"
 SITE_TAGLINE = "Free PDF & image tools — files never leave your browser"
 CONTACT_EMAIL = os.environ.get("SUBMISSION_EMAIL", "hitendra.patel2986@gmail.com")
-DRY_RUN = os.environ.get("DRY_RUN", "true").lower() != "false"
 
 SCREENSHOT_DIR = Path("marketing/screenshots") / datetime.date.today().isoformat()
+_TRACKING_PATH = "marketing/submitted-directories.json"
 
-# Fields to try filling for each logical slot
 _FIELD_SELECTORS: dict[str, list[str]] = {
     "url": [
         'input[name="url"]', 'input[name="website"]', 'input[name="link"]',
@@ -62,12 +62,15 @@ _FIELD_SELECTORS: dict[str, list[str]] = {
 }
 
 
-# ── Public entry point ────────────────────────────────────────────────────────
-
-async def find_and_submit_directories() -> str:
+async def find_and_submit_directories(
+    github_token: str | None = None,
+    github_repo: str | None = None,
+) -> str:
     SCREENSHOT_DIR.mkdir(parents=True, exist_ok=True)
+
+    submitted = _load_submitted(github_token, github_repo)
     results: list[str] = []
-    mode = "DRY RUN — screenshots only" if DRY_RUN else "LIVE SUBMISSION"
+    newly_submitted: list[str] = []
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
@@ -82,123 +85,104 @@ async def find_and_submit_directories() -> str:
         page = await context.new_page()
 
         for directory in KNOWN_DIRECTORIES:
-            handler = _HANDLERS.get(directory["name"])
+            name = directory["name"]
+
+            if name in submitted:
+                results.append(f"**{name}** — Already submitted on {submitted[name]}, skipping")
+                continue
+
+            handler = _HANDLERS.get(name)
             if not handler:
-                results.append(f"**{directory['name']}** — No handler yet. Submit manually: {directory['submit_url']}")
+                results.append(f"**{name}** — No handler yet. Submit manually: {directory['submit_url']}")
                 continue
 
             try:
                 status = await handler(page, directory)
-                results.append(f"**{directory['name']}** — {status} ({mode})")
+                results.append(f"**{name}** — {status}")
+                if "Submitted" in status:
+                    newly_submitted.append(name)
+                    submitted[name] = datetime.date.today().isoformat()
             except Exception as e:
-                await _screenshot(page, f"{directory['name'].lower().replace(' ', '-')}-error")
-                results.append(f"**{directory['name']}** — Error: {e}. Submit manually: {directory['submit_url']}")
+                await _screenshot(page, f"{name.lower().replace(' ', '-')}-error")
+                results.append(f"**{name}** — Error: {e}. Submit manually: {directory['submit_url']}")
 
         await browser.close()
 
-    header = f"_Mode: {mode}. Screenshots saved to {SCREENSHOT_DIR}_\n\n"
-    return header + "\n".join(results)
+    if newly_submitted and github_token and github_repo:
+        _save_submitted(github_token, github_repo, submitted)
+
+    return "\n".join(results)
 
 
-# ── Per-directory handlers ────────────────────────────────────────────────────
+# ── Per-directory handlers ─────────────────────────────────────────────────────
 
 async def _submit_tinytools(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
-
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
     await _fill(page, "description", SITE_DESCRIPTION)
     await _fill(page, "email", CONTACT_EMAIL)
-
     await _screenshot(page, "tinytools-filled")
-
-    if not DRY_RUN:
-        submitted = await _submit(page)
-        await _screenshot(page, "tinytools-submitted")
-        return "Submitted" if submitted else "Submit button not found — check screenshot"
-
-    return "Form filled — screenshot saved"
+    submitted = await _submit(page)
+    await _screenshot(page, "tinytools-submitted")
+    return "Submitted" if submitted else "Submit button not found — check screenshot"
 
 
 async def _submit_uneed(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
-
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
     await _fill(page, "description", SITE_DESCRIPTION)
     await _fill(page, "email", CONTACT_EMAIL)
-
     await _screenshot(page, "uneed-filled")
-
-    if not DRY_RUN:
-        submitted = await _submit(page)
-        await _screenshot(page, "uneed-submitted")
-        return "Submitted" if submitted else "Submit button not found — check screenshot"
-
-    return "Form filled — screenshot saved"
+    submitted = await _submit(page)
+    await _screenshot(page, "uneed-submitted")
+    return "Submitted" if submitted else "Submit button not found — check screenshot"
 
 
 async def _submit_fazier(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
-
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
     await _fill(page, "description", SITE_DESCRIPTION)
     await _fill(page, "email", CONTACT_EMAIL)
-
     await _screenshot(page, "fazier-filled")
-
-    if not DRY_RUN:
-        submitted = await _submit(page)
-        await _screenshot(page, "fazier-submitted")
-        return "Submitted" if submitted else "Submit button not found — check screenshot"
-
-    return "Form filled — screenshot saved"
+    submitted = await _submit(page)
+    await _screenshot(page, "fazier-submitted")
+    return "Submitted" if submitted else "Submit button not found — check screenshot"
 
 
 async def _submit_saashub(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
-
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "description", SITE_DESCRIPTION)
     await _fill(page, "email", CONTACT_EMAIL)
-
     await _screenshot(page, "saashub-filled")
-
-    if not DRY_RUN:
-        submitted = await _submit(page)
-        await _screenshot(page, "saashub-submitted")
-        return "Submitted" if submitted else "Submit button not found — check screenshot"
-
-    return "Form filled — screenshot saved"
+    submitted = await _submit(page)
+    await _screenshot(page, "saashub-submitted")
+    return "Submitted" if submitted else "Submit button not found — check screenshot"
 
 
 async def _submit_prototypr(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
-
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
     await _fill(page, "description", SITE_DESCRIPTION)
     await _fill(page, "email", CONTACT_EMAIL)
-
     await _screenshot(page, "prototypr-filled")
-
-    if not DRY_RUN:
-        submitted = await _submit(page)
-        await _screenshot(page, "prototypr-submitted")
-        return "Submitted" if submitted else "Submit button not found — check screenshot"
-
-    return "Form filled — screenshot saved"
+    submitted = await _submit(page)
+    await _screenshot(page, "prototypr-submitted")
+    return "Submitted" if submitted else "Submit button not found — check screenshot"
 
 
 _HANDLERS: dict[str, Any] = {
@@ -210,7 +194,56 @@ _HANDLERS: dict[str, Any] = {
 }
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Submission tracking ────────────────────────────────────────────────────────
+
+def _load_submitted(github_token: str | None, github_repo: str | None) -> dict[str, str]:
+    if not github_token or not github_repo:
+        return {}
+    url = f"https://api.github.com/repos/{github_repo}/contents/{_TRACKING_PATH}"
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+    })
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read())
+            content = base64.b64decode(data["content"]).decode()
+            return json.loads(content)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return {}
+        raise
+
+
+def _save_submitted(github_token: str, github_repo: str, submitted: dict[str, str]) -> None:
+    url = f"https://api.github.com/repos/{github_repo}/contents/{_TRACKING_PATH}"
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    content = base64.b64encode(json.dumps(submitted, indent=2).encode()).decode()
+
+    sha = None
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req) as resp:
+            sha = json.loads(resp.read()).get("sha")
+    except urllib.error.HTTPError as e:
+        if e.code != 404:
+            raise
+
+    body: dict = {"message": "chore: update submitted-directories tracking", "content": content}
+    if sha:
+        body["sha"] = sha
+
+    req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method="PUT")
+    with urllib.request.urlopen(req) as resp:
+        resp.read()
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
 async def _goto(page: Page, url: str) -> None:
     await page.goto(url, wait_until="domcontentloaded", timeout=25000)
@@ -218,7 +251,6 @@ async def _goto(page: Page, url: str) -> None:
 
 
 async def _fill(page: Page, field_key: str, value: str) -> bool:
-    """Try each selector for the field until one works. Returns True if filled."""
     for selector in _FIELD_SELECTORS.get(field_key, []):
         try:
             el = await page.query_selector(selector)
@@ -235,7 +267,6 @@ async def _fill(page: Page, field_key: str, value: str) -> bool:
 
 
 async def _submit(page: Page) -> bool:
-    """Click the first visible submit button."""
     for selector in [
         'button[type="submit"]',
         'input[type="submit"]',
@@ -257,16 +288,11 @@ async def _submit(page: Page) -> bool:
 
 
 async def _dismiss_cookie_banner(page: Page) -> None:
-    """Accept/close cookie consent dialogs if present."""
     for selector in [
-        'button:text("Accept")',
-        'button:text("Accept all")',
-        'button:text("Accept All")',
-        'button:text("I agree")',
-        'button:text("Got it")',
-        'button:text("Close")',
-        '[aria-label="Accept cookies"]',
-        '#cookie-accept', '.cookie-accept',
+        'button:text("Accept")', 'button:text("Accept all")',
+        'button:text("Accept All")', 'button:text("I agree")',
+        'button:text("Got it")', 'button:text("Close")',
+        '[aria-label="Accept cookies"]', '#cookie-accept', '.cookie-accept',
     ]:
         try:
             btn = await page.query_selector(selector)
@@ -279,7 +305,6 @@ async def _dismiss_cookie_banner(page: Page) -> None:
 
 
 async def _screenshot(page: Page, name: str) -> str:
-    """Save a screenshot and return the file path."""
     path = str(SCREENSHOT_DIR / f"{name}.png")
     await page.screenshot(path=path, full_page=True)
     return path

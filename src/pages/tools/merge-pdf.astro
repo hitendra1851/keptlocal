@@ -10,14 +10,15 @@ const tool = tools.find((t) => t.slug === "merge-pdf")!;
   <PdfMerge slot="tool" />
 
   <Fragment slot="content">
-    <h2>How to merge PDF files</h2>
+    <h2>How to merge PDF files without uploading</h2>
     <ol>
       <li>Drag the PDFs you want to combine into the drop zone above, or click "choose files" to browse.</li>
       <li>Drag rows to set the order pages will appear in the final PDF — page 1 of the top file becomes page 1 of the result.</li>
       <li>Click <strong>Merge &amp; download</strong>. The combined PDF saves directly to your downloads folder.</li>
     </ol>
     <p>
-      Everything runs inside the browser tab you have open right now. No file is sent to a server.
+      Everything runs inside the browser tab you have open right now. No file is sent to a server — this is a
+      genuine merge PDF without uploading tool, not a hosted service with a privacy policy you have to trust.
       If you want to confirm that, open browser DevTools (press <code>F12</code>), switch to the
       <strong>Network</strong> tab, and watch while you merge — you'll see no upload requests.
     </p>
@@ -64,7 +65,7 @@ const tool = tools.find((t) => t.slug === "merge-pdf")!;
       One practical note: phones have less RAM than laptops. For very large PDFs (100+ pages at high resolution), prefer a desktop browser. For typical use — combining a contract, ID scan, and cover letter — a modern iPhone or Android phone handles it with no issue.
     </p>
 
-    <h2>Privacy compared to other PDF mergers</h2>
+    <h2>Why merge PDF without uploading?</h2>
     <p>
       Most online PDF tools — including the popular ones — upload your files to their server, process them
       there, and serve the result back. They publish privacy policies that say files are deleted after some
@@ -73,8 +74,14 @@ const tool = tools.find((t) => t.slug === "merge-pdf")!;
     </p>
     <p>
       This matters most for documents you wouldn't share casually — contracts, financial records, ID scans,
-      medical paperwork. Use keptlocal whenever the content is private and you'd rather not trust a
-      third-party server with it.
+      medical paperwork. Merging a PDF without uploading it means no exposure window, no third-party
+      retention policy to worry about, and no account required. Use keptlocal whenever the content is
+      private and a cloud service is one step too many.
+    </p>
+    <p>
+      Among free PDF mergers, most either impose daily limits (Smallpdf: 2 tasks/day), show watermarks on
+      free output, or require signup. keptlocal has none of those constraints. The only thing it requires
+      is a modern browser.
     </p>
   </Fragment>
 </ToolLayout>

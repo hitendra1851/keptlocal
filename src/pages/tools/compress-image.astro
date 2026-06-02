@@ -56,15 +56,23 @@ const tool = tools.find((t) => t.slug === "compress-image")!;
       The compression runs on the browser's main thread (not a Web Worker) to ensure compatibility across browsers when loading the library from a CDN. For typical images up to 20 MB, this takes under two seconds. Larger images or batches of many files will take proportionally longer — the status indicator updates as each file completes.
     </p>
 
-    <h2>Compressing images for email attachments</h2>
+    <h2>Compress image for email — free, no upload, no account</h2>
     <p>
-      Email has a practical attachment size limit — most services cap messages at 10–25 MB total, and large images consistently trigger bounce-backs or get stripped by the recipient's mail server. The sweet spot for an emailed photo is under 1 MB; for a batch of photos, under 5 MB total.
+      Email has a practical attachment size limit — most services cap messages at 10–25 MB total, and large
+      images consistently trigger bounce-backs or get stripped by the recipient's mail server. The sweet
+      spot for an emailed photo is under 1 MB; for a batch of photos, under 5 MB total.
     </p>
     <p>
-      For a typical 12 MP smartphone photo saved as JPG (3–6 MB), the Balanced compression level produces a result under 1 MB in most cases — small enough for any email client with no perceptible quality loss at normal viewing sizes. Drop in all the photos you need to send, click Compress, then use the Download ZIP button to grab them all at once.
+      For a typical 12 MP smartphone photo saved as JPG (3–6 MB), the Balanced compression level produces
+      a result under 1 MB in most cases — small enough for any email client with no perceptible quality
+      loss at normal viewing sizes. Drop in all the photos you need to send, click Compress, then use the
+      <strong>Download ZIP</strong> button to grab them all at once. The entire process is free, runs in
+      the browser, and never uploads your images anywhere.
     </p>
     <p>
-      A quick workflow: compress your images here, download the ZIP, unzip into a folder, then attach the folder contents to your email. The whole process takes under a minute for a set of 10–15 photos.
+      A quick workflow for compressing images for email: drop your photos here → Balanced preset → click
+      Compress → Download ZIP → attach the unzipped files to your email. Under a minute for a set of
+      10–15 photos, no size restrictions, no watermarks added.
     </p>
 
     <h2>Limits and what to expect</h2>

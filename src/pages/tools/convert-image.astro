@@ -54,15 +54,22 @@ const tool = tools.find((t) => t.slug === "convert-image")!;
       <strong>AVIF input:</strong> Chrome 85+ and Firefox 93+ can decode AVIF natively via the <code>&lt;img&gt;</code> element, so the canvas approach works. Safari added AVIF support in version 16. For older browsers, AVIF input may fail — the tool reports an error per file in that case.
     </p>
 
-    <h2>Converting iPhone HEIC photos without a computer</h2>
+    <h2>Convert HEIC to JPG from iPhone — no app, no upload, no software to install</h2>
     <p>
-      This tool works directly in Safari on iPhone — no app download, no AirDrop to a Mac first. Open the page, tap <strong>choose files</strong>, and select your HEIC photos from the Photos app or Files app. Select multiple at once to batch-convert a whole photo set.
+      This tool works directly in Safari on iPhone. No app to download, no AirDrop to a Mac first, no
+      account to create. Open the page in Safari, tap <strong>choose files</strong>, and select your HEIC
+      photos from the Photos app or Files app. Select multiple at once to batch-convert a whole photo set.
+      The conversion runs locally in the browser — your photos never leave your iPhone.
     </p>
     <p>
-      The converted JPGs download to your iPhone's Downloads folder (Files app → iCloud Drive → Downloads, or Files app → On My iPhone → Downloads depending on your Safari download setting). From there you can share them directly from the Files app, attach them to email, or save them to the Camera Roll.
+      The converted JPGs download to your iPhone's Downloads folder (Files app → iCloud Drive → Downloads,
+      or Files app → On My iPhone → Downloads depending on your Safari download setting). From there you
+      can share them directly from the Files app, attach them to email, or save them to the Camera Roll.
     </p>
     <p>
-      If you prefer to prevent HEIC capture from the start: Settings → Camera → Formats → Most Compatible. This switches new photos to JPG automatically, though it increases the storage used per photo by roughly 50%.
+      If you find yourself converting HEIC photos often, there is a permanent fix: Settings → Camera →
+      Formats → Most Compatible. This switches all new photos to JPG automatically, at the cost of roughly
+      50% more storage per photo.
     </p>
 
     <h2>Limits and what to expect</h2>

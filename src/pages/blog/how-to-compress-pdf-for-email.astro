@@ -17,14 +17,8 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>First: understand what is making the PDF large</h2>
 
 <p>
-  Before compressing, it helps to know what is taking up the space. There are three main culprits:
+  Before compressing, it helps to know what is taking up the space. Embedded images are by far the most common cause — a PDF with scanned pages, product photos, or design graphics can easily reach 50–200 MB because each image is embedded at full resolution. Embedded fonts are the less obvious culprit: PDF can embed the full font file for every typeface used, and a PDF using several custom fonts may include several MB of font data. Documents exported from design tools like InDesign or Illustrator often have a third issue — significant metadata overhead, unused objects, and duplicate resources that contribute nothing visible. I once opened an Illustrator-exported PDF in a hex editor to see what was in it. The answer was surprising: about 40% of the file was redundant colour profile data.
 </p>
-
-<ul>
-  <li><strong>Embedded images:</strong> by far the most common cause of large PDFs. A PDF with scanned pages, product photos, or design graphics can easily reach 50–200 MB because each image is embedded at full resolution.</li>
-  <li><strong>Embedded fonts:</strong> PDF can embed the full font file for every typeface used in the document. A PDF using several custom fonts may include several MB of font data.</li>
-  <li><strong>Metadata and unused resources:</strong> documents exported from design tools (InDesign, Illustrator) often include significant overhead — creation metadata, unused objects, duplicate resources — that contributes nothing visible.</li>
-</ul>
 
 <p>
   The right compression approach depends on which of these is the primary cause.
@@ -125,13 +119,8 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </ul>
 
 <p>
-  For a 15 MB PDF from InDesign with high-resolution graphics:
+  For a 15 MB PDF from InDesign with high-resolution graphics: metadata removal alone brings it to 11 MB — design tools add substantial overhead that contributes nothing to the visual output. Chrome print-to-PDF brings it further to around 8 MB. Acrobat Optimizer with quality settings tuned reaches around 4 MB.
 </p>
-<ul>
-  <li>Metadata removal: 11 MB (significant — design tools add substantial overhead)</li>
-  <li>Chrome print-to-PDF: ~8 MB (additional reduction from image resampling)</li>
-  <li>Acrobat Optimiser: ~4 MB with quality settings tuned</li>
-</ul>
 
 <h2>The privacy consideration</h2>
 

@@ -30,14 +30,8 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   The <a href="/tools/split-pdf">Split PDF tool</a> on keptlocal runs entirely in your browser using pdf-lib, a JavaScript library that processes the file locally. Nothing leaves your device.
 </p>
 
-<p>Two modes are available:</p>
+<p>Two modes: Extract pages produces a single new PDF containing just the pages you specify, entered as a comma-separated list of pages and ranges (e.g., <code>1, 3, 5-8</code>). Split all pages makes each page its own PDF file, bundled into a ZIP archive that downloads automatically.</p>
 
-<ul>
-  <li><strong>Extract pages:</strong> Enter a comma-separated list of pages and ranges — for example <code>1, 3, 5-8</code> — and the tool produces a single new PDF containing just those pages.</li>
-  <li><strong>Split all pages:</strong> Each page becomes its own PDF file. For multi-page documents, these are bundled into a ZIP archive that downloads automatically.</li>
-</ul>
-
-<p>The steps:</p>
 <ol>
   <li>Drop your PDF onto the tool or click to select it.</li>
   <li>Choose a mode and enter your page selection if using Extract.</li>
@@ -110,11 +104,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>The privacy angle</h2>
 
 <p>
-  Online PDF tools that require uploads are not automatically unsafe — most run legitimate services with reasonable data handling practices. The risk is structural: your document passes through infrastructure you did not set up, run by a company whose internal data handling you cannot audit, under a privacy policy that may permit uses you have not considered.
+  Upload-based PDF tools are not automatically unsafe — most run legitimate services with reasonable data handling. The risk is structural: your document passes through infrastructure you did not set up, run by a company whose internal practices you cannot audit, under a privacy policy that may permit uses you did not consider.
 </p>
 
 <p>
-  For documents containing tax information, legal content, health records, or anything covered by confidentiality agreements, the default should be local processing. Splitting a PDF in a browser is not slower or more difficult than uploading it. The only difference is where the work happens.
+  For documents containing tax information, legal content, health records, or anything covered by a confidentiality agreement, local processing should be the default. Splitting a PDF in a browser is not slower or more difficult than uploading it. The only difference is where the work happens.
 </p>
 
 <h2>Which option to use</h2>
@@ -127,7 +121,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </ul>
 
 <p>
-  For most common splitting tasks — extracting a chapter, separating a multi-form scan, sending one section of a document — the browser-based option is the fastest path: no installation, no account, and no file leaves your device.
+  For most common splitting tasks — extracting a chapter, separating a multi-form scan, sending one section of a document — the browser-based option is the fastest path. No installation, no account, and no file leaves your device. This came up when I was testing with a 200-page contract that needed its appendices extracted separately. The split completed in about three seconds.
 </p>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">

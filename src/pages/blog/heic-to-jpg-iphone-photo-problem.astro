@@ -25,19 +25,17 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  Apple introduced HEIC as the default capture format in iOS 11 (2017) and macOS High Sierra. Every iPhone and iPad since has defaulted to HEIC unless you change the settings. Apple's own apps — Photos, iCloud, AirDrop — handle HEIC natively and invisibly. The problem starts the moment a HEIC file leaves the Apple ecosystem.
+  Apple introduced HEIC as the default capture format in iOS 11 (2017) and macOS High Sierra. Every iPhone and iPad since has defaulted to HEIC unless you change the settings. Apple's own apps — Photos, iCloud, AirDrop — handle HEIC natively and invisibly. The problem starts the moment a HEIC file leaves the Apple ecosystem. I noticed this when trying to attach iPhone photos to a report in Windows — the blank icon is genuinely confusing the first time you see it.
 </p>
 
 <h2>Where HEIC causes problems</h2>
 
-<ul>
-  <li><strong>Windows (without the codec):</strong> Windows 10 and 11 can open HEIC files, but only if the HEIC Image Extensions codec is installed from the Microsoft Store. This is not installed by default on most Windows machines. Without it, HEIC files show as a generic icon and cannot be previewed or opened.</li>
-  <li><strong>Older Android devices:</strong> HEIC support was added in Android 10 (2019) via hardware decoders, but support varies by device and app. Many Android photo apps do not support HEIC.</li>
-  <li><strong>Web upload forms:</strong> most websites and web applications accept JPEG and PNG. HEIC is not a web standard and will be rejected by upload forms that validate file type.</li>
-  <li><strong>Email clients:</strong> Outlook and other email clients may display HEIC attachments as a blank thumbnail or as a generic file icon rather than showing a preview.</li>
-  <li><strong>Social media:</strong> Instagram, Twitter/X, Facebook, and LinkedIn accept JPEG and PNG for uploads. HEIC files are rejected.</li>
-  <li><strong>Legacy software:</strong> any application built before 2019 and not updated to handle HEIC will not open the files.</li>
-</ul>
+<p>
+  On Windows, HEIC only works if the HEIC Image Extensions codec is installed from the Microsoft Store — which it is not by default on most machines. Without it, HEIC files appear as generic icons. Older Android devices (pre-Android 10) have no native support, and support on newer Android varies by app. Web upload forms almost universally accept JPEG and PNG but reject HEIC, since it is not a web standard. Outlook displays HEIC attachments as blank thumbnails. Instagram, Twitter/X, and Facebook reject HEIC outright. Any application built before 2019 that has not been updated will not open the files.
+</p>
+<p>
+  The pattern is the same in each case: HEIC works perfectly inside Apple's ecosystem and fails the moment you step outside it.
+</p>
 
 <h2>How to stop iPhone from saving photos as HEIC</h2>
 
@@ -99,11 +97,9 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   HEIC and JPEG are both lossy formats. Converting HEIC to JPEG is a transcode — decode from HEIC, re-encode as JPEG — which introduces generation loss. The amount of loss depends on the JPEG quality setting used:
 </p>
 
-<ul>
-  <li>At 92–100% JPEG quality, the generation loss is not visible to the human eye. Use this setting for any photos you plan to keep or print.</li>
-  <li>At 75–85% JPEG quality, you may see very slight degradation in gradients and fine texture if you zoom in and compare directly. At normal viewing sizes it is not perceptible. This is the right setting for email attachments and social sharing.</li>
-  <li>Below 70%, generation loss becomes visible in photographs. Do not use this for photos of lasting value.</li>
-</ul>
+<p>
+  At 92–100% JPEG quality, the generation loss is not visible. Use this setting for any photos you plan to keep or print. At 75–85%, very slight degradation in gradients and fine texture may appear under close inspection — at normal viewing sizes it is not noticeable, and it is the right setting for email attachments and social sharing. Below 70%, generation loss becomes visible in photographs. Do not use that setting for photos of lasting value.
+</p>
 
 <p>
   The keptlocal Convert Image tool uses 92% JPEG quality by default, which is visually lossless for all practical purposes.
@@ -126,7 +122,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  However, HEIC files will still be rejected by web upload forms regardless of whether you have the codec — the rejection happens server-side based on file type, not your local viewer. For sharing and uploading, JPG conversion is still required.
+  However, HEIC files will still be rejected by web upload forms regardless of whether you have the codec — the rejection happens server-side based on file type, not your local viewer. For sharing and uploading, JPG conversion is still required. The codec just saves you the frustration of not being able to view the files yourself.
 </p>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">

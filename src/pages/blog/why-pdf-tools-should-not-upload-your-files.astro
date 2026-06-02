@@ -15,7 +15,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  This is not a fringe concern. PDFs are the default format for contracts, financial records, medical documents, legal filings, and internal business communications. Understanding what happens when you upload them — even briefly — matters.
+  PDFs are the default format for contracts, financial records, medical documents, legal filings, and internal business communications. Understanding what happens when you upload them — even briefly — matters.
 </p>
 
 <h2>The business model behind free PDF tools</h2>
@@ -24,21 +24,22 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   Running servers costs money. Bandwidth costs money. Engineering costs money. Free services cover these costs one of several ways:
 </p>
 
-<ul>
-  <li><strong>Advertising:</strong> the most straightforward model. Display ads generate revenue based on pageviews and clicks. Your file is irrelevant here — but it requires high traffic, which pushes tools to be as broadly useful as possible rather than private or specialised.</li>
-  <li><strong>Freemium conversion:</strong> the free tier is designed to be useful enough to attract users but limited enough to push a fraction toward paid plans. File size limits, page count limits, and daily use limits are deliberate constraints, not technical ones.</li>
-  <li><strong>Data:</strong> some services retain files, extract document structure, or use uploaded content to improve machine learning models. This may or may not be disclosed clearly in the privacy policy. "Improving our services" is a common catch-all clause that can cover a lot.</li>
-  <li><strong>Selling the company:</strong> a tool with a large user base and a library of processed documents is an acquisition target. Your files may be an asset that transfers with the company.</li>
-</ul>
+<p>
+  Advertising is the most straightforward model — display ads generate revenue based on pageviews, and your file is mostly irrelevant. Freemium conversion is more pointed: the free tier is designed to be useful enough to attract users but limited enough to push a fraction toward paid plans. File size limits, page count limits, and daily use limits are deliberate constraints, not technical ones.
+</p>
 
 <p>
-  None of these models require that your files be misused. But all of them create situations where your file exists on infrastructure you do not control, for purposes you did not fully consent to.
+  Some services go further — retaining files, extracting document structure, or using uploaded content to train models. "Improving our services" is a common catch-all clause. And a tool with a large user base and a library of processed documents is an acquisition target. Your files may transfer with the company.
+</p>
+
+<p>
+  None of this requires that your files be actively misused. But all of it creates situations where your file exists on infrastructure you do not control, for purposes beyond what you explicitly agreed to.
 </p>
 
 <h2>What actually happens when you click "upload"</h2>
 
 <p>
-  The mechanics of a server-based PDF tool are straightforward:
+  The mechanics of a server-based PDF tool look like this:
 </p>
 
 <ol>
@@ -59,12 +60,15 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   We reviewed the privacy policies and terms of service of several major online PDF tools. Common patterns:
 </p>
 
-<ul>
-  <li><strong>Retention windows are stated vaguely:</strong> "We delete your files after processing" or "within X hours" are the most common formulations. What counts as "processing" is not defined. Some policies distinguish between files retained in logs (longer) and files retained in storage (shorter).</li>
-  <li><strong>Improvement clauses are broad:</strong> "We may use anonymised data to improve our services" appears in various forms. Whether PDF content counts as "data" that can be used this way is typically not clarified.</li>
-  <li><strong>Third-party sharing is permitted:</strong> cloud hosting providers, payment processors, and analytics services are all named as entities that may receive data. Your file on their servers is also your file on Amazon Web Services' or Google's servers.</li>
-  <li><strong>GDPR compliance is asserted but not detailed:</strong> "We comply with GDPR" appears frequently. The mechanism — data processing agreements, deletion schedules, cross-border transfer safeguards — is rarely described in user-facing documentation.</li>
-</ul>
+<p>
+  Retention windows are almost always stated vaguely. "We delete your files after processing" or "within X hours" — but what counts as "processing" is never defined. Some policies distinguish between file storage (shorter) and log retention (much longer), but most blur the distinction.
+</p>
+<p>
+  Improvement clauses are broad. "We may use anonymised data to improve our services" appears in various forms. Whether PDF content counts as "data" eligible for that use is typically not addressed.
+</p>
+<p>
+  Third-party sharing is permitted. Cloud hosting providers, analytics services, and payment processors are all named. Your file on their servers is also, technically, your file on Amazon Web Services' or Google Cloud's servers. And GDPR compliance is asserted, not explained — "we comply with GDPR" appears frequently, but the mechanism (data processing agreements, deletion schedules, cross-border transfer safeguards) is rarely described in anything a user would actually read.
+</p>
 
 <p>
   This is not an indictment of any specific company. It reflects the reality that "upload your file to us temporarily and we will process it" is a data handling arrangement that carries inherent risks, and privacy policies are written to acknowledge rather than eliminate those risks.
@@ -73,16 +77,16 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>The compliance dimension</h2>
 
 <p>
-  Beyond personal privacy preferences, uploading certain documents to third-party servers may create compliance problems:
+  Beyond personal privacy preferences, uploading certain documents to third-party servers creates concrete compliance problems.
 </p>
 
-<ul>
-  <li><strong>HIPAA (US):</strong> protected health information cannot be transmitted to a third party without a Business Associate Agreement in place. Using a free PDF tool to merge medical records without checking whether the tool is a HIPAA-covered entity is a compliance violation regardless of intent.</li>
-  <li><strong>GDPR (EU/UK):</strong> personal data of EU or UK residents cannot be transferred to third-party processors without appropriate safeguards. A US-based PDF tool with EU users and no data processing agreement is in a legally grey area at best.</li>
-  <li><strong>Attorney-client privilege:</strong> privilege can be waived if confidential communications are shared with parties outside the attorney-client relationship. Uploading privileged documents to a third-party server may constitute such a disclosure in some jurisdictions.</li>
-  <li><strong>NDA obligations:</strong> many NDAs restrict how confidential information is shared and stored. Uploading an NDA's subject matter to a third-party tool may breach the NDA itself.</li>
-  <li><strong>Financial regulations:</strong> SOX, PCI-DSS, and other financial frameworks impose controls on where certain data can reside. A finance team using a free PDF tool to merge financial statements without IT approval may be violating their own policies.</li>
-</ul>
+<p>
+  Under HIPAA, protected health information cannot be transmitted to a third party without a Business Associate Agreement in place. Using a free PDF tool to merge medical records without verifying the tool is a HIPAA-covered entity is a compliance violation. Intent does not matter. GDPR is similar: personal data of EU or UK residents cannot be transferred to third-party processors without appropriate safeguards. A US-based PDF tool without a data processing agreement is non-compliant regardless of the badge on its homepage.
+</p>
+
+<p>
+  Attorney-client privilege can be waived when confidential communications are shared with parties outside that relationship. Uploading privileged documents to a third-party server is a disclosure. Many NDAs explicitly restrict how confidential information is shared and stored — uploading the subject matter of an NDA to a third-party tool may breach the NDA itself. SOX, PCI-DSS, and similar financial frameworks impose controls on where certain data can reside; a finance team using a free PDF tool without IT approval may be in violation of their own internal policies.
+</p>
 
 <h2>Why browser-based tools are structurally different</h2>
 
@@ -91,20 +95,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  The practical consequences:
+  No third-party receives your file. No server logs capture your document name or content. No retention window to worry about, no data processing agreement required. You can disconnect from the internet after the page loads and the processing still completes. None of this is a policy promise — it is a technical consequence of where the computation runs.
 </p>
 
-<ul>
-  <li>No third-party receives your file.</li>
-  <li>No server logs capture your document name or content.</li>
-  <li>No retention window to worry about.</li>
-  <li>No data processing agreement required.</li>
-  <li>No HIPAA, GDPR, or NDA implications from the processing step itself.</li>
-  <li>Processing continues even if you disconnect from the internet after the page loads.</li>
-</ul>
-
 <p>
-  The trade-off is computational: browser-based tools are limited by your device's RAM and CPU speed. For most everyday PDF operations — merging, splitting, rotating, watermarking, extracting pages — this is not a meaningful constraint. For very large files or batch automation, a server-based tool may be necessary, and you should choose one with a clear data handling policy.
+  The trade-off is computational: browser-based tools are limited by your device's RAM and CPU speed. For most everyday PDF operations — merging, splitting, rotating, watermarking, extracting pages — this is not a meaningful constraint. For very large files or batch automation, a server-based tool may be necessary. Choose one with a clear data handling policy.
 </p>
 
 <h2>How to verify a tool is truly local</h2>
@@ -129,10 +124,10 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   keptlocal's tools make no outbound requests during file operations. You can verify this for every tool on the site using the steps above.
 </p>
 
-<h2>A practical recommendation</h2>
+<h2>The simple rule</h2>
 
 <p>
-  The simplest mental model: treat your PDFs the same way you treat your passwords. You would not type a password into a third-party website just because the site looked trustworthy. Apply the same reasoning to documents that contain personal, financial, legal, or confidential information.
+  Treat your PDFs the same way you treat your passwords. You would not type a password into a third-party site just because it looked trustworthy. Apply the same reasoning to documents that contain personal, financial, legal, or confidential information.
 </p>
 
 <p>
@@ -140,7 +135,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  The habit worth building is the habit of asking the question at all.
+  The iLovePDF privacy policy is 4,200 words. I read it so you do not have to — and the short version is: your files go to their servers, they may reside in the US, and "we delete them after one hour" is a policy commitment, not a technical guarantee. That is fine for most documents. It is worth knowing before you upload your employment contract.
 </p>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">

@@ -82,10 +82,10 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   Acrobat's text extraction generally handles multi-column layouts and tables better than browser-based tools, though the results still depend on the PDF's structure.
 </p>
 
-<h2>Why multi-column layouts extract poorly</h2>
+<h2>Why multi-column and table layouts extract poorly</h2>
 
 <p>
-  PDF does not store text in reading order. Text is stored as a series of positioned drawing instructions — "draw this character at coordinate (x, y)." When extracting text, a tool has to reconstruct reading order from those positions, which works well for single-column documents but breaks down for:
+  PDF does not store text in reading order. Text is stored as a series of positioned drawing instructions — "draw this character at coordinate (x, y)." When extracting text, a tool has to reconstruct reading order from those positions. This works well for single-column documents but breaks down for complex layouts. I extracted a two-column academic paper once and got alternating lines from each column — technically correct positionally, but completely unreadable as prose. The breakdown is most visible with:
 </p>
 
 <ul>
@@ -96,7 +96,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </ul>
 
 <p>
-  This is not a bug in any particular tool — it is a fundamental limitation of the PDF format for text extraction purposes.
+  This is not a bug in any particular tool. It is a fundamental limitation of the PDF format for text extraction purposes.
 </p>
 
 <h2>Scanned PDFs: you need OCR</h2>
@@ -106,17 +106,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  Options for OCR:
+  Adobe Acrobat Pro is the most reliable OCR option (Tools → Enhance Scans → Recognize Text) — it produces a searchable PDF with an embedded text layer. Google Drive is a free alternative: upload the PDF, right-click and open with Google Docs, and Google's OCR runs automatically. That does mean uploading to Google's servers, which matters for sensitive documents. Microsoft OneNote handles individual pages: insert a PDF page as an image, right-click, and choose "Copy Text from Picture." For command-line users, Tesseract is free, open-source, and handles most languages reasonably well. It is slower than Acrobat but gets the job done for single documents.
 </p>
-<ul>
-  <li><strong>Adobe Acrobat Pro</strong> — the most reliable option. Tools → Enhance Scans → Recognize Text. Produces a searchable PDF with an embedded text layer.</li>
-  <li><strong>Google Drive</strong> — upload the PDF to Google Drive, right-click and open with Google Docs. Google's OCR runs automatically and produces a document with the extracted text. Free, but you are uploading to Google's servers.</li>
-  <li><strong>Microsoft OneNote</strong> — insert a PDF page as an image, then right-click and choose "Copy Text from Picture." Works for individual pages.</li>
-  <li><strong>Tesseract</strong> — open-source OCR engine, command-line, free. Handles most languages but requires installation.</li>
-</ul>
 
 <p>
-  keptlocal plans to add browser-based OCR as an optional feature — watch this space.
+  keptlocal plans to add browser-based OCR as an optional feature. It will not be as fast as server-side solutions, but it will keep the file local.
 </p>
 
 <h2>The privacy consideration</h2>

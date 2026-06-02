@@ -35,18 +35,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>What actually happens when you upload to a free PDF merger</h2>
 
 <p>
-  When you upload to a service like SmallPDF, iLovePDF, or similar tools, your file is transmitted to their servers over HTTPS (which means it is encrypted in transit — but that only protects it from interception while travelling, not from the server itself). Once it arrives, several things may happen:
+  When you upload to a service like SmallPDF, iLovePDF, or similar tools, your file is transmitted to their servers over HTTPS. Encrypted in transit — but that only protects it from interception while travelling, not from the server itself. Once it arrives, the file is stored temporarily (most policies say "up to X hours" but rarely commit to zero retention). It sits on shared cloud infrastructure where the underlying provider — AWS, Google Cloud, Azure — has its own access policies. Server logs capture your IP address, the file size, and often the file name. And customer support and operations staff can access uploaded files, even if that access is not routine.
 </p>
 
-<ul>
-  <li><strong>The file is stored temporarily</strong> — most services delete files after a window of one to a few hours. Some keep them longer. Their privacy policies typically say "up to X hours" but rarely commit to zero retention.</li>
-  <li><strong>The file passes through shared infrastructure</strong> — cloud hosting means your PDF sits on a physical server alongside files from thousands of other users. The infrastructure provider (AWS, Google Cloud, Azure) has its own access policies.</li>
-  <li><strong>Metadata is logged</strong> — at minimum, server logs capture your IP address, the time, the file size, and often the file name. Some tools capture more.</li>
-  <li><strong>Staff may be able to access files</strong> — customer support and technical operations teams at most companies can access uploaded files in practice, even if they are not supposed to do so routinely.</li>
-</ul>
-
 <p>
-  None of this is necessarily malicious. Most services handle files responsibly. But "responsible" is not the same as "private." The moment you upload a file, you have lost control of it.
+  Most services handle files responsibly. But "responsible" is not the same as "private." The moment you upload a file, you have lost control of it.
 </p>
 
 <h2>How browser-based PDF merging works</h2>
@@ -107,7 +100,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </ol>
 
 <p>
-  If you see a POST request or an upload to an external URL, stop and leave the site — that tool is uploading your files regardless of what it claims. With keptlocal, the network panel stays quiet.
+  If you see a POST request or an upload to an external URL, stop and leave the site — that tool is uploading your files regardless of what it claims. With keptlocal, the network panel stays quiet. I have run that check dozens of times during testing. It is still satisfying to watch.
 </p>
 
 <h2>What browser-based merging cannot do (and when a server makes sense)</h2>
@@ -130,16 +123,8 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>Which documents most need local-only processing</h2>
 
 <p>
-  Not every merge warrants concern. A PDF of publicly available product specs merged with a price list is not sensitive. But consider these categories before uploading:
+  Not every merge warrants concern. A PDF of publicly available product specs merged with a price list is not sensitive. But legal documents — contracts, NDAs, court filings, wills — contain personal information and may be subject to attorney-client privilege. Medical records carry HIPAA and GDPR implications. Financial documents give away more than you might expect: the file name "Q3_payroll_2026.pdf" alone tells a third-party server something about your organisation before they even open it. HR documents, client materials, anything under an NDA — each carries some form of confidentiality expectation.
 </p>
-
-<ul>
-  <li><strong>Legal documents</strong> — contracts, NDAs, court filings, wills. These contain personal information and may be subject to attorney-client privilege.</li>
-  <li><strong>Medical records</strong> — lab results, discharge summaries, prescriptions. Uploading these may violate HIPAA in the US or GDPR in Europe.</li>
-  <li><strong>Financial documents</strong> — tax returns, bank statements, payroll records. File names alone ("Q3_payroll_2026.pdf") reveal information about your organisation.</li>
-  <li><strong>HR documents</strong> — employee reviews, disciplinary records, offer letters. These are typically subject to data protection obligations.</li>
-  <li><strong>Client documents</strong> — anything a client trusted you with carries an implicit confidentiality expectation.</li>
-</ul>
 
 <p>
   The test is simple: would you hand a physical copy of this document to a stranger and ask them to merge it for you, then hand it back? If not, do not upload it to a server you do not control.

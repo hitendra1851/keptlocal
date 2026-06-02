@@ -51,14 +51,8 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 
 <h3>Third-party access</h3>
 <p>
-  Every policy we reviewed names multiple categories of third parties that may receive user data:
+  Every policy we reviewed names multiple categories of third parties that may receive user data: cloud infrastructure providers (AWS, GCP, Azure) who physically host the files, analytics providers who receive usage data, payment processors if there is a paid tier, and legal authorities "when required by law." That last clause can be triggered in some jurisdictions by requests that do not require a court order.
 </p>
-<ul>
-  <li>Cloud infrastructure providers (AWS, GCP, Azure) who physically host the files</li>
-  <li>Analytics providers (Google Analytics, Amplitude) who receive usage data</li>
-  <li>Payment processors if there is a paid tier</li>
-  <li>Legal authorities "when required by law" — a clause that in some jurisdictions can be triggered by requests that do not require a court order</li>
-</ul>
 
 <h3>Acquisition and business change language</h3>
 <p>
@@ -68,14 +62,12 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>What the Network tab reveals</h2>
 
 <p>
-  We tested several popular free PDF tools with a clearly labelled test document and monitored network traffic. What we found was illuminating:
+  When building keptlocal, I tested several popular free PDF tools with a clearly labelled test document and monitored network traffic. What I found was not surprising, but it was clarifying:
 </p>
 
-<ul>
-  <li><strong>Files are uploaded before the operation runs.</strong> In every server-based tool, the file is transmitted to the server the moment you trigger the operation — or in some cases, before you have confirmed the operation parameters.</li>
-  <li><strong>Analytics events fire throughout.</strong> Events tracking user behaviour — which page, what action, how long it took — fire continuously to third-party analytics services. These events include session identifiers that can be used to link upload events to later visits.</li>
-  <li><strong>Some tools make multiple outbound calls to different domains.</strong> A single file operation can involve the tool's primary servers, a CDN, an analytics provider, and an ad network, each receiving some signal about the operation.</li>
-</ul>
+<p>
+  In every server-based tool I checked, the file was transmitted to the server the moment you triggered the operation — in some cases, before you had even confirmed the operation parameters. Analytics events fired continuously throughout, tracking which page you were on, what actions you took, and how long it took. Those events carry session identifiers that link the upload event to later visits. And a single file operation can touch multiple domains: the tool's primary servers, a CDN, an analytics provider, and an ad network — each receiving some signal.
+</p>
 
 <p>
   None of this is illegal, and in most cases it is disclosed somewhere in the policy documents. But it is very different from the "private and secure" marketing language that most tools use.
@@ -87,13 +79,12 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   Not all PDFs carry the same risk. The following categories warrant particular caution:
 </p>
 
-<ul>
-  <li><strong>Documents containing personal data:</strong> anything with names, addresses, identification numbers, financial account details, or health information is potentially subject to data protection law. Processing these on a third-party server creates compliance obligations and liability.</li>
-  <li><strong>Legal documents under privilege:</strong> contracts, attorney-client communications, litigation materials. Some jurisdictions hold that transmitting privileged documents to a third party waives the privilege.</li>
-  <li><strong>Trade secrets and proprietary information:</strong> confidential business plans, unreleased product specifications, internal financial forecasts. These are often covered by NDAs and internal information security policies.</li>
-  <li><strong>Documents from clients or patients:</strong> if you work with client documents or patient records, your obligations to those individuals may prevent you from uploading their documents to third-party tools without disclosure and consent.</li>
-  <li><strong>Government and defence documents:</strong> classified or sensitive government documents should never go near a free online tool. Most organisations that handle such documents have explicit policies prohibiting this.</li>
-</ul>
+<p>
+  Documents containing personal data — names, addresses, identification numbers, financial details, health information — are potentially subject to data protection law. Processing them on a third-party server creates compliance obligations. Legal documents under privilege carry an additional risk: some jurisdictions hold that transmitting privileged documents to a third party waives the privilege. That is a real consequence, not a theoretical one.
+</p>
+<p>
+  Trade secrets and proprietary information are often covered by NDAs and internal policies. Client documents and patient records carry obligations to the individuals they concern — uploading without disclosure may itself be a violation. Classified or sensitive government documents should not come within a mile of a free online tool. Most organisations that handle them have explicit policies prohibiting it.
+</p>
 
 <h2>The structural solution: browser-based processing</h2>
 
@@ -113,15 +104,19 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   The limitation is real: browser-based tools cannot do everything a server can. Extremely large files, complex format conversions, and batch automation are areas where server-side processing is still necessary. For those cases, choose a tool with explicit data handling commitments — and ideally one that can run on your own infrastructure.
 </p>
 
-<h2>Practical guidance</h2>
+<h2>Before you upload, one question</h2>
 
-<ul>
-  <li><strong>Before uploading any document:</strong> ask whether it contains personal data, is subject to confidentiality obligations, or belongs to a client or patient. If any of these apply, use a local tool.</li>
-  <li><strong>Read the retention policy before trusting it:</strong> "deleted after one hour" means little if backup retention is indefinite. Look for language about backup systems and operational logs, not just the primary file store.</li>
-  <li><strong>Check where the servers are:</strong> for EU users, look for explicit EU data residency commitments. "GDPR compliant" without EU data residency is a weaker protection than it sounds.</li>
-  <li><strong>Verify with the Network tab:</strong> for any tool claiming to be local, check that no outbound requests are made during the file operation. This takes thirty seconds and tells you the truth.</li>
-  <li><strong>Use a dedicated solution for high-sensitivity documents:</strong> organisations that regularly handle sensitive PDFs should evaluate self-hosted document tools, enterprise PDF software with explicit data handling agreements, or browser-based tools where the processing is genuinely local.</li>
-</ul>
+<p>
+  Ask whether the document contains personal data, is subject to confidentiality obligations, or belongs to a client or patient. If any of these apply, use a local tool. Most people skip this question. That is how sensitive documents end up on servers they never agreed to use.
+</p>
+
+<p>
+  If you do use an upload-based tool, read the retention policy properly — "deleted after one hour" means little if backup retention is indefinite. Look for language about backup systems and operational logs, not just the primary file store. For EU users, look for explicit EU data residency commitments. "GDPR compliant" without EU data residency is a weaker protection than it sounds.
+</p>
+
+<p>
+  For any tool claiming to be local, verify it with the Network tab. This takes thirty seconds and tells you the truth. An upload cannot be hidden from DevTools — if the request fires, the file is leaving your device, regardless of what the homepage says.
+</p>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
   keptlocal processes all files locally in your browser. <a href="/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Browse the tools</a> — and verify with DevTools that nothing leaves your device.

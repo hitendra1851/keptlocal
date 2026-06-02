@@ -21,7 +21,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  In most cases, the images contain something meaningful — a signature, a document, private photos — which makes it worth thinking about which tool handles them.
+  In most cases, the images contain something meaningful — a signature, a document, private photos — which makes it worth being deliberate about which tool handles them.
 </p>
 
 <h2>Option 1: Browser-based conversion (no upload, free)</h2>
@@ -30,7 +30,6 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   The <a href="/tools/jpg-to-pdf">JPG to PDF tool</a> on keptlocal runs entirely in your browser using pdf-lib. Your images never leave your device.
 </p>
 
-<p>How it works:</p>
 <ol>
   <li>Drop one or more JPG, PNG, or WebP images onto the tool. You can drag multiple files at once.</li>
   <li>Drag rows in the list to reorder the images — the PDF pages follow this order.</li>
@@ -102,7 +101,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>Quality and file size</h2>
 
 <p>
-  JPG images embedded in a PDF retain their original quality — pdf-lib embeds the JPEG bytes directly without re-encoding, so no additional compression artefacts are introduced. PNG and WebP images are converted to PNG losslessly before embedding. The resulting PDF file size is approximately the sum of the original image file sizes plus a small overhead for PDF structure.
+  JPG images embedded in a PDF retain their original quality — pdf-lib embeds the JPEG bytes directly without re-encoding, so no additional compression artefacts are introduced. This is one of the things I specifically verified when building the tool, because generation loss from re-encoding was a real concern. PNG and WebP images are converted to PNG losslessly before embedding. The resulting PDF file size is approximately the sum of the original image file sizes plus a small overhead for PDF structure.
 </p>
 
 <p>

@@ -64,18 +64,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>Placement conventions</h2>
 
 <p>
-  The position of page numbers follows some loose conventions that vary by document type:
+  The position of page numbers follows some loose conventions. Bottom center is the most common for general documents, reports, and academic papers — visible at a glance regardless of where the page is in a stack. Books and double-sided printing use outside margin placement: bottom right for odd pages, bottom left for even. Legal filings and formal correspondence often use top right. Some government formats use top center.
 </p>
 
-<ul>
-  <li><strong>Bottom center:</strong> the most common position for general documents, reports, and academic papers. Visible at a glance regardless of where the page is in a stack.</li>
-  <li><strong>Bottom right (odd) / bottom left (even):</strong> the standard for books and double-sided printing, where right-hand pages are odd and left-hand pages are even. Often called "outside margin" placement.</li>
-  <li><strong>Top right:</strong> common in legal filings and formal correspondence in some jurisdictions.</li>
-  <li><strong>Top center:</strong> used in some academic and government document formats.</li>
-</ul>
-
 <p>
-  For most purposes — email attachments, shared reports, printed documents — bottom center is the safe default.
+  For most purposes — email attachments, shared reports, printed documents — bottom center is the safe default. When in doubt, use it. Nobody has ever complained that a page number is in the wrong place when it is at the bottom center.
 </p>
 
 <h2>Starting from a number other than 1</h2>
@@ -95,7 +88,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  keptlocal adds page numbers entirely in your browser — the file never leaves your device. Open the Network tab in DevTools while the tool runs and you will see no outbound requests. It is the right choice when the content is sensitive.
+  keptlocal adds page numbers entirely in your browser — the file never leaves your device. Open the Network tab in DevTools while the tool runs and you will see no outbound requests. For internal reports or anything with proprietary content, that matters. It is also just faster than waiting for an upload-and-download cycle.
 </p>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">

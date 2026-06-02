@@ -11,25 +11,17 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 >
 
 <p class="lead">
-  PDF to JPG conversion is one of the most-requested file operations online — and one of the most misused. Converting a text-based PDF to a series of JPEG images discards everything that makes a PDF valuable: the ability to search it, copy text from it, read it with a screen reader, and compress it efficiently. Before you convert, it is worth asking whether you should.
+  PDF to JPG conversion is one of the most-requested file operations online — and one of the most misused. Converting a text-based PDF to a series of JPEG images discards everything that makes a PDF valuable: the ability to search it, copy text from it, read it with a screen reader, and compress it efficiently. Before you convert, consider whether you actually need to.
 </p>
 
 <h2>What you give up when you convert PDF to JPG</h2>
 
 <p>
-  A PDF containing text stores that text as actual characters — a stream of Unicode code points associated with font data and position information. This means:
+  A PDF containing text stores that text as actual characters — a stream of Unicode code points associated with font data and position information. You can select and copy it, search it with Ctrl+F, and screen readers can parse it for accessibility. Vector text in a PDF is resolution-independent: zoomed to 400%, it is still sharp. A JPEG zoomed to 400% shows pixels and compression artefacts. And a page of text as PDF might be 50–200 KB, while the same page rendered at 150 DPI as JPEG might be 300–800 KB. The image format is larger and less functional than the original.
 </p>
 
-<ul>
-  <li><strong>Text is selectable and copyable.</strong> You can highlight a paragraph and paste it elsewhere.</li>
-  <li><strong>The document is searchable.</strong> Ctrl+F finds any word in the file, and search engines can index the text.</li>
-  <li><strong>Screen readers can read it.</strong> Accessibility tools parse the text stream to render audio output for visually impaired readers.</li>
-  <li><strong>The file is compact.</strong> A page of text as PDF might be 50–200 KB. The same page rendered at 150 DPI and saved as JPEG might be 300–800 KB. Images are larger than the text they represent.</li>
-  <li><strong>It scales without degradation.</strong> Vector text in a PDF is resolution-independent. Zoomed to 400%, it is still sharp. A JPEG zoomed to 400% shows pixels and compression artefacts.</li>
-</ul>
-
 <p>
-  When you convert a PDF to JPG, you get a photograph of the document. That photograph is less functional, larger, and lower quality than the PDF it came from — for most use cases.
+  When you convert a PDF to JPG, you get a photograph of the document. That photograph is less functional, larger, and lower quality than the PDF it came from — for most use cases. The question is whether your use case is one of the exceptions.
 </p>
 
 <h2>When PDF to JPG conversion is the right choice</h2>
@@ -51,7 +43,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 
 <h3>Sending a document you do not want the recipient to modify</h3>
 <p>
-  A JPEG cannot be edited with standard text editors or PDF tools. Converting a finalised document to images before sending is a crude form of content protection — the recipient can view it but cannot easily extract and reuse the text. This is particularly common for final invoices, certificates, and formal notices. Note that this is not security: the text is visible and can be transcribed or OCR'd. It is a deterrence, not a barrier.
+  A JPEG cannot be edited with standard text editors or PDF tools. Converting a finalised document to images before sending is a crude form of content protection — the recipient can view it but cannot easily extract and reuse the text. This is particularly common for final invoices, certificates, and formal notices. It is not security. The text is visible and can be transcribed or OCR'd. It is a deterrence, not a barrier.
 </p>
 
 <h3>Working with PDF viewers that render incorrectly</h3>
@@ -61,7 +53,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 
 <h3>The source PDF is already a scan</h3>
 <p>
-  A scanned PDF is already a sequence of images. The PDF wrapper adds structure but the underlying content is pixels, not selectable text (unless OCR has been applied). Converting a scanned PDF to JPG extracts those underlying images with no meaningful loss — you are just changing the container format. In this case, the trade-offs listed above do not apply.
+  A scanned PDF is already a sequence of images. The PDF wrapper adds structure but the underlying content is pixels, not selectable text (unless OCR has been applied). Converting a scanned PDF to JPG extracts those underlying images with no meaningful loss — you are just changing the container. In this case, the trade-offs listed above do not apply. This is actually the most legitimate use case for PDF-to-JPG conversion, and the least common reason people search for it.
 </p>
 
 <h2>How to convert PDF to JPG without uploading the file</h2>
@@ -90,11 +82,15 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   Before converting, consider whether one of these meets your need without discarding the PDF's capabilities:
 </p>
 
-<ul>
-  <li><strong>Share the PDF directly.</strong> Every modern operating system and most mobile devices have native PDF viewers. Email clients display PDFs as attachments. Slack, Teams, and most professional messaging tools show PDF previews. Unless there is a specific reason JPG is required, the PDF is usually the better share format.</li>
-  <li><strong>Use your PDF viewer's screenshot function.</strong> Most viewers let you select a region and copy it to the clipboard as an image. This gives you exactly the part of the page you need without converting the whole document.</li>
-  <li><strong>Export at source.</strong> If the PDF was generated from Word, PowerPoint, or a design tool, re-export from the source application as an image. The source application's image export pipeline typically produces better results than PDF-to-image conversion because it bypasses the PDF rendering step entirely.</li>
-</ul>
+<p>
+  Share the PDF directly. Every modern operating system has a native PDF viewer, and email clients, Slack, and Teams all display PDF previews. Unless there is a specific reason JPG is required, the PDF is usually the better format to share.
+</p>
+<p>
+  Use your PDF viewer's screenshot or selection tool. Most viewers let you copy a region of a page to the clipboard as an image — which gives you exactly what you need without converting the whole document.
+</p>
+<p>
+  Export at source. If the PDF came from Word, PowerPoint, or a design tool, re-export from the source application as an image. The source pipeline produces better results than PDF-to-image conversion because it skips the PDF rendering step entirely.
+</p>
 
 <h2>Quality expectations and browser limitations</h2>
 

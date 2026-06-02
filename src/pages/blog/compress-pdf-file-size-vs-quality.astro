@@ -17,16 +17,16 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>Why are PDFs so large?</h2>
 
 <p>
-  A PDF is a container format. It can hold text (as actual characters), vector graphics (as drawing instructions), raster images (as pixel data), fonts, metadata, and more. The dominant contributor to file size varies by document type:
+  A PDF is a container format. It can hold text (as actual characters), vector graphics (as drawing instructions), raster images (as pixel data), fonts, metadata, and more. The dominant contributor to file size varies by document type.
 </p>
 
-<ul>
-  <li><strong>Image-heavy documents:</strong> embedded images — photographs, screenshots, scanned pages — are almost always the largest component. A slide deck with high-resolution stock photos is large because those photos are large.</li>
-  <li><strong>Scanned PDFs:</strong> a scanned page is a photograph of paper. A colour scan of one A4 page at 300 DPI produces an image of 2480 × 3508 pixels — roughly 25 megapixels. Stored as JPEG at reasonable quality, that is 500 KB–2 MB per page. A 100-page scanned document is easily 100–200 MB before any compression.</li>
-  <li><strong>Embedded fonts:</strong> PDFs embed font data so the document renders identically on every device. A document using three different font families, each with multiple weights, may carry 1–3 MB of font data before a single word of content is counted. Subsetting — embedding only the characters actually used — is a common optimisation that reduces this significantly.</li>
-  <li><strong>Uncompressed image data:</strong> some tools export PDFs with images stored as raw uncompressed bitmaps rather than JPEG or PNG. The same photograph at the same resolution is 10–20× larger uncompressed than JPEG-compressed.</li>
-  <li><strong>Duplicate resources:</strong> PDFs assembled by merging other PDFs sometimes contain duplicated fonts, colour profiles, or images — the same resource embedded multiple times because each source document carried its own copy.</li>
-</ul>
+<p>
+  Embedded images are almost always the largest component. A slide deck with high-resolution stock photos is large because those photos are large. Scanned PDFs are a specific case worth understanding: a scanned page is a photograph of paper. A colour scan of one A4 page at 300 DPI produces an image of 2480 × 3508 pixels — roughly 25 megapixels. Stored as JPEG at reasonable quality, that is 500 KB–2 MB per page. A 100-page scanned document is easily 100–200 MB before any compression.
+</p>
+
+<p>
+  Fonts are the less obvious culprit — and the one that surprised me most when I first started pulling PDFs apart. PDFs embed font data so the document renders identically on every device. A document using three different font families, each with multiple weights, may carry 1–3 MB of font data before a single word of content is counted. Subsetting — embedding only the characters actually used — is a common optimisation that reduces this significantly. Some tools export PDFs with images stored as raw uncompressed bitmaps rather than JPEG or PNG; the same photograph at the same resolution is 10–20× larger uncompressed. And PDFs assembled by merging other PDFs sometimes contain duplicated fonts, colour profiles, or images — the same resource embedded multiple times because each source document carried its own copy.
+</p>
 
 <h2>What compression actually does</h2>
 
@@ -82,13 +82,12 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   The right target depends on how the document will be used:
 </p>
 
-<ul>
-  <li><strong>Email attachment:</strong> most email providers enforce limits of 10–25 MB. A practical target for an attachment is under 5 MB to ensure delivery across varied mail servers. For a document with photos, 150 DPI at 75% JPEG quality typically achieves this without perceptible quality loss at normal reading size.</li>
-  <li><strong>Web upload / CMS:</strong> depends on the platform. WordPress default is 2 MB. Government portals often impose 5 MB or 10 MB limits. A 150 DPI, 75% quality setting usually clears both.</li>
-  <li><strong>Print-ready output:</strong> do not compress a document you intend to send to a commercial printer. Print requires 300 DPI minimum; many specifications require 300–600 DPI for images. Compressing below 300 DPI produces visible pixelation when printed.</li>
-  <li><strong>Screen-only display:</strong> 96–150 DPI is indistinguishable from 300 DPI on screen. Aggressive downsampling to 96 DPI is appropriate for documents that will only ever be read digitally.</li>
-  <li><strong>Archival storage:</strong> do not compress archival documents. Store originals at full quality and make compressed copies for distribution if needed.</li>
-</ul>
+<p>
+  For email attachments, most providers enforce limits of 10–25 MB. A practical target is under 5 MB to ensure delivery across varied mail servers. For documents with photos, 150 DPI at 75% JPEG quality gets you there without perceptible quality loss at normal reading size. Web uploads depend on the platform — WordPress defaults to 2 MB, government portals often set 5–10 MB limits. The same 150 DPI / 75% setting clears most of them.
+</p>
+<p>
+  Do not compress a document you intend to send to a commercial printer. Print requires 300 DPI at minimum, often 300–600 DPI for images. Compressing below 300 DPI produces visible pixelation when printed. For screen-only documents, by contrast, 96–150 DPI is indistinguishable from 300 DPI on screen — aggressive downsampling is appropriate and produces the smallest files. And for archival storage: do not compress originals. Store full quality, distribute compressed copies.
+</p>
 
 <h2>What you lose when you compress</h2>
 
@@ -100,20 +99,18 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   Lossy compression (image re-encoding, downsampling) loses data permanently. The discarded data cannot be recovered from the compressed file. Specific things that degrade:
 </p>
 
-<ul>
-  <li><strong>Fine text on image-based pages:</strong> scanned documents with small text at the margins may become unreadable after aggressive compression. 75% JPEG quality on a dense text scan can introduce blocking artefacts.</li>
-  <li><strong>Photographs with subtle gradients:</strong> skin tones, skies, and gradients show JPEG banding at lower quality settings. On screen this may be acceptable; in a printed portfolio or report it is not.</li>
-  <li><strong>Line art and diagrams:</strong> JPEG is terrible at compressing sharp-edged content like text, diagrams, and graphs. The compression algorithm blurs edges. For documents with this content, PNG or lossless PDF compression preserves quality better.</li>
-</ul>
+<p>
+  Fine text on image-based pages is the most common problem: scanned documents with small text at the margins can become unreadable after aggressive compression. 75% JPEG quality on a dense text scan introduces visible blocking artefacts. Photographs with subtle gradients — skin tones, skies — show JPEG banding at lower quality settings. On screen you can live with it; in a printed portfolio or report you cannot. Line art and diagrams are the worst case: JPEG compresses sharp-edged content poorly, blurring the edges that carry the meaning. For documents with technical diagrams, PNG or lossless PDF compression is the right choice.
+</p>
 
-<h2>A practical workflow</h2>
+<h2>The workflow that works</h2>
 
 <ol>
   <li><strong>Identify what is making the file large.</strong> Open the PDF properties (File → Properties in Adobe Reader, or inspect via our <a href="/tools/pdf-page-count">PDF Info Viewer</a>). If the file is under 5 MB, it may not need compression at all — check the target limit first.</li>
   <li><strong>Try lossless options first.</strong> Remove unnecessary metadata and apply stream compression before touching image quality. Many tools can reduce file size 20–40% losslessly.</li>
   <li><strong>Set the minimum quality that meets your use case.</strong> If the document will be read on screen only, 150 DPI and 75% JPEG quality is the sweet spot. Aggressive settings below 100 DPI or below 60% quality introduce visible degradation.</li>
   <li><strong>Test the result before distributing.</strong> Open the compressed file, zoom to 100%, and look at a text-heavy region and an image-heavy region. If both look acceptable, the compression is fine. If either shows artefacts, reduce the compression level.</li>
-  <li><strong>Keep the original.</strong> Never overwrite the source file with the compressed version. Compression is irreversible — you cannot recover quality once discarded.</li>
+  <li><strong>Keep the original.</strong> Never overwrite the source file with the compressed version. Compression is irreversible — you cannot recover quality once discarded. This is the step people skip and regret.</li>
 </ol>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">

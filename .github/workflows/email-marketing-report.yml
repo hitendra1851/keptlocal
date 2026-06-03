@@ -73,23 +73,22 @@ jobs:
           gmail_from = os.environ['GMAIL_FROM']
           recipient  = 'hitendra.patel2986@gmail.com'
 
-          html_body = f"""<!DOCTYPE html>
-<html><body style="margin:0;padding:0;background:#f9f7f4;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-<div style="max-width:680px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">
-  <div style="background:#1a3d2b;padding:24px 32px">
-    <p style="color:#a8c5b2;margin:0;font-size:13px;letter-spacing:0.5px">KEPTLOCAL.COM</p>
-    <h1 style="color:#fff;margin:4px 0 0;font-size:22px;font-weight:600">Marketing Report</h1>
-    <p style="color:#a8c5b2;margin:4px 0 0;font-size:14px">{date}</p>
-  </div>
-  <div style="padding:24px 32px 32px">{md_to_html(content)}</div>
-  <div style="background:#f9f7f4;padding:16px 32px;border-top:1px solid #eee">
-    <p style="color:#999;font-size:12px;margin:0">
-      Sent automatically by your keptlocal marketing agent &middot;
-      <a href="https://github.com/hitendra1851/keptlocal/tree/main/marketing/reports" style="color:#1a3d2b">View all reports</a>
-    </p>
-  </div>
-</div>
-</body></html>"""
+          html_body = (
+              '<!DOCTYPE html>'
+              '<html><body style="margin:0;padding:0;background:#f9f7f4;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif">'
+              '<div style="max-width:680px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)">'
+              '<div style="background:#1a3d2b;padding:24px 32px">'
+              '<p style="color:#a8c5b2;margin:0;font-size:13px;letter-spacing:0.5px">KEPTLOCAL.COM</p>'
+              '<h1 style="color:#fff;margin:4px 0 0;font-size:22px;font-weight:600">Marketing Report</h1>'
+              f'<p style="color:#a8c5b2;margin:4px 0 0;font-size:14px">{date}</p>'
+              '</div>'
+              f'<div style="padding:24px 32px 32px">{md_to_html(content)}</div>'
+              '<div style="background:#f9f7f4;padding:16px 32px;border-top:1px solid #eee">'
+              '<p style="color:#999;font-size:12px;margin:0">'
+              'Sent automatically by your keptlocal marketing agent &middot; '
+              '<a href="https://github.com/hitendra1851/keptlocal/tree/main/marketing/reports" style="color:#1a3d2b">View all reports</a>'
+              '</p></div></div></body></html>'
+          )
 
           msg = MIMEMultipart('alternative')
           msg['Subject'] = f'keptlocal Marketing Report — {date}'

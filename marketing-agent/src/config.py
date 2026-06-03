@@ -109,10 +109,10 @@ COMPETITORS = [
 ]
 
 KNOWN_DIRECTORIES = [
-    {"name": "Tinytools.directory", "url": "https://tinytools.directory", "submit_url": "https://tinytools.directory/submit"},
+    {"name": "Tinytools.directory", "url": "https://tinytools.directory", "submit_url": "https://tinytools.directory/submit-tool"},
     {"name": "Uneed", "url": "https://www.uneed.be", "submit_url": "https://www.uneed.be/submit-a-tool"},
     {"name": "Fazier", "url": "https://fazier.com", "submit_url": "https://fazier.com/launches/new"},
-    {"name": "SaaSHub", "url": "https://www.saashub.com", "submit_url": "https://www.saashub.com/add-product"},
+    {"name": "SaaSHub", "url": "https://www.saashub.com", "submit_url": "https://www.saashub.com/new-product"},
     {"name": "AlternativeTo", "url": "https://alternativeto.net", "submit_url": "https://alternativeto.net/user-apps/"},
     {"name": "BetaList", "url": "https://betalist.com", "submit_url": "https://betalist.com/submit"},
     {"name": "Prototypr", "url": "https://prototypr.io", "submit_url": "https://prototypr.io/toolbox/"},

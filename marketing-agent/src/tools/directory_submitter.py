@@ -81,6 +81,7 @@ async def find_and_submit_directories(
                 "Chrome/124.0.0.0 Safari/537.36"
             ),
             viewport={"width": 1280, "height": 900},
+            ignore_https_errors=True,
         )
         page = await context.new_page()
 
@@ -119,6 +120,9 @@ async def find_and_submit_directories(
 async def _submit_tinytools(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
+    if not await _has_form(page):
+        await _screenshot(page, "tinytools-page")
+        return f"Login required or page changed — submit manually: {directory['submit_url']}"
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
@@ -127,12 +131,15 @@ async def _submit_tinytools(page: Page, directory: dict) -> str:
     await _screenshot(page, "tinytools-filled")
     submitted = await _submit(page)
     await _screenshot(page, "tinytools-submitted")
-    return "Submitted" if submitted else "Submit button not found — check screenshot"
+    return "Submitted" if submitted else f"Submit button not found — submit manually: {directory['submit_url']}"
 
 
 async def _submit_uneed(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
+    if not await _has_form(page):
+        await _screenshot(page, "uneed-page")
+        return f"Login required or page changed — submit manually: {directory['submit_url']}"
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
@@ -141,12 +148,15 @@ async def _submit_uneed(page: Page, directory: dict) -> str:
     await _screenshot(page, "uneed-filled")
     submitted = await _submit(page)
     await _screenshot(page, "uneed-submitted")
-    return "Submitted" if submitted else "Submit button not found — check screenshot"
+    return "Submitted" if submitted else f"Submit button not found — submit manually: {directory['submit_url']}"
 
 
 async def _submit_fazier(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
+    if not await _has_form(page):
+        await _screenshot(page, "fazier-page")
+        return f"Login required — submit manually: {directory['submit_url']}"
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
@@ -155,12 +165,15 @@ async def _submit_fazier(page: Page, directory: dict) -> str:
     await _screenshot(page, "fazier-filled")
     submitted = await _submit(page)
     await _screenshot(page, "fazier-submitted")
-    return "Submitted" if submitted else "Submit button not found — check screenshot"
+    return "Submitted" if submitted else f"Submit button not found — submit manually: {directory['submit_url']}"
 
 
 async def _submit_saashub(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
+    if not await _has_form(page):
+        await _screenshot(page, "saashub-page")
+        return f"Login required or page changed — submit manually: {directory['submit_url']}"
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "description", SITE_DESCRIPTION)
@@ -168,12 +181,15 @@ async def _submit_saashub(page: Page, directory: dict) -> str:
     await _screenshot(page, "saashub-filled")
     submitted = await _submit(page)
     await _screenshot(page, "saashub-submitted")
-    return "Submitted" if submitted else "Submit button not found — check screenshot"
+    return "Submitted" if submitted else f"Submit button not found — submit manually: {directory['submit_url']}"
 
 
 async def _submit_prototypr(page: Page, directory: dict) -> str:
     await _goto(page, directory["submit_url"])
     await _dismiss_cookie_banner(page)
+    if not await _has_form(page):
+        await _screenshot(page, "prototypr-page")
+        return f"Login required — submit manually: {directory['submit_url']}"
     await _fill(page, "url", SITE_URL)
     await _fill(page, "name", SITE_NAME)
     await _fill(page, "tagline", SITE_TAGLINE)
@@ -182,7 +198,7 @@ async def _submit_prototypr(page: Page, directory: dict) -> str:
     await _screenshot(page, "prototypr-filled")
     submitted = await _submit(page)
     await _screenshot(page, "prototypr-submitted")
-    return "Submitted" if submitted else "Submit button not found — check screenshot"
+    return "Submitted" if submitted else f"Submit button not found — submit manually: {directory['submit_url']}"
 
 
 _HANDLERS: dict[str, Any] = {
@@ -244,6 +260,18 @@ def _save_submitted(github_token: str, github_repo: str, submitted: dict[str, st
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
+
+async def _has_form(page: Page) -> bool:
+    """Return True if the page has at least one visible text/url/email input or textarea."""
+    for selector in ['input[type="url"]', 'input[type="text"]', 'input[type="email"]', 'textarea']:
+        try:
+            el = await page.query_selector(selector)
+            if el and await el.is_visible():
+                return True
+        except Exception:
+            continue
+    return False
+
 
 async def _goto(page: Page, url: str) -> None:
     await page.goto(url, wait_until="domcontentloaded", timeout=25000)

@@ -56,6 +56,27 @@ const tool = tools.find((t) => t.slug === "compress-image")!;
       The compression runs on the browser's main thread (not a Web Worker) to ensure compatibility across browsers when loading the library from a CDN. For typical images up to 20 MB, this takes under two seconds. Larger images or batches of many files will take proportionally longer — the status indicator updates as each file completes.
     </p>
 
+    <h2>Compress image to a specific file size (100KB, 200KB, 500KB)</h2>
+    <p>
+      Many forms, portals, and submission systems enforce a strict file size limit — a visa application that
+      accepts photos under 100KB, a job portal capped at 200KB, an insurance form with a 500KB limit. The
+      compression level presets are useful for general reduction, but when you need to hit an exact ceiling
+      the <strong>Target size</strong> field is the faster path.
+    </p>
+    <p>
+      Enter a value in kilobytes and the tool will automatically reduce quality until the output falls under
+      that threshold. To compress an image to 100KB, type <code>100</code>. For 200KB, type <code>200</code>.
+      The target size overrides the compression level preset — the tool will use as much or as little
+      compression as needed to get the file under the limit.
+    </p>
+    <p>
+      One practical note: very aggressive size targets on large images (e.g., compressing a 5 MB photograph
+      to 50KB) will produce visible quality loss. The tool will always get below the target, but at extreme
+      reductions the image will look heavily compressed. For size limits under 100KB, consider also reducing
+      the image dimensions first using the Resize Image tool — smaller dimensions need less compression to
+      hit a given file size.
+    </p>
+
     <h2>Compress image for email — free, no upload, no account</h2>
     <p>
       Email has a practical attachment size limit — most services cap messages at 10–25 MB total, and large

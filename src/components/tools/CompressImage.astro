@@ -42,6 +42,22 @@
       </div>
     </div>
 
+    <!-- Target size (optional) -->
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Target size <span class="normal-case font-normal">(optional)</span></p>
+      <div class="flex items-center gap-2">
+        <input
+          type="number"
+          id="target-size-input"
+          min="1"
+          max="50000"
+          placeholder="e.g. 100"
+          class="w-32 px-3 py-2 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)]"
+        />
+        <span class="text-sm text-[var(--color-ink-muted)]">KB — overrides compression level if set</span>
+      </div>
+    </div>
+
     <!-- File list -->
     <div>
       <div class="flex items-center justify-between mb-2">
@@ -82,18 +98,19 @@
   const ACCEPTED = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
   const $ = (id) => document.getElementById(id);
-  const dropZone      = $('drop-zone');
-  const fileInput     = $('file-input');
-  const browseBtn     = $('browse-btn');
-  const emptyState    = $('empty-state');
-  const controls      = $('controls');
-  const fileListEl    = $('file-list');
-  const addMoreBtn    = $('add-more-btn');
-  const compressBtn   = $('compress-btn');
-  const compressLabel = $('compress-label');
-  const spinner       = $('spinner');
-  const statusMsg     = $('status-msg');
+  const dropZone       = $('drop-zone');
+  const fileInput      = $('file-input');
+  const browseBtn      = $('browse-btn');
+  const emptyState     = $('empty-state');
+  const controls       = $('controls');
+  const fileListEl     = $('file-list');
+  const addMoreBtn     = $('add-more-btn');
+  const compressBtn    = $('compress-btn');
+  const compressLabel  = $('compress-label');
+  const spinner        = $('spinner');
+  const statusMsg      = $('status-msg');
   const downloadZipBtn = $('download-zip-btn');
+  const targetSizeInput = $('target-size-input');
 
   let files = [];       // { id, file, status, result: null | { blob, size } }
   let preset = 'balanced';
@@ -231,7 +248,13 @@
     compressLabel.textContent = 'Compressing…';
     setStatus('Compressing in your browser…');
 
+    const targetKb = parseFloat(targetSizeInput.value);
     const options = { ...PRESETS[preset] };
+    if (targetKb > 0) {
+      options.maxSizeMB = targetKb / 1024;
+      // Allow quality to drop as low as needed to hit the target
+      options.initialQuality = 0.85;
+    }
 
     for (const item of pending) {
       item.status = 'compressing';

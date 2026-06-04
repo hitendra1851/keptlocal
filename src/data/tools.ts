@@ -472,25 +472,25 @@ export const tools: Tool[] = [
   },
   {
     slug: "delete-pages-pdf",
-    name: "Delete PDF Pages",
-    shortName: "Delete Pages",
+    name: "Remove Pages from PDF",
+    shortName: "Remove Pages",
     description: "Remove specific pages from a PDF — entirely in your browser.",
-    longDescription: "Remove pages from a PDF without uploading — no signup, no account, no watermark. Enter the page numbers to delete and download the cleaned-up file instantly.",
+    longDescription: "Remove pages from a PDF without uploading — no signup, no account, no watermark. Enter the page numbers to remove and download the cleaned-up file instantly.",
     category: "PDF",
     icon: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16",
     status: "live",
-    keywords: ["delete pages from pdf", "remove pages from pdf", "remove pdf pages online free", "delete pdf pages without uploading", "pdf page remover browser"],
+    keywords: ["remove pages from pdf", "delete pages from pdf", "remove pdf pages online free", "remove pages from pdf without uploading", "pdf page remover browser"],
     faq: [
       {
         q: "Are my files uploaded to a server?",
-        a: "No. Page deletion runs entirely in your browser using pdf-lib. Your PDF never leaves your device — open DevTools → Network while processing to confirm no upload requests.",
+        a: "No. Page removal runs entirely in your browser using pdf-lib. Your PDF never leaves your device — open DevTools → Network while processing to confirm no upload requests.",
       },
       {
-        q: "How do I specify which pages to delete?",
-        a: "Enter a comma-separated list of page numbers and ranges — for example '1, 3, 5-8' deletes pages 1, 3, 5, 6, 7, and 8. Pages are numbered from 1.",
+        q: "How do I specify which pages to remove?",
+        a: "Enter a comma-separated list of page numbers and ranges — for example '1, 3, 5-8' removes pages 1, 3, 5, 6, 7, and 8. Pages are numbered from 1.",
       },
       {
-        q: "Can I delete all pages?",
+        q: "Can I remove all pages?",
         a: "The tool requires at least one page to remain in the output. If you enter all page numbers, processing will stop with an error.",
       },
       {

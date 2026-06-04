@@ -7,323 +7,473 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   description="Marketing agent run history"
   noindex={true}
 >
-  <div class="min-h-screen" style="background:var(--color-paper);color:var(--color-ink)">
 
-    <!-- Header -->
-    <div style="border-bottom:1px solid var(--color-rule);padding:1.25rem 2rem;display:flex;align-items:center;gap:1rem;">
-      <a href="/" style="color:var(--color-ink-muted);font-size:0.85rem;font-family:var(--font-sans);text-decoration:none;">← keptlocal.com</a>
-      <span style="color:var(--color-rule)">|</span>
-      <span style="font-family:var(--font-serif);font-size:1.1rem;font-weight:600;">Agent Dashboard</span>
-      <span id="run-badge" style="margin-left:auto;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:999px;background:var(--color-accent-tint);color:var(--color-accent);font-family:var(--font-sans);display:none;"></span>
-    </div>
+<div id="app" style="min-height:100vh;background:#0f1117;color:#e8e4db;font-family:var(--font-sans);">
 
-    <div style="max-width:1100px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:220px 1fr;gap:2rem;align-items:start;">
+  <!-- Top bar -->
+  <div style="background:#0f1117;border-bottom:1px solid #1e2130;padding:0 1.5rem;height:52px;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:50;">
+    <a href="/" style="color:#6b7280;font-size:0.8rem;text-decoration:none;display:flex;align-items:center;gap:0.35rem;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      keptlocal.com
+    </a>
+    <span style="color:#2d3148;font-size:1rem;">|</span>
+    <span style="font-size:0.9rem;font-weight:600;color:#e8e4db;">Agent Dashboard</span>
 
-      <!-- Sidebar: date list -->
-      <div id="date-list" style="position:sticky;top:2rem;">
-        <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ink-muted);margin-bottom:0.75rem;font-family:var(--font-sans);">Reports</div>
-        <div id="dates-container" style="display:flex;flex-direction:column;gap:0.25rem;">
-          <div style="color:var(--color-ink-muted);font-size:0.85rem;">Loading...</div>
-        </div>
-      </div>
-
-      <!-- Main content -->
-      <div id="report-area">
-        <div id="loading" style="color:var(--color-ink-muted);font-family:var(--font-sans);padding:3rem 0;">Loading latest report...</div>
-        <div id="report-content" style="display:none;"></div>
-        <div id="error-msg" style="display:none;color:var(--color-warn);font-family:var(--font-sans);"></div>
-      </div>
-
+    <!-- Date picker -->
+    <div style="margin-left:auto;display:flex;align-items:center;gap:0.5rem;">
+      <span style="color:#6b7280;font-size:0.78rem;">Report:</span>
+      <select id="date-select" style="background:#1a1d2e;border:1px solid #2d3148;color:#e8e4db;border-radius:6px;padding:0.3rem 0.6rem;font-size:0.82rem;cursor:pointer;outline:none;">
+        <option>Loading…</option>
+      </select>
     </div>
   </div>
-</BaseLayout>
+
+  <!-- Loading state -->
+  <div id="loading-state" style="display:flex;align-items:center;justify-content:center;height:60vh;color:#6b7280;font-size:0.9rem;gap:0.5rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    Loading report…
+  </div>
+
+  <!-- Main content (hidden until loaded) -->
+  <div id="main-content" style="display:none;max-width:1200px;margin:0 auto;padding:1.5rem;">
+
+    <!-- Run meta row -->
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+      <h1 id="report-date" style="font-family:var(--font-serif);font-size:1.5rem;font-weight:700;margin:0;color:#f0ebe0;"></h1>
+      <span id="run-status" style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.78rem;padding:0.25rem 0.65rem;border-radius:999px;font-weight:600;"></span>
+    </div>
+
+    <!-- Metric cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
+      <div class="metric-card" id="metric-dirs">
+        <div class="metric-label">Directories</div>
+        <div class="metric-value" id="dirs-val">—</div>
+        <div class="metric-sub" id="dirs-sub"></div>
+      </div>
+      <div class="metric-card" id="metric-kw">
+        <div class="metric-label">Keywords Ranking</div>
+        <div class="metric-value" id="kw-val">—</div>
+        <div class="metric-sub" id="kw-sub"></div>
+      </div>
+      <div class="metric-card" id="metric-backlinks">
+        <div class="metric-label">Backlinks Live</div>
+        <div class="metric-value" id="bl-val">—</div>
+        <div class="metric-sub" id="bl-sub"></div>
+      </div>
+      <div class="metric-card" id="metric-actions">
+        <div class="metric-label">Actions Needed</div>
+        <div class="metric-value" id="act-val">—</div>
+        <div class="metric-sub" id="act-sub" style="color:#f59e0b;"></div>
+      </div>
+    </div>
+
+    <!-- Action Required block (shown only if items exist) -->
+    <div id="action-block" style="display:none;margin-bottom:1.5rem;background:#1a1208;border:1px solid #7c4a00;border-radius:10px;overflow:hidden;">
+      <div style="padding:0.75rem 1.2rem;background:#291a08;border-bottom:1px solid #7c4a00;display:flex;align-items:center;gap:0.6rem;">
+        <svg width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2.5" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span style="font-size:0.75rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#f59e0b;">Action Required</span>
+        <span id="action-count-badge" style="margin-left:auto;background:#7c4a00;color:#fcd34d;font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:999px;font-weight:700;"></span>
+      </div>
+      <div id="action-items" style="padding:1rem 1.2rem;display:flex;flex-direction:column;gap:0.5rem;"></div>
+    </div>
+
+    <!-- Two columns: directory tracker + competitor activity -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+
+      <!-- Directory Tracker -->
+      <div class="panel">
+        <div class="panel-header">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Directory Tracker
+          <span id="dir-count-badge" style="margin-left:auto;font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:999px;font-weight:700;"></span>
+        </div>
+        <div id="dir-list" style="padding:0;"></div>
+      </div>
+
+      <!-- Competitor Activity -->
+      <div class="panel">
+        <div class="panel-header">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Competitor Activity
+        </div>
+        <div id="competitor-list" style="padding:0.75rem 1rem;"></div>
+      </div>
+
+    </div>
+
+    <!-- Backlink Status -->
+    <div class="panel" style="margin-bottom:1rem;">
+      <div class="panel-header">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Backlink Status
+      </div>
+      <div id="backlink-table" style="padding:0;"></div>
+    </div>
+
+    <!-- Keyword Rankings (collapsible) -->
+    <div class="panel" style="margin-bottom:1rem;">
+      <button id="kw-toggle" class="panel-header" style="width:100%;text-align:left;background:none;border:none;cursor:pointer;color:inherit;" onclick="toggleKeywords()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Keyword Rankings
+        <span id="kw-badge" style="margin-left:0.5rem;font-size:0.72rem;padding:0.15rem 0.5rem;border-radius:999px;background:#1e2130;color:#6b7280;font-weight:700;"></span>
+        <svg id="kw-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="kw-table" style="display:none;"></div>
+    </div>
+
+  </div>
+</div>
 
 <style>
-  .date-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 0.4rem 0.65rem;
-    border-radius: 6px;
-    border: none;
-    background: transparent;
-    color: var(--color-ink-soft);
-    font-family: var(--font-sans);
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: background 0.15s;
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .metric-card {
+    background: #151820;
+    border: 1px solid #1e2130;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
   }
-  .date-btn:hover { background: var(--color-paper-dark); }
-  .date-btn.active {
-    background: var(--color-accent-tint);
-    color: var(--color-accent);
+  .metric-label {
+    font-size: 0.72rem;
     font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #4b5563;
+    margin-bottom: 0.4rem;
+  }
+  .metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #f0ebe0;
+    font-family: var(--font-serif);
+    margin-bottom: 0.3rem;
+  }
+  .metric-sub {
+    font-size: 0.78rem;
+    color: #4b5563;
   }
 
-  /* Report sections */
-  .report-section {
-    margin-bottom: 2rem;
-    border: 1px solid var(--color-rule);
+  .panel {
+    background: #151820;
+    border: 1px solid #1e2130;
     border-radius: 10px;
     overflow: hidden;
   }
-  .section-header {
-    padding: 0.75rem 1.1rem;
-    background: var(--color-paper-dark);
-    border-bottom: 1px solid var(--color-rule);
-    font-family: var(--font-sans);
-    font-size: 0.75rem;
+  .panel-header {
+    padding: 0.7rem 1rem;
+    background: #0f1117;
+    border-bottom: 1px solid #1e2130;
+    font-size: 0.73rem;
     font-weight: 700;
     letter-spacing: 0.07em;
     text-transform: uppercase;
-    color: var(--color-ink-muted);
+    color: #6b7280;
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
-  .section-body {
-    padding: 1rem 1.1rem;
-    font-family: var(--font-sans);
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--color-ink-soft);
+
+  .dir-row {
+    display: flex;
+    align-items: center;
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid #1a1d2e;
+    gap: 0.75rem;
+    font-size: 0.85rem;
   }
+  .dir-row:last-child { border-bottom: none; }
 
-  /* Status pills */
-  .pill-ok  { display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:#e6ede0;color:#2d5016;font-size:0.75rem;font-weight:600; }
-  .pill-err { display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:#fce8e0;color:#9c4221;font-size:0.75rem;font-weight:600; }
-  .pill-skip{ display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:var(--color-paper-dark);color:var(--color-ink-muted);font-size:0.75rem;font-weight:600; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .pill-green  { background:#052e16;color:#4ade80; }
+  .pill-red    { background:#2d0a0a;color:#f87171; }
+  .pill-yellow { background:#2d1f00;color:#fbbf24; }
+  .pill-gray   { background:#1e2130;color:#6b7280; }
 
-  /* Table */
-  .report-table { width:100%;border-collapse:collapse;font-size:0.85rem; }
-  .report-table th { text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-rule);font-weight:600;color:var(--color-ink-muted);font-size:0.78rem; }
-  .report-table td { padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-rule); }
-  .report-table tr:last-child td { border-bottom:none; }
+  .kw-row { display:grid;grid-template-columns:1fr 80px 80px;padding:0.35rem 1rem;border-bottom:1px solid #1a1d2e;font-size:0.82rem;gap:0.5rem;align-items:center; }
+  .kw-row:last-child { border-bottom:none; }
+  .kw-header { background:#0f1117;color:#4b5563;font-weight:700;font-size:0.72rem;letter-spacing:0.05em;text-transform:uppercase; }
 
-  .pos-ranked { font-weight:700;color:var(--color-accent); }
-  .pos-none   { color:var(--color-ink-muted); }
-  .delta-up   { color:var(--color-accent);font-weight:600; }
-  .delta-down { color:var(--color-warn);font-weight:600; }
+  .comp-item { padding:0.5rem 0;border-bottom:1px solid #1a1d2e; }
+  .comp-item:last-child { border-bottom:none; }
+  .comp-name { font-size:0.73rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem; }
+  .comp-link { font-size:0.83rem;color:#818cf8;text-decoration:none;display:block;padding:0.15rem 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+  .comp-link:hover { color:#a5b4fc; }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 7px;
+    background: #1a1208;
+    border: 1px solid #3d2500;
+    font-size: 0.84rem;
+    color: #d6c9a8;
+  }
+  .action-item a { color:#fbbf24;text-decoration:underline;word-break:break-word; }
+  .action-tag {
+    font-size:0.68rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:1px;
+  }
+  .tag-dir     { background:#1e3a5f;color:#60a5fa; }
+  .tag-content { background:#1a2e1a;color:#86efac; }
 </style>
 
 <script>
-const REPO = "hitendra1851/keptlocal";
-const BASE  = `https://api.github.com/repos/${REPO}/contents/marketing/reports`;
-const RAW   = `https://raw.githubusercontent.com/${REPO}/main/marketing/reports`;
+const REPO   = "hitendra1851/keptlocal";
+const RAW    = `https://raw.githubusercontent.com/${REPO}/main`;
+const API    = `https://api.github.com/repos/${REPO}/contents/marketing/reports`;
 
-let currentDate = "";
+const DIRS = [
+  { name:"Tinytools.directory", url:"https://tinytools.directory/submit-tool" },
+  { name:"Uneed",               url:"https://www.uneed.be/submit-a-tool" },
+  { name:"Fazier",              url:"https://fazier.com/launches/new" },
+  { name:"SaaSHub",             url:"https://www.saashub.com/new-product" },
+  { name:"AlternativeTo",       url:"https://alternativeto.net/user-apps/" },
+  { name:"BetaList",            url:"https://betalist.com/submit" },
+  { name:"Prototypr",           url:"https://prototypr.io/toolbox/" },
+];
 
-async function listReports() {
-  const r = await fetch(BASE);
-  if (!r.ok) throw new Error("Could not fetch report list");
-  const files = await r.json();
-  return files
-    .filter((f) => f.name.endsWith(".md"))
-    .map((f) => f.name.replace(".md", ""))
-    .sort()
-    .reverse();
+let kwVisible = false;
+
+function toggleKeywords() {
+  kwVisible = !kwVisible;
+  document.getElementById("kw-table").style.display = kwVisible ? "block" : "none";
+  document.getElementById("kw-chevron").style.transform = kwVisible ? "rotate(180deg)" : "";
 }
 
-async function fetchReport(date) {
-  const r = await fetch(`${RAW}/${date}.md`);
-  if (!r.ok) throw new Error(`Report not found for ${date}`);
-  return r.text();
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-function parseMarkdownReport(md, date) {
+function parseSections(md) {
   const sections = {};
-  let current = null;
+  let cur = null;
   for (const line of md.split("\n")) {
-    if (line.startsWith("## ")) {
-      current = line.replace("## ", "").trim();
-      sections[current] = [];
-    } else if (current) {
-      sections[current].push(line);
-    }
+    if (line.startsWith("## ")) { cur = line.slice(3).trim(); sections[cur] = []; }
+    else if (cur) sections[cur].push(line);
   }
   return sections;
 }
 
-function renderRankings(lines) {
-  const rows = lines.filter(l => l.startsWith("|") && !l.includes("------") && !l.includes("Keyword"));
-  if (!rows.length) return '<p style="color:var(--color-ink-muted)">No data yet.</p>';
+function render(md, date) {
+  const S = parseSections(md);
 
-  let html = '<table class="report-table"><thead><tr><th>Keyword</th><th>Position</th><th>Change</th></tr></thead><tbody>';
-  for (const row of rows) {
-    const cols = row.split("|").map(c => c.trim()).filter(Boolean);
-    if (cols.length < 2) continue;
-    const [kw, pos, delta] = cols;
-    const posClass = (pos && pos !== "—") ? "pos-ranked" : "pos-none";
-    const deltaClass = delta?.includes("▲") ? "delta-up" : delta?.includes("▼") ? "delta-down" : "";
-    html += `<tr>
-      <td>${kw}</td>
-      <td class="${posClass}">${pos || "—"}</td>
-      <td class="${deltaClass}">${delta || "—"}</td>
-    </tr>`;
+  // ── Date + status ──
+  document.getElementById("report-date").textContent = date;
+
+  // ── Directory Tracker ──
+  const dirLines  = S["Directory Submissions"] ?? [];
+  const blLines   = S["Backlink Status"] ?? [];
+  const dirStatus = {};
+
+  for (const line of dirLines) {
+    const m = line.match(/\*\*(.+?)\*\*\s*[—–-]+\s*(.+)/);
+    if (!m) continue;
+    const [,name,raw] = m;
+    const lower = raw.toLowerCase();
+    let status, pill;
+    if (/already submitted/.test(lower))               { status="Already submitted"; pill="pill-green"; }
+    else if (/^submitted/.test(lower))                  { status="Submitted"; pill="pill-green"; }
+    else if (/login required|submit manually/.test(lower)) { status="Manual required"; pill="pill-yellow"; }
+    else if (/no handler/.test(lower))                  { status="Manual required"; pill="pill-yellow"; }
+    else if (/error|not found|invalid/.test(lower))    { status="Error"; pill="pill-red"; }
+    else                                                { status="Unknown"; pill="pill-gray"; }
+    dirStatus[name.trim()] = { status, pill, raw: raw.trim() };
   }
-  html += "</tbody></table>";
-  return html;
-}
 
-function renderCompetitors(lines) {
-  const text = lines.join("\n").trim();
-  if (!text) return '<p style="color:var(--color-ink-muted)">No data.</p>';
-  return `<div style="white-space:pre-wrap;font-size:0.85rem;">${escHtml(text)}</div>`;
-}
+  let submitted=0, pending=0;
+  let dirHTML = "";
+  for (const d of DIRS) {
+    const s = dirStatus[d.name] ?? { status:"Pending", pill:"pill-gray", raw:"" };
+    const isDone = s.pill === "pill-green";
+    if (isDone) submitted++; else pending++;
 
-function renderBacklinks(lines) {
-  const rows = lines.filter(l => l.startsWith("|") && !l.includes("------") && !l.includes("Directory"));
-  if (!rows.length) return '<p style="color:var(--color-ink-muted)">No data.</p>';
-  let html = '<table class="report-table"><thead><tr><th>Directory</th><th>Status</th></tr></thead><tbody>';
-  for (const row of rows) {
-    const cols = row.split("|").map(c => c.trim()).filter(Boolean);
-    if (cols.length < 2) continue;
-    const [name, status] = cols;
-    const pillClass = status?.includes("Listed") && !status.includes("Not") ? "pill-ok" : "pill-err";
-    html += `<tr><td>${name}</td><td><span class="${pillClass}">${status}</span></td></tr>`;
-  }
-  html += "</tbody></table>";
-  return html;
-}
+    const submitBtn = !isDone
+      ? `<a href="${d.url}" target="_blank" rel="noopener"
+           style="margin-left:auto;font-size:0.73rem;color:#818cf8;text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:0.25rem;">
+           Submit
+           <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+         </a>`
+      : "";
 
-function renderDirectories(lines) {
-  const text = lines.join("\n").trim();
-  if (!text) return '<p style="color:var(--color-ink-muted)">No data.</p>';
-  let html = "";
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const m = line.match(/\*\*(.+?)\*\*\s*[—-]+\s*(.+)/);
-    if (m) {
-      const [, name, status] = m;
-      let pillClass = "pill-skip";
-      if (/submitted/i.test(status)) pillClass = "pill-ok";
-      else if (/error|not found|invalid/i.test(status)) pillClass = "pill-err";
-      else if (/already/i.test(status)) pillClass = "pill-skip";
-      else if (/login required|manually/i.test(status)) pillClass = "pill-err";
-      html += `<div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--color-rule);">
-        <span style="min-width:140px;font-weight:600;">${escHtml(name)}</span>
-        <span class="${pillClass}" style="flex-shrink:0;">${pillClass === "pill-ok" ? "Submitted" : pillClass === "pill-skip" ? "Skipped" : "Manual"}</span>
-        <span style="color:var(--color-ink-muted);font-size:0.82rem;">${escHtml(status)}</span>
-      </div>`;
-    }
-  }
-  return html || '<p style="color:var(--color-ink-muted)">No data.</p>';
-}
-
-function renderActions(lines) {
-  const items = lines.filter(l => l.trim().startsWith("- [ ]"));
-  if (!items.length) return '<p style="color:var(--color-ink-muted)">No actions today.</p>';
-  let html = '<ul style="list-style:none;padding:0;margin:0;">';
-  for (const item of items) {
-    const text = item.replace("- [ ]", "").trim();
-    html += `<li style="padding:0.35rem 0;border-bottom:1px solid var(--color-rule);display:flex;gap:0.5rem;align-items:flex-start;">
-      <span style="margin-top:2px;flex-shrink:0;">☐</span>
-      <span>${linkify(escHtml(text))}</span>
-    </li>`;
-  }
-  html += "</ul>";
-  return html;
-}
-
-function escHtml(s) {
-  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-function linkify(s) {
-  return s.replace(/https?:\/\/[^\s<"]+/g, url => `<a href="${url}" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">${url}</a>`);
-}
-
-function renderReport(md, date) {
-  const sections = parseMarkdownReport(md, date);
-
-  const icons = {
-    "Keyword Rankings": "📊",
-    "Competitor Activity": "🔍",
-    "Backlink Status": "🔗",
-    "Directory Submissions": "📋",
-    "Actions for Hiten": "✅",
-  };
-
-  const renderers = {
-    "Keyword Rankings": renderRankings,
-    "Competitor Activity": renderCompetitors,
-    "Backlink Status": renderBacklinks,
-    "Directory Submissions": renderDirectories,
-    "Actions for Hiten": renderActions,
-  };
-
-  let html = `<div style="margin-bottom:1.5rem;display:flex;align-items:baseline;gap:1rem;">
-    <h1 style="font-family:var(--font-serif);font-size:1.6rem;font-weight:700;margin:0;">${date}</h1>
-    <span style="color:var(--color-ink-muted);font-size:0.85rem;font-family:var(--font-sans);">Daily agent report</span>
-  </div>`;
-
-  for (const [title, renderer] of Object.entries(renderers)) {
-    const lines = sections[title] ?? [];
-    const icon = icons[title] ?? "";
-    html += `<div class="report-section">
-      <div class="section-header">${icon} ${title}</div>
-      <div class="section-body">${renderer(lines)}</div>
+    dirHTML += `<div class="dir-row">
+      <span style="width:160px;font-weight:500;color:${isDone?"#9ca3af":"#e8e4db"};text-decoration:${isDone?"line-through":"none"};font-size:0.84rem;">${esc(d.name)}</span>
+      <span class="pill ${s.pill}">${s.status}</span>
+      ${submitBtn}
     </div>`;
   }
+  document.getElementById("dir-list").innerHTML = dirHTML;
 
-  return html;
+  const dirsTotal = DIRS.length;
+  document.getElementById("dirs-val").textContent = `${submitted}/${dirsTotal}`;
+  document.getElementById("dirs-sub").textContent = `${pending} pending`;
+  document.getElementById("dirs-sub").style.color = pending > 0 ? "#f59e0b" : "#4ade80";
+
+  const dirBadgeEl = document.getElementById("dir-count-badge");
+  dirBadgeEl.textContent = `${submitted}/${dirsTotal} submitted`;
+  dirBadgeEl.className = "pill " + (submitted === dirsTotal ? "pill-green" : submitted > 0 ? "pill-yellow" : "pill-red");
+
+  // ── Keyword Rankings ──
+  const kwLines = S["Keyword Rankings"] ?? [];
+  const kwRows  = kwLines.filter(l => l.startsWith("|") && !l.includes("---") && !l.includes("Keyword"));
+  let kwRanked = 0;
+  let kwHTML = `<div class="kw-row kw-header"><div>Keyword</div><div>Position</div><div>Change</div></div>`;
+  for (const row of kwRows) {
+    const cols = row.split("|").map(c=>c.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+    const [kw, pos, delta=""] = cols;
+    const ranked = pos && pos !== "—";
+    if (ranked) kwRanked++;
+    const posColor = ranked ? "#4ade80" : "#374151";
+    const deltaColor = delta.includes("▲") ? "#4ade80" : delta.includes("▼") ? "#f87171" : "#374151";
+    kwHTML += `<div class="kw-row">
+      <div style="color:${ranked?"#e8e4db":"#6b7280"}">${esc(kw)}</div>
+      <div style="font-weight:${ranked?"700":"400"};color:${posColor}">${esc(pos)}</div>
+      <div style="color:${deltaColor}">${esc(delta)||"—"}</div>
+    </div>`;
+  }
+  document.getElementById("kw-table").innerHTML = kwHTML;
+  document.getElementById("kw-val").textContent = `${kwRanked}/${kwRows.length}`;
+  document.getElementById("kw-sub").textContent = kwRanked ? `${kwRows.length-kwRanked} not yet ranking` : "none ranking yet";
+  document.getElementById("kw-badge").textContent = `${kwRanked} ranking`;
+  if (kwRanked > 0) { document.getElementById("kw-badge").style.background="#052e16"; document.getElementById("kw-badge").style.color="#4ade80"; }
+
+  // ── Backlinks ──
+  const blRows = blLines.filter(l => l.startsWith("|") && !l.includes("---") && !l.includes("Directory"));
+  let blLive = 0;
+  let blHTML = "";
+  for (const row of blRows) {
+    const cols = row.split("|").map(c=>c.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+    const [name, status] = cols;
+    const live = /listed$/i.test(status) && !/not yet/i.test(status);
+    if (live) blLive++;
+    blHTML += `<div class="dir-row">
+      <span style="color:${live?"#e8e4db":"#6b7280"};font-size:0.84rem;width:180px;">${esc(name)}</span>
+      <span class="pill ${live?"pill-green":"pill-gray"}">${esc(status)}</span>
+    </div>`;
+  }
+  document.getElementById("backlink-table").innerHTML = blHTML;
+  document.getElementById("bl-val").textContent = `${blLive}/${blRows.length}`;
+  document.getElementById("bl-sub").textContent = blLive ? "listing found" : "none live yet";
+
+  // ── Competitor Activity ──
+  const compLines = S["Competitor Activity"] ?? [];
+  let compHTML = "";
+  let curComp = null;
+  for (const line of compLines) {
+    const bold = line.match(/\*\*(.+?)\*\*/);
+    if (bold) {
+      if (curComp) compHTML += "</div>";
+      curComp = bold[1];
+      const noPost = /no recent/.test(line);
+      compHTML += `<div class="comp-item">
+        <div class="comp-name">${esc(curComp)} ${noPost ? '<span style="color:#374151;font-weight:400;text-transform:none;letter-spacing:0;">— quiet</span>' : ""}</div>`;
+    } else {
+      const linkM = line.match(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/);
+      if (linkM) compHTML += `<a class="comp-link" href="${esc(linkM[2])}" target="_blank" rel="noopener">↗ ${esc(linkM[1])}</a>`;
+    }
+  }
+  if (curComp) compHTML += "</div>";
+  document.getElementById("competitor-list").innerHTML = compHTML || '<p style="color:#4b5563;font-size:0.85rem;">No data.</p>';
+
+  // ── Actions ──
+  const actLines = S["Actions for Hiten"] ?? [];
+  const actItems = actLines.filter(l => l.trim().startsWith("- [ ]"));
+  const actCount = actItems.length;
+
+  // Add pending directory submissions as action items
+  const dirActions = DIRS
+    .filter(d => (dirStatus[d.name]?.pill ?? "pill-gray") !== "pill-green")
+    .map(d => ({ tag:"dir", text:`Submit to <strong>${d.name}</strong>`, url: d.url }));
+
+  const contentActions = actItems.map(item => {
+    const text = item.replace("- [ ]","").trim();
+    const linkM = text.match(/\[(.+?)\]\((https?:\/\/[^\)]+)\)/);
+    const label = linkM ? linkM[1] : text.replace(/Review competitor content:\s*/i,"");
+    const href  = linkM ? linkM[2] : null;
+    return { tag:"content", text: href ? `<a href="${href}" target="_blank" rel="noopener">${esc(label)}</a>` : esc(label), url: href };
+  });
+
+  const allActions = [...dirActions, ...contentActions];
+  const totalActions = allActions.length;
+
+  document.getElementById("act-val").textContent = totalActions;
+  document.getElementById("act-sub").textContent = totalActions ? `${dirActions.length} dirs + ${contentActions.length} content` : "nothing pending";
+
+  const runStatusEl = document.getElementById("run-status");
+  runStatusEl.innerHTML = totalActions > 0
+    ? `<svg width="8" height="8" viewBox="0 0 8 8" fill="#fbbf24"><circle cx="4" cy="4" r="4"/></svg> ${totalActions} action${totalActions!==1?"s":""} pending`
+    : `<svg width="8" height="8" viewBox="0 0 8 8" fill="#4ade80"><circle cx="4" cy="4" r="4"/></svg> All clear`;
+  runStatusEl.style.background = totalActions > 0 ? "#2d1f00" : "#052e16";
+  runStatusEl.style.color      = totalActions > 0 ? "#fbbf24" : "#4ade80";
+
+  if (allActions.length) {
+    document.getElementById("action-block").style.display = "block";
+    document.getElementById("action-count-badge").textContent = `${allActions.length} items`;
+    let aHTML = "";
+    for (const a of allActions) {
+      aHTML += `<div class="action-item">
+        <span class="action-tag ${a.tag==="dir"?"tag-dir":"tag-content"}">${a.tag==="dir"?"SUBMIT":"REVIEW"}</span>
+        <span>${a.tag==="dir" ? `${a.text} — <a href="${a.url}" target="_blank" rel="noopener">${a.url}</a>` : a.text}</span>
+      </div>`;
+    }
+    document.getElementById("action-items").innerHTML = aHTML;
+  }
 }
 
 async function loadReport(date) {
-  currentDate = date;
-  document.getElementById("loading").style.display = "block";
-  document.getElementById("report-content").style.display = "none";
-  document.getElementById("error-msg").style.display = "none";
-
-  document.querySelectorAll(".date-btn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.date === date);
-  });
-
   try {
-    const md = await fetchReport(date);
-    const html = renderReport(md, date);
-    document.getElementById("report-content").innerHTML = html;
-    document.getElementById("report-content").style.display = "block";
-    document.getElementById("loading").style.display = "none";
-  } catch (e) {
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("error-msg").textContent = e.message;
-    document.getElementById("error-msg").style.display = "block";
+    const md = await fetch(`${RAW}/marketing/reports/${date}.md`).then(r=>r.text());
+    render(md, date);
+    document.getElementById("loading-state").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+  } catch(e) {
+    document.getElementById("loading-state").textContent = "Failed to load report: " + e.message;
   }
 }
 
 async function init() {
   try {
-    const dates = await listReports();
+    const files = await fetch(API).then(r=>r.json());
+    const dates = files
+      .filter(f => f.name.endsWith(".md"))
+      .map(f => f.name.replace(".md",""))
+      .sort().reverse();
 
-    const container = document.getElementById("dates-container");
-    container.innerHTML = "";
-
-    for (const date of dates) {
-      const btn = document.createElement("button");
-      btn.className = "date-btn";
-      btn.textContent = date;
-      btn.dataset.date = date;
-      btn.onclick = () => loadReport(date);
-      container.appendChild(btn);
+    const sel = document.getElementById("date-select");
+    sel.innerHTML = "";
+    for (const d of dates) {
+      const opt = document.createElement("option");
+      opt.value = opt.textContent = d;
+      sel.appendChild(opt);
     }
+    sel.addEventListener("change", () => {
+      document.getElementById("main-content").style.display = "none";
+      document.getElementById("loading-state").style.display = "flex";
+      // reset action block
+      document.getElementById("action-block").style.display = "none";
+      loadReport(sel.value);
+    });
 
-    // Update badge
-    if (dates.length) {
-      const badge = document.getElementById("run-badge");
-      badge.textContent = `Last run: ${dates[0]}`;
-      badge.style.display = "inline-block";
-    }
-
-    // Load latest
     if (dates.length) await loadReport(dates[0]);
-    else {
-      document.getElementById("loading").textContent = "No reports yet.";
-    }
-  } catch (e) {
-    document.getElementById("loading").textContent = "Error: " + e.message;
+    else document.getElementById("loading-state").textContent = "No reports yet.";
+  } catch(e) {
+    document.getElementById("loading-state").textContent = "Error: " + e.message;
   }
 }
 
 init();
 </script>
+
+</BaseLayout>

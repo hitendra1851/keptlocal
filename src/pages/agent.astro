@@ -1,0 +1,329 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Agent Dashboard — keptlocal"
+  description="Marketing agent run history"
+  noindex={true}
+>
+  <div class="min-h-screen" style="background:var(--color-paper);color:var(--color-ink)">
+
+    <!-- Header -->
+    <div style="border-bottom:1px solid var(--color-rule);padding:1.25rem 2rem;display:flex;align-items:center;gap:1rem;">
+      <a href="/" style="color:var(--color-ink-muted);font-size:0.85rem;font-family:var(--font-sans);text-decoration:none;">← keptlocal.com</a>
+      <span style="color:var(--color-rule)">|</span>
+      <span style="font-family:var(--font-serif);font-size:1.1rem;font-weight:600;">Agent Dashboard</span>
+      <span id="run-badge" style="margin-left:auto;font-size:0.75rem;padding:0.2rem 0.6rem;border-radius:999px;background:var(--color-accent-tint);color:var(--color-accent);font-family:var(--font-sans);display:none;"></span>
+    </div>
+
+    <div style="max-width:1100px;margin:0 auto;padding:2rem;display:grid;grid-template-columns:220px 1fr;gap:2rem;align-items:start;">
+
+      <!-- Sidebar: date list -->
+      <div id="date-list" style="position:sticky;top:2rem;">
+        <div style="font-size:0.7rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--color-ink-muted);margin-bottom:0.75rem;font-family:var(--font-sans);">Reports</div>
+        <div id="dates-container" style="display:flex;flex-direction:column;gap:0.25rem;">
+          <div style="color:var(--color-ink-muted);font-size:0.85rem;">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Main content -->
+      <div id="report-area">
+        <div id="loading" style="color:var(--color-ink-muted);font-family:var(--font-sans);padding:3rem 0;">Loading latest report...</div>
+        <div id="report-content" style="display:none;"></div>
+        <div id="error-msg" style="display:none;color:var(--color-warn);font-family:var(--font-sans);"></div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .date-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--color-ink-soft);
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .date-btn:hover { background: var(--color-paper-dark); }
+  .date-btn.active {
+    background: var(--color-accent-tint);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  /* Report sections */
+  .report-section {
+    margin-bottom: 2rem;
+    border: 1px solid var(--color-rule);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 0.75rem 1.1rem;
+    background: var(--color-paper-dark);
+    border-bottom: 1px solid var(--color-rule);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-body {
+    padding: 1rem 1.1rem;
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
+
+  /* Status pills */
+  .pill-ok  { display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:#e6ede0;color:#2d5016;font-size:0.75rem;font-weight:600; }
+  .pill-err { display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:#fce8e0;color:#9c4221;font-size:0.75rem;font-weight:600; }
+  .pill-skip{ display:inline-block;padding:0.1rem 0.5rem;border-radius:999px;background:var(--color-paper-dark);color:var(--color-ink-muted);font-size:0.75rem;font-weight:600; }
+
+  /* Table */
+  .report-table { width:100%;border-collapse:collapse;font-size:0.85rem; }
+  .report-table th { text-align:left;padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-rule);font-weight:600;color:var(--color-ink-muted);font-size:0.78rem; }
+  .report-table td { padding:0.4rem 0.6rem;border-bottom:1px solid var(--color-rule); }
+  .report-table tr:last-child td { border-bottom:none; }
+
+  .pos-ranked { font-weight:700;color:var(--color-accent); }
+  .pos-none   { color:var(--color-ink-muted); }
+  .delta-up   { color:var(--color-accent);font-weight:600; }
+  .delta-down { color:var(--color-warn);font-weight:600; }
+</style>
+
+<script>
+const REPO = "hitendra1851/keptlocal";
+const BASE  = `https://api.github.com/repos/${REPO}/contents/marketing/reports`;
+const RAW   = `https://raw.githubusercontent.com/${REPO}/main/marketing/reports`;
+
+let currentDate = "";
+
+async function listReports() {
+  const r = await fetch(BASE);
+  if (!r.ok) throw new Error("Could not fetch report list");
+  const files = await r.json();
+  return files
+    .filter((f) => f.name.endsWith(".md"))
+    .map((f) => f.name.replace(".md", ""))
+    .sort()
+    .reverse();
+}
+
+async function fetchReport(date) {
+  const r = await fetch(`${RAW}/${date}.md`);
+  if (!r.ok) throw new Error(`Report not found for ${date}`);
+  return r.text();
+}
+
+function parseMarkdownReport(md, date) {
+  const sections = {};
+  let current = null;
+  for (const line of md.split("\n")) {
+    if (line.startsWith("## ")) {
+      current = line.replace("## ", "").trim();
+      sections[current] = [];
+    } else if (current) {
+      sections[current].push(line);
+    }
+  }
+  return sections;
+}
+
+function renderRankings(lines) {
+  const rows = lines.filter(l => l.startsWith("|") && !l.includes("------") && !l.includes("Keyword"));
+  if (!rows.length) return '<p style="color:var(--color-ink-muted)">No data yet.</p>';
+
+  let html = '<table class="report-table"><thead><tr><th>Keyword</th><th>Position</th><th>Change</th></tr></thead><tbody>';
+  for (const row of rows) {
+    const cols = row.split("|").map(c => c.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+    const [kw, pos, delta] = cols;
+    const posClass = (pos && pos !== "—") ? "pos-ranked" : "pos-none";
+    const deltaClass = delta?.includes("▲") ? "delta-up" : delta?.includes("▼") ? "delta-down" : "";
+    html += `<tr>
+      <td>${kw}</td>
+      <td class="${posClass}">${pos || "—"}</td>
+      <td class="${deltaClass}">${delta || "—"}</td>
+    </tr>`;
+  }
+  html += "</tbody></table>";
+  return html;
+}
+
+function renderCompetitors(lines) {
+  const text = lines.join("\n").trim();
+  if (!text) return '<p style="color:var(--color-ink-muted)">No data.</p>';
+  return `<div style="white-space:pre-wrap;font-size:0.85rem;">${escHtml(text)}</div>`;
+}
+
+function renderBacklinks(lines) {
+  const rows = lines.filter(l => l.startsWith("|") && !l.includes("------") && !l.includes("Directory"));
+  if (!rows.length) return '<p style="color:var(--color-ink-muted)">No data.</p>';
+  let html = '<table class="report-table"><thead><tr><th>Directory</th><th>Status</th></tr></thead><tbody>';
+  for (const row of rows) {
+    const cols = row.split("|").map(c => c.trim()).filter(Boolean);
+    if (cols.length < 2) continue;
+    const [name, status] = cols;
+    const pillClass = status?.includes("Listed") && !status.includes("Not") ? "pill-ok" : "pill-err";
+    html += `<tr><td>${name}</td><td><span class="${pillClass}">${status}</span></td></tr>`;
+  }
+  html += "</tbody></table>";
+  return html;
+}
+
+function renderDirectories(lines) {
+  const text = lines.join("\n").trim();
+  if (!text) return '<p style="color:var(--color-ink-muted)">No data.</p>';
+  let html = "";
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const m = line.match(/\*\*(.+?)\*\*\s*[—-]+\s*(.+)/);
+    if (m) {
+      const [, name, status] = m;
+      let pillClass = "pill-skip";
+      if (/submitted/i.test(status)) pillClass = "pill-ok";
+      else if (/error|not found|invalid/i.test(status)) pillClass = "pill-err";
+      else if (/already/i.test(status)) pillClass = "pill-skip";
+      else if (/login required|manually/i.test(status)) pillClass = "pill-err";
+      html += `<div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--color-rule);">
+        <span style="min-width:140px;font-weight:600;">${escHtml(name)}</span>
+        <span class="${pillClass}" style="flex-shrink:0;">${pillClass === "pill-ok" ? "Submitted" : pillClass === "pill-skip" ? "Skipped" : "Manual"}</span>
+        <span style="color:var(--color-ink-muted);font-size:0.82rem;">${escHtml(status)}</span>
+      </div>`;
+    }
+  }
+  return html || '<p style="color:var(--color-ink-muted)">No data.</p>';
+}
+
+function renderActions(lines) {
+  const items = lines.filter(l => l.trim().startsWith("- [ ]"));
+  if (!items.length) return '<p style="color:var(--color-ink-muted)">No actions today.</p>';
+  let html = '<ul style="list-style:none;padding:0;margin:0;">';
+  for (const item of items) {
+    const text = item.replace("- [ ]", "").trim();
+    html += `<li style="padding:0.35rem 0;border-bottom:1px solid var(--color-rule);display:flex;gap:0.5rem;align-items:flex-start;">
+      <span style="margin-top:2px;flex-shrink:0;">☐</span>
+      <span>${linkify(escHtml(text))}</span>
+    </li>`;
+  }
+  html += "</ul>";
+  return html;
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function linkify(s) {
+  return s.replace(/https?:\/\/[^\s<"]+/g, url => `<a href="${url}" target="_blank" rel="noopener" style="color:var(--color-accent);text-decoration:underline;">${url}</a>`);
+}
+
+function renderReport(md, date) {
+  const sections = parseMarkdownReport(md, date);
+
+  const icons = {
+    "Keyword Rankings": "📊",
+    "Competitor Activity": "🔍",
+    "Backlink Status": "🔗",
+    "Directory Submissions": "📋",
+    "Actions for Hiten": "✅",
+  };
+
+  const renderers = {
+    "Keyword Rankings": renderRankings,
+    "Competitor Activity": renderCompetitors,
+    "Backlink Status": renderBacklinks,
+    "Directory Submissions": renderDirectories,
+    "Actions for Hiten": renderActions,
+  };
+
+  let html = `<div style="margin-bottom:1.5rem;display:flex;align-items:baseline;gap:1rem;">
+    <h1 style="font-family:var(--font-serif);font-size:1.6rem;font-weight:700;margin:0;">${date}</h1>
+    <span style="color:var(--color-ink-muted);font-size:0.85rem;font-family:var(--font-sans);">Daily agent report</span>
+  </div>`;
+
+  for (const [title, renderer] of Object.entries(renderers)) {
+    const lines = sections[title] ?? [];
+    const icon = icons[title] ?? "";
+    html += `<div class="report-section">
+      <div class="section-header">${icon} ${title}</div>
+      <div class="section-body">${renderer(lines)}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+async function loadReport(date) {
+  currentDate = date;
+  document.getElementById("loading").style.display = "block";
+  document.getElementById("report-content").style.display = "none";
+  document.getElementById("error-msg").style.display = "none";
+
+  document.querySelectorAll(".date-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.date === date);
+  });
+
+  try {
+    const md = await fetchReport(date);
+    const html = renderReport(md, date);
+    document.getElementById("report-content").innerHTML = html;
+    document.getElementById("report-content").style.display = "block";
+    document.getElementById("loading").style.display = "none";
+  } catch (e) {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("error-msg").textContent = e.message;
+    document.getElementById("error-msg").style.display = "block";
+  }
+}
+
+async function init() {
+  try {
+    const dates = await listReports();
+
+    const container = document.getElementById("dates-container");
+    container.innerHTML = "";
+
+    for (const date of dates) {
+      const btn = document.createElement("button");
+      btn.className = "date-btn";
+      btn.textContent = date;
+      btn.dataset.date = date;
+      btn.onclick = () => loadReport(date);
+      container.appendChild(btn);
+    }
+
+    // Update badge
+    if (dates.length) {
+      const badge = document.getElementById("run-badge");
+      badge.textContent = `Last run: ${dates[0]}`;
+      badge.style.display = "inline-block";
+    }
+
+    // Load latest
+    if (dates.length) await loadReport(dates[0]);
+    else {
+      document.getElementById("loading").textContent = "No reports yet.";
+    }
+  } catch (e) {
+    document.getElementById("loading").textContent = "Error: " + e.message;
+  }
+}
+
+init();
+</script>

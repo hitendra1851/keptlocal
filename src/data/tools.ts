@@ -134,7 +134,7 @@ export const tools: Tool[] = [
     category: "PDF",
     icon: "M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12",
     status: "live",
-    keywords: ["jpg to pdf", "images to pdf", "convert jpg to pdf free", "jpg to pdf without uploading", "png to pdf browser"],
+    keywords: ["jpg to pdf", "multiple jpg to pdf", "convert multiple jpg to pdf", "images to pdf", "jpg to pdf free no sign up"],
     faq: [
       {
         q: "Are my images uploaded to a server?",

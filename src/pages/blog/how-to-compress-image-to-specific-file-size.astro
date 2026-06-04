@@ -1,0 +1,158 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Compress an Image to a Specific File Size (100KB, 200KB, 500KB)"
+  description="Many portals and forms enforce strict image size limits. Here is how to compress an image to exactly 100KB, 200KB, or any target size — free, in your browser, no upload required."
+  publishDate="2026-06-04"
+  readTime={6}
+  tags={["Image"]}
+>
+
+<p class="lead">
+  A visa application portal says photos must be under 100KB. A job application form caps uploads at 200KB.
+  An insurance claim system refuses files above 500KB. These limits are everywhere, and a phone camera
+  that shoots 8–12 MB JPGs does not care about any of them. Here is how to hit an exact target size
+  without sacrificing more quality than necessary.
+</p>
+
+<h2>Why portals enforce strict file size limits</h2>
+
+<p>
+  Government and institutional systems are often built on infrastructure from a decade ago. File size
+  limits keep their databases from filling up, prevent slow uploads on poor connections, and set a
+  ceiling on storage costs. The limits are not arbitrary — they reflect the original design assumptions
+  of the system — but they collide with modern smartphone cameras that produce files ten to a hundred
+  times larger than those assumptions anticipated.
+</p>
+
+<p>
+  The result is a practical problem: you have a perfectly good photo, a form that needs it, and a size
+  requirement that the photo does not meet. You need a way to reduce the file size to a specific ceiling
+  without running it through desktop software you may not own.
+</p>
+
+<h2>How to compress an image to a specific KB target</h2>
+
+<p>
+  The <a href="/tools/compress-image">Compress Image tool</a> on keptlocal has a <strong>Target size</strong>
+  field that lets you set an exact ceiling in kilobytes. Everything runs in your browser — your image is
+  never uploaded anywhere.
+</p>
+
+<ol>
+  <li>Open the <a href="/tools/compress-image">Compress Image</a> tool.</li>
+  <li>Drop your JPG, PNG, or WebP image into the drop zone.</li>
+  <li>In the <strong>Target size</strong> field, type the maximum file size in KB — for example <code>100</code> for a 100KB limit, or <code>200</code> for a 200KB limit.</li>
+  <li>Click <strong>Compress</strong>. The tool reduces quality automatically until the output falls below your target.</li>
+  <li>Click <strong>Save</strong> to download the compressed file.</li>
+</ol>
+
+<p>
+  The before and after file sizes are shown next to each image so you can confirm the result meets the
+  requirement before downloading. If you need to compress multiple images to the same target, drop them
+  all at once — each is compressed individually to the same ceiling.
+</p>
+
+<h2>Compress image to 100KB</h2>
+
+<p>
+  100KB is one of the most common limits you will encounter — it appears on visa and passport photo
+  uploads, government identity verification portals, and some HR systems. A typical smartphone JPG
+  shot at 12 MP is 3–6 MB, so you are looking at a 97–98% file size reduction.
+</p>
+
+<p>
+  At 100KB, a photo that was shot at 12 MP will typically be compressed to somewhere between 1–2 MP
+  effective resolution, depending on the content. Faces, documents, and solid-colour backgrounds compress
+  well and look acceptable at 100KB. Highly detailed scenes (dense foliage, fabric texture, complex
+  backgrounds) will show more compression artefacts.
+</p>
+
+<p>
+  A practical tip for passport and visa photos specifically: before compressing, crop the image to the
+  required framing (typically head and shoulders, with the face centred). A tightly cropped image needs
+  less data to represent the same level of face detail, so it reaches 100KB at a higher effective quality
+  than a full-frame shot compressed to the same size. Use the <a href="/tools/crop-image">Crop Image</a> tool
+  first, then compress to the target.
+</p>
+
+<h2>Compress image to 200KB</h2>
+
+<p>
+  200KB is a more generous limit — common on job application portals, tenancy application forms, and
+  document submission systems that expect scanned pages rather than professional photographs. At 200KB, a
+  12 MP photo can retain noticeably better quality than at 100KB, and the result is usually acceptable
+  for any identification or documentation purpose.
+</p>
+
+<p>
+  For scanned document pages (utility bills, bank statements, ID cards), 200KB is typically enough to
+  keep text readable and logos recognisable. If you are scanning at high DPI, consider reducing the scan
+  resolution first — a document scanned at 150 DPI is usually sharper-looking at 200KB than the same
+  document scanned at 600 DPI and aggressively compressed down to the same file size.
+</p>
+
+<h2>Compress image to 50KB</h2>
+
+<p>
+  50KB is a strict limit that you will mostly see on older government portals and systems with legacy
+  infrastructure. At 50KB, visible compression artefacts are almost inevitable on complex photographic
+  content. The best strategy is to combine compression with dimension reduction: resize the image to
+  roughly 400–600 pixels wide first using the <a href="/tools/resize-image">Resize Image</a> tool, then
+  compress to 50KB. A smaller image needs less data to represent the same number of pixels, so the
+  quality at 50KB is meaningfully better than compressing a full-resolution photo to the same ceiling.
+</p>
+
+<h2>Understanding the quality-size trade-off</h2>
+
+<p>
+  JPEG compression works by discarding fine detail that the human eye is least sensitive to — high-frequency
+  texture, subtle colour variation, and sharp edges in complex regions. At high quality settings (85%+),
+  the discarded detail is virtually undetectable at normal viewing sizes. As quality drops, the artefacts
+  become visible first in regions with sharp colour transitions (text on a background, a sky meeting a
+  roofline) and in fine texture.
+</p>
+
+<p>
+  The relationship between quality and file size is not linear. Going from 85% to 75% quality typically
+  halves the file size while producing very little visible degradation. Going from 75% to 55% halves it
+  again with more noticeable artefacts. Going below 50% compresses aggressively — the file gets very small
+  but the image looks heavily processed.
+</p>
+
+<p>
+  When you set a target size, the compression tool iterates through quality levels to find the highest
+  quality that gets the file under your ceiling. You always get the best possible quality for the target
+  size, rather than applying a fixed level and hoping it lands in range.
+</p>
+
+<h2>PNG images and size targets</h2>
+
+<p>
+  PNG is a lossless format — it stores every pixel exactly, which means there is no "quality" dial to
+  turn in the same sense as JPEG. Compressing a PNG to a specific size target works differently: the tool
+  reduces the image dimensions until the file fits under the ceiling. A 3000 &times; 2000 PNG may need to
+  be scaled down to 800 &times; 533 to fit within 100KB, depending on the image content.
+</p>
+
+<p>
+  If you need both a small file size and full resolution for a PNG, the practical answer is to convert it
+  to JPG or WebP first. Both formats achieve much smaller file sizes at the same visual resolution.
+  Use the <a href="/tools/convert-image">Convert Image</a> tool to convert PNG to JPG, then compress to
+  your target size.
+</p>
+
+<h2>Checking the result before submitting</h2>
+
+<p>
+  Once you have the compressed file, verify the file size before uploading to the portal. On Windows,
+  right-click the file and choose Properties — the size is shown in both bytes and KB. On Mac, select
+  the file and press <code>Cmd+I</code> — the size appears under "Size." Make sure the figure shown is
+  below the portal's limit, bearing in mind that some portals use 1 KB = 1000 bytes while others use
+  1 KB = 1024 bytes. The difference matters at tight limits like 100KB — a 102,000-byte file is under
+  100KB at 1000 bytes/KB but over at 1024 bytes/KB. To be safe, aim for about 5% under the stated limit.
+</p>
+
+</BlogLayout>

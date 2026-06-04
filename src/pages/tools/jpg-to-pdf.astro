@@ -10,9 +10,9 @@ const tool = tools.find((t) => t.slug === "jpg-to-pdf")!;
   <JpgToPdf slot="tool" />
 
   <Fragment slot="content">
-    <h2>How to convert images to PDF</h2>
+    <h2>How to convert JPG to PDF</h2>
     <ol>
-      <li>Drop your images into the zone above, or click to browse. JPG, PNG, and WebP are all accepted.</li>
+      <li>Drop your images into the zone above, or click to browse. JPG, PNG, and WebP are all accepted — select as many as you need at once.</li>
       <li>Drag rows to set the order they will appear in the PDF — the top image becomes page 1.</li>
       <li>Choose a page size: <strong>A4</strong> or <strong>Letter</strong> centre each image on a standard page with a small margin. <strong>Original</strong> sizes each page exactly to the image dimensions.</li>
       <li>Click <strong>Create PDF</strong>. The file downloads instantly to your device.</li>
@@ -22,42 +22,83 @@ const tool = tools.find((t) => t.slug === "jpg-to-pdf")!;
       No image is uploaded. Open DevTools (<code>F12</code>) → Network while converting to confirm zero upload requests.
     </p>
 
+    <h2>Convert multiple JPG to PDF in one go</h2>
+    <p>
+      The tool is designed for batch conversion — there is no one-image limit. Drop ten, twenty, or fifty
+      images at once and they all land in the file list. Drag to reorder, remove any you do not need, then
+      click <strong>Create PDF</strong> to produce a single multi-page document with one image per page.
+    </p>
+    <p>
+      This is the differentiating feature versus simpler converters that only accept a single file at a time.
+      Common use cases: combining a set of scanned pages back into a document, packaging a sequence of
+      screenshots into a report, bundling a photo series into a single shareable file.
+    </p>
+    <p>
+      The images appear in the PDF in exactly the order shown in the list. Reordering is done by dragging
+      rows — no need to rename files before importing. There is no signup, no file size cap, and no watermark
+      on the output.
+    </p>
+
     <h2>When to convert images to PDF</h2>
     <ul>
       <li><strong>Submitting scanned documents</strong> — many portals, banks, and government services require PDF uploads. Scanning produces JPG or PNG files; this tool bundles them into the format you actually need.</li>
       <li><strong>Sending a photo portfolio</strong> — a single PDF is easier to email, easier to print, and more professional than a folder of image files.</li>
-      <li><strong>Combining whiteboard photos from a meeting</strong> — stack multiple photos into a single document that can be shared, archived, and searched.</li>
-      <li><strong>Creating a photo book draft</strong> — rough out page order and sequence before handing off to a design tool.</li>
-      <li><strong>Packaging screenshots as a report</strong> — attach a sequence of screenshots as a single PDF rather than a chain of inline images.</li>
-      <li><strong>Converting iPhone screenshots to PDF for email</strong> — iOS exports screenshots as PNG; PDF is a more universally compatible format for formal correspondence.</li>
+      <li><strong>Combining whiteboard photos from a meeting</strong> — stack multiple photos into a single document that can be shared, archived, and annotated.</li>
+      <li><strong>Packaging screenshots as a report</strong> — attach a sequence of screenshots as a single PDF rather than a chain of inline images in an email.</li>
+      <li><strong>Converting iPhone screenshots to PDF</strong> — iOS exports screenshots as PNG; PDF is a more universally compatible format for formal correspondence and submission portals.</li>
+      <li><strong>Creating a simple photo book draft</strong> — rough out page order and sequence before handing off to a print design tool.</li>
     </ul>
 
     <h2>How it works under the hood</h2>
     <p>
-      pdf-lib is a JavaScript library that constructs PDF documents from scratch in the browser. For each image you add, it embeds the image data directly into the PDF's internal object structure — JPG bytes stay as JPG (no re-encoding), and PNG bytes stay as PNG. This means the embedded images are exactly as sharp as the originals.
+      pdf-lib is a JavaScript library that constructs PDF documents from scratch in the browser. For each image
+      you add, it embeds the image data directly into the PDF's internal object structure — JPG bytes stay as
+      JPG (no re-encoding), and PNG bytes stay as PNG. This means the embedded images are exactly as sharp as
+      the originals and the output file size is roughly the sum of the input images.
     </p>
     <p>
-      WebP images are not natively supported by the PDF format, so the tool first draws the WebP to an off-screen HTML <code>&lt;canvas&gt;</code> and exports a lossless PNG, which pdf-lib then embeds. The visual result is identical to the source.
+      WebP images are not natively supported by the PDF format, so the tool first draws the WebP to an
+      off-screen HTML <code>&lt;canvas&gt;</code> and exports a lossless PNG, which pdf-lib then embeds.
+      The visual result is identical to the source.
     </p>
     <p>
-      When you choose A4 or Letter, the tool auto-detects whether your image is portrait or landscape and rotates the page to match, then scales the image to fill the page with a small margin. When you choose Original, the page dimensions are set to the image's pixel width and height in points (1 point = 1/72 inch at 72 DPI effective). This preserves the image at exactly its native resolution.
+      When you choose A4 or Letter, the tool auto-detects whether your image is portrait or landscape and
+      rotates the page to match, then scales the image to fill the page with a small margin. When you choose
+      Original, each page is sized exactly to the image's pixel dimensions in points.
+    </p>
+
+    <h2>JPG to PDF free, no sign up</h2>
+    <p>
+      Most JPG to PDF converters online are free for occasional use but impose friction: a daily task limit
+      (Smallpdf: 2 free conversions per day), a watermark on the output, or a required account before you
+      can download. keptlocal has none of these — the conversion runs entirely in the browser with no account,
+      no watermark, no daily cap, and no upload of any kind.
+    </p>
+    <p>
+      The "free with limits" model exists because server-based tools have real infrastructure costs for every
+      file they process. keptlocal has no server involved, so there is no cost to pass on and no reason to
+      restrict use. Your images go directly from your device into a PDF on your device.
     </p>
 
     <h2>Limits and what to expect</h2>
     <ul>
-      <li><strong>HEIC (iPhone photos):</strong> HEIC is not supported directly. Use your phone's camera settings to export as JPG, or convert HEIC to JPG using our Convert Image tool (coming soon).</li>
-      <li><strong>File size:</strong> JPG and PNG bytes are embedded as-is, so the output PDF will be roughly the sum of the input image sizes plus a small PDF overhead. Ten 2 MB JPGs produce roughly a 20 MB PDF.</li>
-      <li><strong>Very large images:</strong> images above 20 MP may be slow to process and embed. Performance depends on your device's available RAM.</li>
-      <li><strong>Colour profiles:</strong> embedded ICC colour profiles in PNG files are preserved. JPG colour profiles are carried through without modification.</li>
-      <li><strong>Browser support:</strong> requires modern browser with WebAssembly. Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+      <li><strong>HEIC (iPhone photos):</strong> HEIC is not supported directly. Use our <a href="/tools/convert-image">Convert Image</a> tool to convert HEIC to JPG first, then come back here.</li>
+      <li><strong>File size:</strong> JPG and PNG bytes are embedded as-is, so the output PDF will be roughly the sum of the input image sizes plus a small PDF overhead. Ten 2 MB JPGs produce roughly a 20 MB PDF. Use the <a href="/tools/compress-image">Compress Image</a> tool first if you need a smaller output.</li>
+      <li><strong>Very large images:</strong> images above 20 MP may be slow to embed. Performance is bounded by your device's available RAM.</li>
+      <li><strong>Colour profiles:</strong> embedded ICC colour profiles in PNG files are preserved. JPG colour profiles pass through without modification.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
     <h2>Privacy: what happens to your images</h2>
     <p>
-      Your images are read into browser memory using the <code>File</code> API and processed entirely in JavaScript. They are never sent to a server, never stored in any cloud, and never visible to anyone but you. The converted PDF is assembled in memory and downloaded directly — the data stays local from start to finish.
+      Your images are read into browser memory using the <code>File</code> API and processed entirely in
+      JavaScript. They are never sent to a server, never stored in any cloud, and never visible to anyone
+      but you. The converted PDF is assembled in memory and downloaded directly to your device.
     </p>
     <p>
-      This is especially relevant for sensitive images: ID documents, medical scans, financial statements, personal photos. With upload-based tools you are trusting the provider's infrastructure and retention policy. With keptlocal the question does not arise.
+      This matters for sensitive images — ID documents, medical scans, financial statements, personal
+      photographs. With upload-based converters you are trusting the provider's infrastructure and retention
+      policy. With keptlocal the question does not arise: the data never leaves your machine.
     </p>
   </Fragment>
 </ToolLayout>

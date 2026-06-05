@@ -19,7 +19,9 @@ const tool = tools.find((t) => t.slug === "merge-pdf")!;
     <p>
       Everything runs inside the browser tab you have open right now. No file is sent to a server — this is a
       genuine merge PDF without uploading tool, not a hosted service with a privacy policy you have to trust.
-      If you want to confirm that, open browser DevTools (press <code>F12</code>), switch to the
+      There is no upload limit; your browser's available RAM is the only constraint, which means it handles
+      files that would hit the size caps on iLovePDF or Smallpdf without issue.
+      If you want to confirm no upload happens, open browser DevTools (press <code>F12</code>), switch to the
       <strong>Network</strong> tab, and watch while you merge — you'll see no upload requests.
     </p>
 

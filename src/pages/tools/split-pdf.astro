@@ -10,7 +10,7 @@ const tool = tools.find((t) => t.slug === "split-pdf")!;
   <SplitPdf slot="tool" />
 
   <Fragment slot="content">
-    <h2>How to split a PDF</h2>
+    <h2>How to split a PDF — no account, no upload</h2>
     <ol>
       <li>Drop your PDF into the zone above, or click "choose a file" to browse.</li>
       <li>Choose a mode: <strong>Extract pages</strong> to pull out specific pages, or <strong>Split all pages</strong> to turn every page into its own file.</li>
@@ -18,7 +18,7 @@ const tool = tools.find((t) => t.slug === "split-pdf")!;
       <li>Click the download button. A PDF (for extraction) or a ZIP archive (when splitting all pages) saves directly to your downloads folder.</li>
     </ol>
     <p>
-      Everything runs inside the browser tab you have open. No file is sent anywhere.
+      Everything runs inside the browser tab you have open. No file is sent anywhere, no account is needed, and there are no daily limits.
       Open DevTools (<code>F12</code>), go to the Network tab, and run the tool — you will see zero upload requests.
     </p>
 

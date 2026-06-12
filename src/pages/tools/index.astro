@@ -1,0 +1,257 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ToolCard from "../../components/ToolCard.astro";
+import { tools } from "../../data/tools";
+
+const liveTools = tools.filter((t) => t.status === "live");
+const pdfTools   = liveTools.filter((t) => t.category === "PDF");
+const imageTools = liveTools.filter((t) => t.category === "Image");
+const utilityTools = liveTools.filter((t) => t.category === "Utility");
+
+const title = `All ${liveTools.length} Free Browser Tools — PDF & Image | keptlocal`;
+const description = `Browse all ${liveTools.length} free browser-based PDF and image tools on keptlocal. Merge, split, compress, convert, watermark, crop, and more — no uploads, no signup, no limits.`;
+
+const schema = [
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://keptlocal.com/" },
+      { "@type": "ListItem", position: 2, name: "All Tools", item: "https://keptlocal.com/tools" },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Free browser-based PDF and image tools",
+    numberOfItems: liveTools.length,
+    itemListElement: liveTools.map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: t.pageTitle || t.name,
+      url: `https://keptlocal.com/tools/${t.slug}`,
+    })),
+  },
+];
+---
+
+<BaseLayout title={title} description={description} schema={schema}>
+  <Header />
+
+  <main class="max-w-5xl mx-auto px-6 pt-10 pb-20">
+
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-[var(--color-ink-muted)] mb-8" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-[var(--color-ink)]">Home</a>
+      <span class="mx-2">/</span>
+      <span class="text-[var(--color-ink-soft)]">All Tools</span>
+    </nav>
+
+    <!-- Page header -->
+    <div class="mb-10 reveal">
+      <h1 class="font-display text-4xl md:text-5xl text-[var(--color-ink)] tracking-tighter mb-3">
+        All {liveTools.length} free tools
+      </h1>
+      <p class="text-lg text-[var(--color-ink-soft)] max-w-2xl leading-relaxed">
+        Every tool runs entirely in your browser. No file uploads, no account, no size limits.
+        Filter by category or search by name below.
+      </p>
+    </div>
+
+    <!-- Search + filter bar -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-10 reveal" style="animation-delay:0.05s">
+      <div class="relative flex-1">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
+          class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-muted)] pointer-events-none">
+          <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+        </svg>
+        <input
+          id="tool-search"
+          type="search"
+          placeholder="Search tools…"
+          autocomplete="off"
+          class="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)] transition-colors"
+        />
+      </div>
+      <div id="category-filters" class="flex gap-2 flex-wrap" role="group" aria-label="Filter by category">
+        {[["all", "All"], ["pdf", "PDF"], ["image", "Image"], ["utility", "Utility"]].map(([val, label]) => (
+          <button
+            data-filter={val}
+            class:list={[
+              "filter-btn px-4 py-2 text-sm rounded-lg border transition-colors",
+              val === "all"
+                ? "border-[var(--color-accent)] bg-[var(--color-accent)] text-[var(--color-paper)] font-medium"
+                : "border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink-soft)] hover:border-[var(--color-accent)] hover:text-[var(--color-ink)]"
+            ]}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- No results message (hidden by default) -->
+    <p id="no-results" class="hidden text-sm text-[var(--color-ink-muted)] mb-6">
+      No tools match that search. <button id="clear-search" class="text-[var(--color-accent)] hover:underline underline-offset-4">Clear filter</button>
+    </p>
+
+    <!-- PDF tools section -->
+    <section id="section-pdf" data-category-section="pdf" class="mb-14 reveal" style="animation-delay:0.08s">
+      <div class="flex items-center gap-2 mb-6">
+        <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
+        <h2 class="font-display text-2xl tracking-tighter text-[var(--color-ink)]">PDF tools</h2>
+        <span class="text-xs text-[var(--color-ink-muted)] ml-1">{pdfTools.length}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {pdfTools.map((t) => (
+          <div class="tool-item" data-name={`${t.name} ${t.description}`.toLowerCase()} data-category="pdf">
+            <ToolCard tool={t} />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Image tools section -->
+    <section id="section-image" data-category-section="image" class="mb-14 reveal" style="animation-delay:0.12s">
+      <div class="flex items-center gap-2 mb-6">
+        <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
+        <h2 class="font-display text-2xl tracking-tighter text-[var(--color-ink)]">Image tools</h2>
+        <span class="text-xs text-[var(--color-ink-muted)] ml-1">{imageTools.length}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {imageTools.map((t) => (
+          <div class="tool-item" data-name={`${t.name} ${t.description}`.toLowerCase()} data-category="image">
+            <ToolCard tool={t} />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Utility tools section -->
+    <section id="section-utility" data-category-section="utility" class="mb-14 reveal" style="animation-delay:0.16s">
+      <div class="flex items-center gap-2 mb-6">
+        <div class="w-1 h-5 bg-[var(--color-accent)] rounded-full"></div>
+        <h2 class="font-display text-2xl tracking-tighter text-[var(--color-ink)]">Utility tools</h2>
+        <span class="text-xs text-[var(--color-ink-muted)] ml-1">{utilityTools.length}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {utilityTools.map((t) => (
+          <div class="tool-item" data-name={`${t.name} ${t.description}`.toLowerCase()} data-category="utility">
+            <ToolCard tool={t} />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- SEO content -->
+    <section class="mt-4 border-t border-[var(--color-rule)] pt-12 prose-doc max-w-2xl">
+      <h2>Free online tools that never touch a server</h2>
+      <p>
+        Every tool on keptlocal runs locally inside your browser tab using WebAssembly.
+        When you merge a PDF, resize a photo, or convert a HEIC file, the processing
+        happens on your device — not on a server somewhere. There are no upload requests,
+        no accounts to create, and no file size caps imposed by a server quota.
+      </p>
+      <p>
+        You can verify this yourself: open browser DevTools (<code>F12</code>), switch to
+        the Network tab, and run any tool. You will see zero POST or upload requests fire.
+        The only traffic is the page assets loading once on your first visit.
+      </p>
+      <h3>PDF tools</h3>
+      <p>
+        The PDF toolkit covers the most common document tasks: merging multiple files into
+        one, splitting or extracting specific pages, rotating and reordering pages,
+        adding watermarks or page numbers, converting to and from JPG and PNG,
+        compressing for smaller file sizes, and removing or adding password protection.
+        All processing uses <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>
+        and <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> —
+        production-grade libraries that run entirely in WebAssembly.
+      </p>
+      <h3>Image tools</h3>
+      <p>
+        The image toolkit handles compression, resizing, cropping, flipping, rotating,
+        format conversion (including HEIC from iPhones), grayscale conversion, EXIF metadata
+        removal, and Base64 encoding. The Canvas API and the
+        <a href="https://github.com/Donaldcwl/browser-image-compression" target="_blank" rel="noopener">browser-image-compression</a>
+        library do the heavy lifting — same device, no upload.
+      </p>
+      <h3>How this compares to iLovePDF and Smallpdf</h3>
+      <p>
+        iLovePDF, Smallpdf, and most other PDF sites upload your file to their servers.
+        That works, but it means your contract, tax return, or medical document passes
+        through someone else's infrastructure. keptlocal's architecture makes that impossible —
+        there is no server to upload to. The tradeoff is that very aggressive PDF compression
+        (re-encoding embedded images) requires server-side tools; keptlocal's browser-based
+        compression removes metadata and unused objects, which is sufficient for most files.
+      </p>
+    </section>
+
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<script>
+  const searchInput  = document.getElementById("tool-search") as HTMLInputElement;
+  const clearBtn     = document.getElementById("clear-search");
+  const noResults    = document.getElementById("no-results");
+  const filterBtns   = document.querySelectorAll<HTMLButtonElement>(".filter-btn");
+  const toolItems    = document.querySelectorAll<HTMLElement>(".tool-item");
+  const sections     = document.querySelectorAll<HTMLElement>("[data-category-section]");
+
+  let activeCategory = "all";
+
+  function applyFilters() {
+    const query = searchInput.value.trim().toLowerCase();
+
+    let visibleCount = 0;
+    toolItems.forEach((item) => {
+      const nameMatch = !query || item.dataset.name!.includes(query);
+      const catMatch  = activeCategory === "all" || item.dataset.category === activeCategory;
+      const show      = nameMatch && catMatch;
+      item.style.display = show ? "" : "none";
+      if (show) visibleCount++;
+    });
+
+    // Show/hide entire category sections based on whether they have visible children
+    sections.forEach((section) => {
+      const cat = section.dataset.categorySection!;
+      const catHidden = activeCategory !== "all" && activeCategory !== cat;
+      if (catHidden) {
+        section.style.display = "none";
+        return;
+      }
+      const visible = [...section.querySelectorAll<HTMLElement>(".tool-item")]
+        .some((el) => el.style.display !== "none");
+      section.style.display = visible ? "" : "none";
+    });
+
+    noResults!.classList.toggle("hidden", visibleCount > 0);
+  }
+
+  searchInput?.addEventListener("input", applyFilters);
+
+  clearBtn?.addEventListener("click", () => {
+    searchInput.value = "";
+    applyFilters();
+  });
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      activeCategory = btn.dataset.filter!;
+      filterBtns.forEach((b) => {
+        const active = b.dataset.filter === activeCategory;
+        b.classList.toggle("border-[var(--color-accent)]", active);
+        b.classList.toggle("bg-[var(--color-accent)]", active);
+        b.classList.toggle("text-[var(--color-paper)]", active);
+        b.classList.toggle("font-medium", active);
+        b.classList.toggle("border-[var(--color-rule)]", !active);
+        b.classList.toggle("bg-[var(--color-paper)]", !active);
+        b.classList.toggle("text-[var(--color-ink-soft)]", !active);
+      });
+      applyFilters();
+    });
+  });
+</script>

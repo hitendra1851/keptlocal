@@ -17,7 +17,7 @@ const relatedTools = tools
   .filter((t) => t.category === tool.category && t.slug !== tool.slug && t.status === "live")
   .slice(0, 4);
 
-const title = `${tool.name} — Free & Private | keptlocal`;
+const title = `${tool.pageTitle || tool.name} — Free & Private | keptlocal`;
 const description = tool.longDescription || tool.description;
 
 // Schema: WebApplication + FAQPage + BreadcrumbList
@@ -75,7 +75,7 @@ if (tool.faq.length > 0) {
     <div class="mb-8 reveal">
       <PrivacyBadge variant="block" />
       <h1 class="font-display text-4xl md:text-5xl text-[var(--color-ink)] mt-4 mb-3 tracking-tighter">
-        {tool.name}
+        {tool.pageTitle || tool.name}
       </h1>
       <p class="text-lg text-[var(--color-ink-soft)] max-w-2xl leading-relaxed">
         {tool.longDescription || tool.description}

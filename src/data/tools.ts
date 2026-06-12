@@ -6,6 +6,7 @@ export interface Tool {
   slug: string;
   name: string;
   shortName: string;
+  pageTitle?: string; // Long-tail H1 + title tag override; name stays short for cards/breadcrumbs
   description: string;
   longDescription: string;
   category: "PDF" | "Image" | "Utility" | "AI";
@@ -20,6 +21,7 @@ export const tools: Tool[] = [
     slug: "merge-pdf",
     name: "Merge PDF",
     shortName: "Merge PDF",
+    pageTitle: "Merge PDF Without Uploading",
     description: "Combine multiple PDFs into one — entirely in your browser.",
     longDescription:
       "Merge PDFs without uploading to any server — drag files in, arrange the order, and download the combined file instantly. No signup, no account, no watermark.",
@@ -55,6 +57,7 @@ export const tools: Tool[] = [
     slug: "split-pdf",
     name: "Split PDF",
     shortName: "Split PDF",
+    pageTitle: "Split PDF — No Account, No Upload",
     description: "Extract pages or split into separate documents — entirely in your browser.",
     longDescription: "Split or extract PDF pages in your browser — no account, no upload, no watermark. Choose pages to extract or split every page into its own file. Downloads instantly.",
     category: "PDF",
@@ -92,6 +95,7 @@ export const tools: Tool[] = [
     slug: "pdf-to-jpg",
     name: "PDF to JPG",
     shortName: "PDF → JPG",
+    pageTitle: "PDF to JPG in Your Browser",
     description: "Convert PDF pages to high-quality JPG images — entirely in your browser.",
     longDescription: "Convert PDF to JPG in your browser — no upload, no signup, no account needed. Choose a quality preset and every page renders locally. Single pages download as one file; multiple pages as a ZIP.",
     category: "PDF",
@@ -129,6 +133,7 @@ export const tools: Tool[] = [
     slug: "jpg-to-pdf",
     name: "JPG to PDF",
     shortName: "JPG → PDF",
+    pageTitle: "JPG to PDF — No Watermark",
     description: "Combine images into a single PDF document — entirely in your browser.",
     longDescription: "Turn JPG, PNG, or WebP images into a PDF instantly — no watermark, no signup, no upload. Arrange image order, choose a page size, and download. Files never leave your device.",
     category: "PDF",
@@ -166,6 +171,7 @@ export const tools: Tool[] = [
     slug: "rotate-pdf",
     name: "Rotate PDF",
     shortName: "Rotate PDF",
+    pageTitle: "Rotate PDF — No Upload",
     description: "Rotate all pages or specific pages 90°, 180°, or 270° — entirely in your browser.",
     longDescription: "Rotate PDF pages free in your browser — no upload, no account needed. Choose 90°, 180°, or 270°, optionally target specific pages, and download instantly.",
     category: "PDF",
@@ -240,6 +246,7 @@ export const tools: Tool[] = [
     slug: "watermark-pdf",
     name: "Watermark PDF",
     shortName: "Watermark PDF",
+    pageTitle: "Watermark PDF — Free, No Signup",
     description: "Stamp a diagonal text watermark across every PDF page — entirely in your browser.",
     longDescription: "Add a text watermark to a PDF — free, no registration, no account, nothing uploaded. Type the text, set opacity and size, and download the stamped PDF instantly.",
     category: "PDF",
@@ -359,6 +366,7 @@ export const tools: Tool[] = [
     slug: "resize-image",
     name: "Resize Image",
     shortName: "Resize Image",
+    pageTitle: "Resize Image Without Uploading",
     description: "Resize JPG, PNG, and WebP images by dimensions, percentage, or longest side — in your browser.",
     longDescription: "Resize images without uploading — set exact pixel dimensions, a percentage, or a longest-side limit. Free in your browser, no account needed. Aspect ratio lock keeps proportions correct.",
     category: "Image",
@@ -396,6 +404,7 @@ export const tools: Tool[] = [
     slug: "convert-image",
     name: "Convert Image",
     shortName: "Convert Image",
+    pageTitle: "Convert Image — HEIC to JPG and More",
     description: "Convert HEIC, JPG, PNG, WebP, and AVIF images — including iPhone HEIC photos — entirely in your browser.",
     longDescription: "Convert HEIC to JPG (iPhone photos), PNG to WebP, and more — free in your browser, no upload needed. HEIC files from iPhone and iPad are fully supported. Drop files, pick a format, download instantly.",
     category: "Image",

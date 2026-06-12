@@ -57,7 +57,6 @@ def _build_report(
     backlinks: str,
     directories: str,
 ) -> str:
-    ranked_count = rankings.count("keptlocal") if rankings else 0
     return f"""# Marketing Report — {today}
 
 ## Keyword Rankings
@@ -84,7 +83,7 @@ def _extract_actions(directories: str, competitors: str) -> str:
     lines = []
     # Pull out any "submit manually" lines from directory tool output
     for line in directories.splitlines():
-        if "submit_url" in line.lower() or "submit at:" in line.lower():
+        if "submit manually" in line.lower():
             lines.append(f"- [ ] {line.strip()}")
     # Flag competitor keywords worth targeting
     for line in competitors.splitlines():

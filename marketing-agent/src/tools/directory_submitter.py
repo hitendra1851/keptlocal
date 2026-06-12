@@ -89,7 +89,14 @@ async def find_and_submit_directories(
             name = directory["name"]
 
             if name in submitted:
-                results.append(f"**{name}** — Already submitted on {submitted[name]}, skipping")
+                when = submitted[name]
+                # Some sessions record "pending-YYYY-MM-DD" to mean
+                # "submitted, listing awaiting approval"
+                if when.startswith("pending-"):
+                    date = when.removeprefix("pending-")
+                    results.append(f"**{name}** — Submitted on {date}, listing pending approval, skipping")
+                else:
+                    results.append(f"**{name}** — Already submitted on {when}, skipping")
                 continue
 
             handler = _HANDLERS.get(name)

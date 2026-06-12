@@ -34,3 +34,12 @@ pnpm-debug.log*
 
 # claude code
 .claude/
+
+# terraform (state contains account details and secret ARNs)
+marketing-agent/infra/.terraform/
+marketing-agent/infra/.terraform.lock.hcl
+marketing-agent/infra/*.tfstate
+marketing-agent/infra/*.tfstate.backup
+
+# amplify manual deploy artifact
+deploy.zip

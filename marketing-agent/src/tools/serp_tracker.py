@@ -1,12 +1,28 @@
-"""Track Google SERP rankings for keptlocal.com target keywords."""
+"""Track Google SERP rankings for keptlocal.com target keywords.
+
+Prefers the Serper.dev API when SERPER_API_KEY is set — Google blocks
+headless-browser scraping (it redirects straight to /sorry/), so the
+Playwright path exists only as a fallback and reports blocked checks
+honestly instead of pretending the site isn't ranked.
+"""
 from __future__ import annotations
 
 import asyncio
+import json
 import os
+import random
+import urllib.parse
+import urllib.request
 
 from playwright.async_api import async_playwright
 
 from config import TARGET_KEYWORDS
+
+# Sentinel outcomes for a rank check that did not produce a position.
+# "not ranked" means the SERP parsed fine and keptlocal.com wasn't in it;
+# "blocked" means Google served a captcha/empty page, so the rank is UNKNOWN.
+NOT_RANKED = "not_ranked"
+BLOCKED = "blocked"
 
 # Injected into every new page to remove the webdriver fingerprint
 _STEALTH_SCRIPT = """
@@ -34,6 +50,83 @@ async def track_keyword_rankings(github_token: str | None = None, github_repo: s
         except Exception:
             pass  # first run — no previous data
 
+    serper_key = os.environ.get("SERPER_API_KEY")
+    if serper_key:
+        results = _check_ranks_serper(serper_key)
+    else:
+        results = await _check_ranks_playwright()
+
+    if not results:
+        return "No ranking data collected."
+
+    blocked_count = 0
+    lines = ["| Keyword | Position | Change |", "|---------|----------|--------|"]
+    for r in results:
+        kw = r["keyword"]
+        pos = r["position"]
+        if isinstance(pos, int):
+            pos_str = str(pos)
+        elif pos == NOT_RANKED:
+            pos_str = "not in top 30"
+        else:
+            pos_str = "check failed"
+            blocked_count += 1
+
+        prev_pos = prev.get(kw)
+        if not isinstance(pos, int) or prev_pos is None:
+            delta = "—"
+        elif pos < prev_pos:
+            delta = f"▲ {prev_pos - pos}"
+        elif pos > prev_pos:
+            delta = f"▼ {pos - prev_pos}"
+        else:
+            delta = "="
+
+        lines.append(f"| {kw} | {pos_str} | {delta} |")
+
+    table = "\n".join(lines)
+    if blocked_count:
+        if serper_key:
+            table += (
+                f"\n\n_{blocked_count} of {len(results)} Serper API checks failed — "
+                "verify the API key and remaining credits at serper.dev._"
+            )
+        else:
+            table += (
+                f"\n\n_{blocked_count} of {len(results)} checks were blocked by Google bot "
+                "detection — those rankings are unknown, not absent. Set SERPER_API_KEY "
+                "to use the Serper.dev API for reliable data._"
+            )
+    return table
+
+
+def _check_ranks_serper(api_key: str) -> list[dict]:
+    """Look up rankings via the Serper.dev Google Search API (no scraping)."""
+    results: list[dict] = []
+    for keyword in TARGET_KEYWORDS:
+        results.append({"keyword": keyword, "position": _serper_rank(api_key, keyword)})
+    return results
+
+
+def _serper_rank(api_key: str, keyword: str) -> int | str:
+    body = json.dumps({"q": keyword, "num": 30, "gl": "us", "hl": "en"}).encode()
+    req = urllib.request.Request(
+        "https://google.serper.dev/search",
+        data=body,
+        headers={"X-API-KEY": api_key, "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read())
+    except Exception:
+        return BLOCKED
+    for item in data.get("organic", []):
+        if "keptlocal.com" in item.get("link", ""):
+            return int(item.get("position", 0)) or NOT_RANKED
+    return NOT_RANKED
+
+
+async def _check_ranks_playwright() -> list[dict]:
     results: list[dict] = []
 
     async with async_playwright() as p:
@@ -53,41 +146,32 @@ async def track_keyword_rankings(github_token: str | None = None, github_repo: s
         await context.add_init_script(_STEALTH_SCRIPT)
         page = await context.new_page()
 
+        blocked_streak = 0
         for keyword in TARGET_KEYWORDS:
             position = await _check_rank(page, keyword)
             results.append({"keyword": keyword, "position": position})
-            await asyncio.sleep(3)
+            if position == BLOCKED:
+                blocked_streak += 1
+                # Google has flagged this session — further checks will all fail.
+                if blocked_streak >= 5:
+                    for kw in TARGET_KEYWORDS[len(results):]:
+                        results.append({"keyword": kw, "position": BLOCKED})
+                    break
+            else:
+                blocked_streak = 0
+            await asyncio.sleep(random.uniform(4, 9))
 
         await browser.close()
 
-    if not results:
-        return "No ranking data collected."
-
-    lines = ["| Keyword | Position | Change |", "|---------|----------|--------|"]
-    for r in results:
-        kw = r["keyword"]
-        pos = r["position"]
-        pos_str = str(pos) if pos is not None else "—"
-
-        prev_pos = prev.get(kw)
-        if pos is None or prev_pos is None:
-            delta = "—"
-        elif pos < prev_pos:
-            delta = f"▲ {prev_pos - pos}"
-        elif pos > prev_pos:
-            delta = f"▼ {pos - prev_pos}"
-        else:
-            delta = "="
-
-        lines.append(f"| {kw} | {pos_str} | {delta} |")
-
-    return "\n".join(lines)
+    return results
 
 
-async def _check_rank(page, keyword: str) -> int | None:
-    """Return 1-based organic Google position for keptlocal.com, or None if not in top 30."""
+async def _check_rank(page, keyword: str) -> int | str:
+    """Return 1-based organic Google position for keptlocal.com,
+    NOT_RANKED if the SERP parsed but keptlocal.com isn't in the top 30,
+    or BLOCKED if Google refused to serve results (captcha, empty page, error)."""
     try:
-        query = keyword.replace(" ", "+")
+        query = urllib.parse.quote_plus(keyword)
         await page.goto(
             f"https://www.google.com/search?q={query}&num=30&hl=en&gl=us",
             wait_until="domcontentloaded",
@@ -106,27 +190,34 @@ async def _check_rank(page, keyword: str) -> int | None:
             except Exception:
                 pass
 
-        # Detect captcha — skip this keyword if blocked
+        # Google's bot-detection page redirects to /sorry/
+        if "/sorry/" in page.url:
+            return BLOCKED
+        body_text = (await page.inner_text("body"))[:2000].lower()
+        if "unusual traffic" in body_text or "not a robot" in body_text:
+            return BLOCKED
         for selector in _CAPTCHA_SIGNALS:
             try:
                 el = await page.query_selector(selector)
                 if el and await el.is_visible():
-                    return None  # captcha detected, skip gracefully
+                    return BLOCKED
             except Exception:
                 pass
 
-        # Count only organic results (skip ads: data-text-ad, .ads-ad, #tads)
-        position = 0
-        all_result_divs = await page.query_selector_all(
-            "div.g:not([data-text-ad]):not(.ads-ad) a[href^='http'], "
-            "div[data-hveid]:not([data-text-ad]) a[href^='http']"
+        # Organic results: external anchors wrapping an h3 title inside the
+        # results container. Ads ("/aclk?") and Google-internal links are skipped.
+        anchors = await page.query_selector_all(
+            "#search a[href^='http']:has(h3), #rso a[href^='http']:has(h3)"
         )
+        if not anchors:
+            anchors = await page.query_selector_all("a[href^='http']:has(h3)")
+
+        position = 0
         seen_hrefs: set[str] = set()
-        for el in all_result_divs:
+        for el in anchors:
             href = (await el.get_attribute("href") or "").strip()
             if not href or href in seen_hrefs:
                 continue
-            # Skip Google-internal links and ad URLs
             if "google.com" in href or "/aclk?" in href:
                 continue
             seen_hrefs.add(href)
@@ -136,6 +227,10 @@ async def _check_rank(page, keyword: str) -> int | None:
             if position >= 30:
                 break
 
-        return None
+        # Zero organic results parsed means Google served a captcha/empty page
+        # (or changed markup) — the rank is unknown, not absent.
+        if position == 0:
+            return BLOCKED
+        return NOT_RANKED
     except Exception:
-        return None
+        return BLOCKED

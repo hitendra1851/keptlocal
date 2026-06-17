@@ -10,9 +10,13 @@ export interface Props {
   readTime: number;       // minutes
   tags?: string[];
   canonical?: string;
+  toolSlug?: string;      // links to /tools/[slug] for the CTA block
+  toolName?: string;      // display name, e.g. "Merge PDF"
+  toolTagline?: string;   // one-liner shown in the CTA
 }
 
-const { title, description, publishDate, readTime, tags = [], canonical } = Astro.props;
+const { title, description, publishDate, readTime, tags = [], canonical, toolSlug, toolName, toolTagline } = Astro.props;
+const toolHref = toolSlug ? `/tools/${toolSlug}` : "/tools";
 
 const siteUrl = "https://keptlocal.com";
 const pageUrl  = canonical ?? `${siteUrl}${Astro.url.pathname}`;
@@ -114,6 +118,25 @@ const schema = [
           <slot />
         </div>
 
+        <!-- Tool CTA -->
+        {(toolSlug || toolName) && (
+          <div class="mt-10 p-5 rounded-xl border-2 border-[var(--color-accent)] bg-[var(--color-accent-tint)] flex flex-col sm:flex-row sm:items-center gap-4">
+            <div class="flex-1">
+              <div class="text-xs font-medium text-[var(--color-accent)] uppercase tracking-wide mb-1">Free browser tool</div>
+              <div class="font-display text-xl text-[var(--color-ink)] tracking-tight">{toolName || "Try it on keptlocal"}</div>
+              {toolTagline && <p class="text-sm text-[var(--color-ink-soft)] mt-1">{toolTagline}</p>}
+              <p class="text-xs text-[var(--color-ink-muted)] mt-1">No upload. No signup. Runs in your browser.</p>
+            </div>
+            <a
+              href={toolHref}
+              class="btn-primary shrink-0 self-start sm:self-center"
+            >
+              {toolSlug ? `Use ${toolName || "this tool"}` : (toolName || "Browse tools")}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        )}
+
         <!-- Ad slot: in-content bottom -->
         <div class="ad-slot mt-10" data-ad-position="in-content-bottom"></div>
       </article>
@@ -124,9 +147,20 @@ const schema = [
           <div class="ad-slot" data-ad-position="sidebar" style="min-height: 250px;"></div>
 
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Privacy-first tools</h4>
-            <p class="text-xs text-[var(--color-ink-muted)] mb-3">All keptlocal tools run entirely in your browser. Files never leave your device.</p>
-            <a href="/" class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4">Browse all tools →</a>
+            {toolSlug ? (
+              <>
+                <h4 class="font-medium text-sm text-[var(--color-ink)] mb-1">{toolName || "Try the tool"}</h4>
+                {toolTagline && <p class="text-xs text-[var(--color-ink-muted)] mb-2">{toolTagline}</p>}
+                <p class="text-xs text-[var(--color-ink-muted)] mb-3">Free. No upload. Runs in your browser.</p>
+                <a href={toolHref} class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4 font-medium">Use {toolName} →</a>
+              </>
+            ) : (
+              <>
+                <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Privacy-first tools</h4>
+                <p class="text-xs text-[var(--color-ink-muted)] mb-3">All keptlocal tools run entirely in your browser. Files never leave your device.</p>
+                <a href="/tools" class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4">Browse all tools →</a>
+              </>
+            )}
           </div>
 
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">

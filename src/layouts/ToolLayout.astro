@@ -17,6 +17,53 @@ const relatedTools = tools
   .filter((t) => t.category === tool.category && t.slug !== tool.slug && t.status === "live")
   .slice(0, 4);
 
+const blogMap: Record<string, { slug: string; title: string }[]> = {
+  "merge-pdf": [
+    { slug: "merge-pdf-without-uploading", title: "How to Merge PDFs Without Uploading" },
+    { slug: "why-pdf-tools-should-not-upload-your-files", title: "Why PDF Tools Shouldn't Upload Your Files" },
+  ],
+  "split-pdf": [
+    { slug: "how-to-split-a-pdf-without-uploading", title: "How to Split a PDF Without Uploading" },
+  ],
+  "pdf-to-jpg": [
+    { slug: "pdf-to-jpg-when-and-when-not-to-convert", title: "PDF to JPG: When (and When Not) to Convert" },
+  ],
+  "pdf-to-png": [
+    { slug: "pdf-to-jpg-when-and-when-not-to-convert", title: "PDF to JPG vs PNG: Which to Use" },
+  ],
+  "jpg-to-pdf": [
+    { slug: "how-to-convert-jpg-to-pdf", title: "How to Convert JPG to PDF for Free" },
+  ],
+  "compress-pdf": [
+    { slug: "compress-pdf-file-size-vs-quality", title: "File Size vs. Quality: PDF Compression Explained" },
+    { slug: "how-to-compress-pdf-for-email", title: "How to Compress a PDF for Email" },
+  ],
+  "delete-pages-pdf": [
+    { slug: "how-to-remove-pages-from-pdf", title: "How to Remove Pages from a PDF Without Uploading" },
+  ],
+  "add-page-numbers-pdf": [
+    { slug: "how-to-add-page-numbers-to-pdf", title: "How to Add Page Numbers to a PDF" },
+  ],
+  "pdf-to-text": [
+    { slug: "how-to-extract-text-from-pdf", title: "How to Extract Text from a PDF" },
+  ],
+  "unlock-pdf": [
+    { slug: "how-to-remove-pdf-password", title: "How to Remove a PDF Password" },
+  ],
+  "compress-image": [
+    { slug: "how-to-compress-image-to-specific-file-size", title: "Compress an Image to 100KB, 200KB, 500KB" },
+    { slug: "image-compression-formats-jpg-webp-avif-2026", title: "JPG vs WebP vs AVIF: Which Format to Use" },
+  ],
+  "convert-image": [
+    { slug: "heic-to-jpg-iphone-photo-problem", title: "HEIC to JPG: The iPhone Photo Problem" },
+    { slug: "image-compression-formats-jpg-webp-avif-2026", title: "JPG vs WebP vs AVIF Compared" },
+  ],
+  "qr-code-generator": [
+    { slug: "qr-code-guide-free-no-signup", title: "QR Codes Explained: What They Store and How to Make One Free" },
+  ],
+};
+const relatedPosts = blogMap[tool.slug] ?? [];
+
 const title = `${tool.pageTitle || tool.name} — Free & Private | keptlocal`;
 const description = tool.longDescription || tool.description;
 
@@ -125,6 +172,24 @@ if (tool.faq.length > 0) {
               </ul>
             </div>
           )}
+          {relatedPosts.length > 0 && (
+            <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
+              <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">From the blog</h4>
+              <ul class="space-y-2">
+                {relatedPosts.map((p) => (
+                  <li>
+                    <a
+                      href={`/blog/${p.slug}`}
+                      class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4 leading-snug block"
+                    >
+                      {p.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
             <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
             <ol class="text-sm text-[var(--color-ink-soft)] space-y-2 list-decimal pl-4">

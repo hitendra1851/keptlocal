@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://keptlocal.com',
-  integrations: [sitemap({ filter: (page) => !page.includes('/kl-stats') })],
+  integrations: [sitemap({ filter: (page) => !page.includes('/kl-stats') && !page.includes('/agent') })],
   vite: {
     plugins: [tailwindcss()],
   },

@@ -1,0 +1,208 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="QR Codes Explained: What They Store, How They Work, and How to Make One Free"
+  description="Everything you need to know about QR codes — what information they can hold, how to create one without tracking or signup, and how to make sure it scans reliably."
+  publishDate="2026-06-17"
+  readTime={7}
+  tags={["Utility"]}
+  toolSlug="qr-code-generator"
+  toolName="QR Code Generator"
+  toolTagline="Generate QR codes for URLs, text, or contact info — instantly in your browser."
+>
+
+<p class="lead">
+  QR codes are on restaurant menus, business cards, product packaging, event tickets, and government
+  forms. Most people scan them every week. Far fewer know how they work, what they can actually store,
+  or how to make one that scans reliably — without handing your data to a third-party tracking service
+  in the process.
+</p>
+
+<h2>What a QR code actually is</h2>
+
+<p>
+  A QR code (Quick Response code) is a two-dimensional barcode invented in 1994 by Denso Wave for
+  tracking automotive parts. The "two-dimensional" part matters: unlike a traditional barcode that
+  stores data in one direction (varying widths of vertical stripes), a QR code stores data in both
+  horizontal and vertical directions, which is why it can hold far more information.
+</p>
+
+<p>
+  The black and white squares encode data using a specific international standard (ISO 18004). The
+  three large square markers in the corners (called "finder patterns") let a scanner determine the
+  code's orientation and size regardless of how the image is held or photographed. The smaller squares
+  scattered inside (alignment patterns) help the scanner decode the code even if the image is slightly
+  distorted or printed on a curved surface.
+</p>
+
+<h2>What can a QR code store?</h2>
+
+<p>
+  A QR code can encode any text, up to a maximum of around 3,000 characters (the exact limit depends
+  on the character type and error correction level). In practice, QR codes are used for:
+</p>
+
+<ul>
+  <li><strong>URLs</strong> — the most common use. The code encodes a web address; scanning it opens
+  the URL in the device's browser. Example: <code>https://keptlocal.com/tools/qr-code-generator</code></li>
+  <li><strong>Plain text</strong> — any string of characters, such as a Wi-Fi password hint,
+  a product serial number, or a short message</li>
+  <li><strong>Email</strong> — a <code>mailto:</code> link that opens the device's email app with
+  a pre-filled recipient address (and optionally, subject and body)</li>
+  <li><strong>Phone numbers</strong> — a <code>tel:</code> link that prompts the device to dial</li>
+  <li><strong>Wi-Fi credentials</strong> — a structured format (<code>WIFI:S:NetworkName;T:WPA;P:password;;</code>)
+  that iOS and Android can parse to join a network automatically</li>
+  <li><strong>vCard / contact info</strong> — a structured format that lets users add someone to
+  their contacts by scanning</li>
+  <li><strong>App store links</strong> — URLs pointing to App Store or Google Play listings</li>
+</ul>
+
+<p>
+  One thing a QR code cannot do on its own: track anything. A QR code is static data. It does not
+  know who scanned it, when, or from where. Tracking happens when the URL inside the code leads to
+  a redirect service (like a link shortener) that logs the visit before sending the user onward.
+  More on this below.
+</p>
+
+<h2>Error correction: why QR codes still scan when damaged</h2>
+
+<p>
+  QR codes include redundant data through a technique called Reed-Solomon error correction.
+  This allows the code to be decoded correctly even if part of it is damaged, dirty, or obscured —
+  useful when codes are printed on surfaces that wear, used outdoors, or have a logo placed on top.
+</p>
+
+<p>
+  There are four error correction levels:
+</p>
+
+<ul>
+  <li><strong>L (Low)</strong> — recovers up to 7% data loss. Best for clean digital displays
+  where damage is unlikely. Produces the smallest, least dense code.</li>
+  <li><strong>M (Medium)</strong> — recovers up to 15% data loss. The practical default for
+  most use cases.</li>
+  <li><strong>Q (Quartile)</strong> — recovers up to 25% data loss. Good for industrial or
+  outdoor printing.</li>
+  <li><strong>H (High)</strong> — recovers up to 30% data loss. Use when you plan to add a
+  logo to the center of the code, or when the printing environment is harsh.</li>
+</ul>
+
+<p>
+  Higher error correction makes the code denser (more squares) and slightly harder to scan at
+  very small sizes. For most uses, Medium is the right balance.
+</p>
+
+<h2>The tracking problem with free QR code generators</h2>
+
+<p>
+  Many free QR code generators are businesses built around data collection. They fall into two categories:
+</p>
+
+<p>
+  <strong>Static code generators with analytics dashboards</strong> — these generate a unique
+  redirect URL (something like <code>qr.io/abc123</code>) that points to your destination. Every scan
+  goes through their server, logging the scan count, device type, approximate location, and time.
+  This is useful if you genuinely need analytics, but it means every future scan depends on their
+  service staying online, and all scan data belongs to them.
+</p>
+
+<p>
+  <strong>Generators that require account creation</strong> — some tools gate QR code downloads
+  or scan limits behind a signup, turning a simple utility into a lead-capture mechanism.
+</p>
+
+<p>
+  If you just need a QR code that encodes a URL and scans reliably — and you do not need scan analytics —
+  there is no reason to use either. A browser-generated QR code that encodes the URL directly has no
+  redirect layer, no dependency on a third-party service, and no expiry date.
+</p>
+
+<h2>How to generate a QR code without tracking or signup</h2>
+
+<ol>
+  <li>Open a browser-based QR code generator (keptlocal's is at <a href="/tools/qr-code-generator">/tools/qr-code-generator</a>)</li>
+  <li>Paste the URL or text you want to encode</li>
+  <li>Choose a size — 300px for digital use, 500px+ for print</li>
+  <li>Set error correction to Medium for general use, High if adding a logo or printing on rough surfaces</li>
+  <li>Download the PNG</li>
+</ol>
+
+<p>
+  The resulting PNG contains the QR code image. Open it in any image editor to resize or modify.
+  No redirect server is involved — scanning the code takes the user directly to your URL.
+</p>
+
+<h2>Getting the size right for print</h2>
+
+<p>
+  QR codes scale as vector-like pixel art — they look sharp as long as the squares in the code
+  map cleanly to printer dots. The rule of thumb: the minimum print size is approximately
+  2cm × 2cm (about 0.8 inches), with a quiet zone (white border) of at least 4 squares wide on
+  all sides. Below that size, older or low-quality scanners start failing.
+</p>
+
+<p>
+  For business cards: 1.5–2 cm. For A4 posters: 4–6 cm. For billboards or large-format print:
+  aim for a size that can be scanned from the expected viewing distance — the code should subtend
+  about 10° of field of view at the scanner.
+</p>
+
+<p>
+  When downloading for print use, choose a larger pixel size (500px or above) so that scaling in
+  your design software does not introduce blurring. QR codes should never be resized by a
+  non-integer factor — only scale by whole multiples (2×, 3×, etc.) or keep the original pixel
+  dimensions.
+</p>
+
+<h2>Testing before you commit</h2>
+
+<p>
+  Always test your QR code before printing it at scale or distributing it permanently. Scan it
+  with at least two different devices (different phone models, different operating systems). Check
+  that the URL opens correctly, including on mobile — some URLs that work on desktop have mobile
+  redirect issues.
+</p>
+
+<p>
+  If you add a logo to the center of the QR code, test the modified version. A logo covering more
+  than about 20–25% of the code area will cause scan failures unless you used High error correction.
+</p>
+
+<h2>What happens when the URL in your QR code changes</h2>
+
+<p>
+  A static QR code cannot be edited after generation — it is just an image encoding a fixed string.
+  If the URL it points to moves (the page is deleted, the domain expires, the company rebrands),
+  the code breaks.
+</p>
+
+<p>
+  There are two solutions:
+</p>
+
+<p>
+  <strong>Use a URL you control permanently</strong> — the cleanest option. If the QR code points to
+  your own domain, you can update the destination without changing the code. Point the URL to a
+  landing page on your own site, then redirect from there to wherever the content lives.
+</p>
+
+<p>
+  <strong>Use a dynamic QR service</strong> — a redirect service that lets you update the destination
+  URL without regenerating the code. This is the right choice when the code is already printed at
+  scale and the destination genuinely needs to change. The trade-off is the service dependency
+  described above.
+</p>
+
+<h2>Common QR code mistakes</h2>
+
+<ul>
+  <li><strong>Too small to scan reliably</strong> — test at the intended print size before committing to a print run</li>
+  <li><strong>Low contrast</strong> — dark squares on a light background is the standard for a reason. Coloured codes can work but need testing; pastels on white or white-on-white never work</li>
+  <li><strong>No quiet zone</strong> — the white border around the code is required. Remove it and many scanners fail</li>
+  <li><strong>Linking to a page that does not work on mobile</strong> — the vast majority of QR scans happen on phones; test the destination on mobile</li>
+  <li><strong>Encoding too much data</strong> — very long URLs produce very dense codes that are harder to scan. Use a URL shortener for the destination if the URL is unusually long</li>
+</ul>
+
+</BlogLayout>

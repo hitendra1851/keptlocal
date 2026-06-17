@@ -1,0 +1,196 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Why Browser-Based PDF Tools Are Safer for Legal and Compliance Teams"
+  description="Legal and compliance teams handle some of the most sensitive documents in any organization. Here is why browser-based PDF processing is a structurally sounder choice than cloud-upload tools."
+  publishDate="2026-06-17"
+  readTime={8}
+  tags={["PDF", "Privacy"]}
+  toolName="Browse all tools"
+  toolTagline="All keptlocal tools process files in your browser — nothing reaches a server."
+>
+
+<p class="lead">
+  Legal teams deal in documents that cannot afford exposure: contracts under negotiation, privileged communications,
+  regulatory filings, settlement drafts. Every time one of those documents passes through an online PDF tool,
+  it passes through someone else's infrastructure. Most legal and compliance officers do not think about this
+  — but the IT security teams responsible for data handling should.
+</p>
+
+<h2>The upload problem is not hypothetical</h2>
+
+<p>
+  Free online PDF tools are businesses. They have servers, S3 buckets, logging infrastructure, and support
+  staff who can access uploaded files. Their privacy policies — when they exist and are readable — typically
+  promise deletion "within 24 hours" or "within X days after processing." What they do not promise is
+  that the file never reaches a log, never touches a backup system, and is never accessible to any employee
+  during that window.
+</p>
+
+<p>
+  Sophos, Cloudflare, and multiple academic researchers have documented cases where free file-processing
+  services retained files well beyond their stated policies. In regulated industries, the question is not
+  whether this is theoretically possible — it is whether your organisation can demonstrate control over
+  where confidential documents go. With upload-based tools, you cannot.
+</p>
+
+<h2>What makes a document legally sensitive?</h2>
+
+<p>
+  The answer is broader than most people assume. The obvious cases are straightforward:
+</p>
+
+<ul>
+  <li><strong>Privileged communications</strong> — attorney-client exchanges, legal opinions, strategy memos</li>
+  <li><strong>Deal documents</strong> — term sheets, NDAs, merger agreements before public announcement</li>
+  <li><strong>Regulatory submissions</strong> — GDPR data protection assessments, SEC filings, clinical trial data</li>
+  <li><strong>HR records</strong> — performance reviews, disciplinary records, compensation details</li>
+  <li><strong>Medical records</strong> — anything subject to HIPAA (US), UK GDPR, or equivalent EU/national laws</li>
+</ul>
+
+<p>
+  Less obvious: any document that contains PII (personally identifiable information) is potentially regulated
+  under GDPR, CCPA, or similar frameworks. A PDF containing a client list, a supplier contract with named
+  individuals, or even a meeting agenda with employee names could constitute personal data under a strict
+  reading of those regulations.
+</p>
+
+<h2>The regulatory landscape for cloud PDF processing</h2>
+
+<p>
+  GDPR Article 28 requires that any party processing personal data on behalf of a controller be a "data
+  processor" operating under a written contract. When a legal assistant uploads a document to a free online
+  tool to merge or compress it, they are effectively routing personal data through an unvetted third-party
+  processor — with no data processing agreement, no subprocessor disclosure, and no way to fulfil a
+  subject access request that includes that processing event.
+</p>
+
+<p>
+  HIPAA has parallel requirements under the Business Associate Agreement framework. A covered entity
+  that uploads protected health information to a free PDF tool has created a BAA-free relationship with
+  a processor that almost certainly has not agreed to HIPAA obligations.
+</p>
+
+<p>
+  For organisations operating under ISO 27001 or SOC 2 frameworks, the question is whether "using a free
+  online tool" is a documented and approved data handling activity. In most audited environments, it is not.
+</p>
+
+<h2>How browser-based processing eliminates the exposure window</h2>
+
+<p>
+  Browser-based PDF tools like keptlocal work by running the processing code inside your browser tab.
+  When you merge, compress, or split a PDF in a browser-based tool:
+</p>
+
+<ol>
+  <li>The file is read into your browser's memory from your local filesystem</li>
+  <li>The processing library (in this case, pdf-lib compiled to WebAssembly) runs in the browser sandbox</li>
+  <li>The output is written to your browser's memory and offered as a download</li>
+  <li>At no point does any byte of the document reach an external server</li>
+</ol>
+
+<p>
+  You can verify this in seconds: open any keptlocal tool, open your browser's DevTools (press F12),
+  switch to the Network tab, then run the tool. You will see requests for the JavaScript libraries —
+  fetched once and cacheable — but zero upload requests for your document. The file never leaves the
+  browser tab.
+</p>
+
+<p>
+  This is not a privacy policy claim. It is observable, verifiable browser behaviour. A compliance
+  officer or IT auditor can confirm it in under two minutes.
+</p>
+
+<h2>The vendor-lock and egress problem</h2>
+
+<p>
+  Upload-based tools create dependency beyond the privacy question. If a tool changes its pricing, goes
+  offline, or changes its terms of service, any workflows built around it break. Browser-based tools
+  have no such dependency: the processing code runs in your browser, which you control. There are no
+  API keys to manage, no accounts to maintain, and no service continuity risk.
+</p>
+
+<p>
+  For enterprises with strict change management processes, this matters. Introducing a SaaS dependency
+  for document processing requires vendor due diligence, procurement approval, and ongoing monitoring.
+  A browser-based tool that runs locally has a much simpler risk profile.
+</p>
+
+<h2>What browser-based tools cannot do (yet)</h2>
+
+<p>
+  Being transparent about limitations is important. There are PDF operations that genuinely require
+  server-side processing today:
+</p>
+
+<ul>
+  <li><strong>High-compression PDF</strong> — aggressive image recompression using Ghostscript produces
+  better results than is achievable in a browser. The difference matters for image-heavy documents.</li>
+  <li><strong>PDF to Word conversion</strong> — converting to an editable Word document requires
+  interpreting PDF layout semantics that current browser libraries handle imperfectly.</li>
+  <li><strong>OCR on scanned documents</strong> — optical character recognition is computationally
+  expensive and the best models run server-side.</li>
+  <li><strong>AI-powered extraction</strong> — extracting structured data from complex documents
+  (invoices, contracts, clinical forms) requires language model inference.</li>
+</ul>
+
+<p>
+  For these use cases, a vetted, contract-backed cloud service with a data processing agreement is
+  the right answer — not a free online tool. The distinction matters: there is a difference between
+  a managed service relationship and uploading to a free tool that makes money through ads.
+</p>
+
+<h2>Practical recommendations for legal and compliance teams</h2>
+
+<p>
+  A reasonable policy for document handling in a regulated organisation might look like this:
+</p>
+
+<ol>
+  <li><strong>Default to browser-based tools</strong> for routine operations: merging, splitting,
+  rotating, compressing, watermarking, numbering pages. These cover the vast majority of use cases
+  and have no data-egress risk.</li>
+  <li><strong>Use vetted, contracted services</strong> for operations that require server-side
+  processing. Ensure a data processing agreement is in place and the service appears in your
+  vendor register.</li>
+  <li><strong>Prohibit free upload-based tools</strong> for documents classified above a certain
+  sensitivity threshold. The policy does not need to be complex — a simple rule that confidential
+  or above documents must not be uploaded to unapproved services is sufficient.</li>
+  <li><strong>Document the tool selection rationale</strong> for auditors. "We use browser-based
+  tools because processing is verifiably local" is a defensible, auditable statement.</li>
+</ol>
+
+<h2>The audit trail question</h2>
+
+<p>
+  One consideration that sometimes arises: if no data leaves the browser, how do you audit what
+  processing was done? The answer is that browser-based processing leaves the same audit trail as
+  any local processing on a user's machine — which is to say, none inherently. This is the same
+  situation as using desktop software like Adobe Acrobat.
+</p>
+
+<p>
+  If your organisation requires an audit log of document processing events, the appropriate solution
+  is endpoint monitoring or a document management system — not relying on a cloud tool's server-side
+  logs, which you do not control and cannot independently verify.
+</p>
+
+<h2>Conclusion</h2>
+
+<p>
+  Browser-based PDF processing is not just a privacy preference — for organisations handling regulated
+  data, it is a structurally sounder approach to routine document operations. The absence of an upload
+  is verifiable, the absence of a vendor dependency simplifies procurement, and the privacy guarantee
+  is architectural rather than contractual.
+</p>
+
+<p>
+  For the routine document operations that legal and compliance teams run every day — merging contracts,
+  removing pages from a draft, compressing attachments for email — a browser-based tool requires no
+  trust assumptions. The document stays where it started: on your device.
+</p>
+
+</BlogLayout>

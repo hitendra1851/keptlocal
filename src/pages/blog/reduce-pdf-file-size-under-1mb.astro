@@ -1,0 +1,237 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Reduce a PDF to Under 1MB (Without Making It Unreadable)"
+  description="Email providers, portals, and government forms often cap PDF uploads at 1MB, 2MB, or 5MB. Here is how to hit those limits without destroying the document's readability."
+  publishDate="2026-06-17"
+  readTime={7}
+  tags={["PDF"]}
+  toolSlug="compress-pdf"
+  toolName="Compress PDF"
+  toolTagline="Reduce PDF file size by removing unused objects and metadata — in your browser."
+>
+
+<p class="lead">
+  A visa portal caps photos at 100KB. An insurance claim form rejects anything over 2MB. A job application
+  system has a 1MB limit on "supporting documents." These limits are everywhere, and a standard PDF export
+  from Word, Acrobat, or a scanner routinely produces files four to ten times larger. Here is how to bridge
+  the gap without making the document unreadable at the other end.
+</p>
+
+<h2>Why PDFs are larger than you expect</h2>
+
+<p>
+  A PDF's file size is the sum of several components, and understanding which ones are large tells
+  you which approach will work:
+</p>
+
+<ul>
+  <li><strong>Embedded images</strong> — the biggest contributor in most documents. A scanned PDF
+  or a report with photographs can have images totalling tens of megabytes embedded at full resolution.</li>
+  <li><strong>Fonts</strong> — PDFs embed the fonts used in the document so they render identically
+  on any device. A document using several uncommon fonts can carry a few hundred kilobytes of font data.</li>
+  <li><strong>Metadata</strong> — document properties (author, creation date, edit history, software used)
+  are usually small but worth removing for both privacy and size.</li>
+  <li><strong>Annotations and form data</strong> — interactive forms, comments, and digital signatures
+  add overhead.</li>
+  <li><strong>Unused objects</strong> — PDFs accumulate debris as they are edited: deleted pages may
+  leave orphaned objects, form fields that were removed may have residual data structures.</li>
+  <li><strong>Version history</strong> — incrementally-saved PDFs stack changes rather than rewriting
+  the file, which can significantly bloat size.</li>
+</ul>
+
+<h2>The right approach depends on what is making it large</h2>
+
+<p>
+  Before compressing blindly, look at what kind of PDF you have:
+</p>
+
+<p>
+  <strong>Text-heavy document (report, contract, letter)</strong> — these are typically under 500KB
+  already. If yours is large, the culprit is probably embedded fonts or metadata. Metadata removal
+  and object cleanup (both achievable in a browser-based tool) usually bring these under any
+  reasonable limit.
+</p>
+
+<p>
+  <strong>Scanned document (scan of paper)</strong> — these are essentially image files wrapped in
+  a PDF container. The images are the entire size. A 10-page A4 scan at 300 DPI can easily be 10–30MB.
+  Getting this under 1MB requires image recompression, which means some quality loss is unavoidable.
+</p>
+
+<p>
+  <strong>Mixed document (text with embedded photos)</strong> — the images drive size, but the text
+  portions can be preserved perfectly. The right approach is to recompress only the images, leaving
+  text and vector content intact.
+</p>
+
+<p>
+  <strong>Exported from Word / PowerPoint</strong> — these often contain images that were not
+  optimised before export. Recompressing or reducing image DPI typically yields large savings.
+</p>
+
+<h2>Method 1: Browser-based metadata and object cleanup (no upload needed)</h2>
+
+<p>
+  For text-heavy PDFs and documents where the source content is well-optimised, removing metadata
+  and unused objects can achieve meaningful size reductions without any quality loss.
+</p>
+
+<p>
+  keptlocal's <a href="/tools/compress-pdf">Compress PDF tool</a> does this in your browser:
+  it strips document metadata (author, creation software, modification dates) and removes orphaned
+  objects and unused resources. No upload, no account.
+</p>
+
+<p>
+  What to expect: text-only PDFs often see 10–30% reduction. Image-heavy PDFs see less,
+  because the images themselves are not recompressed — only the surrounding overhead is removed.
+</p>
+
+<h2>Method 2: Reduce resolution before exporting</h2>
+
+<p>
+  If you still have the source file (Word document, InDesign file, presentation), the best time
+  to address PDF size is before you export. Modern versions of Microsoft Word, LibreOffice, and
+  Google Docs all have export settings that let you specify image quality.
+</p>
+
+<p>
+  In Microsoft Word: File → Save As → PDF → Options → Image Quality. Choose "Standard (publishing
+  online and printing)" rather than "Best for printing." The difference in file size for a
+  photo-heavy document can be 3–5×, with no visible quality loss for screen viewing.
+</p>
+
+<p>
+  In Google Docs: File → Download → PDF Document. Google's PDF export is reasonably well-optimised
+  by default.
+</p>
+
+<h2>Method 3: Server-side compression for scanned documents</h2>
+
+<p>
+  Scanned PDFs require re-encoding the embedded images at lower quality or lower resolution.
+  This is where browser-based tools hit a wall — recompressing JPEG data inside a PDF properly
+  requires a tool like Ghostscript (used by most professional PDF compressors), which runs server-side.
+</p>
+
+<p>
+  For scanned documents that need to be under 1MB:
+</p>
+
+<ul>
+  <li><strong>Adobe Acrobat (desktop)</strong> — File → Save As Other → Reduced Size PDF.
+  Choose the compatibility version (Acrobat 9 or later is fine for most cases). For heavy
+  scans, use Tools → Optimize PDF for more granular control over image resolution.</li>
+  <li><strong>Smallpdf or PDF24</strong> — both offer server-side compression that uses
+  Ghostscript under the hood. They upload your file. For non-sensitive documents, this is
+  a pragmatic choice. For sensitive documents, consider the privacy trade-off.</li>
+  <li><strong>Ghostscript (command line)</strong> — free, open-source, runs locally:
+  <code>gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/ebook -o output.pdf input.pdf</code>.
+  The <code>/ebook</code> preset targets 150 DPI and typically reduces scanned PDFs by 60–80%.
+  Use <code>/screen</code> for 72 DPI (aggressive) or <code>/printer</code> for 300 DPI (conservative).</li>
+</ul>
+
+<h2>Target sizes and what to expect from each approach</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Document type</th>
+      <th>Typical original size</th>
+      <th>Browser cleanup</th>
+      <th>Server-side (Ghostscript /ebook)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>10-page text report</td>
+      <td>200–800 KB</td>
+      <td>150–600 KB</td>
+      <td>100–300 KB</td>
+    </tr>
+    <tr>
+      <td>10-page scan (300 DPI)</td>
+      <td>5–20 MB</td>
+      <td>4–18 MB</td>
+      <td>500 KB–2 MB</td>
+    </tr>
+    <tr>
+      <td>20-page photo-heavy report</td>
+      <td>10–50 MB</td>
+      <td>8–45 MB</td>
+      <td>1–5 MB</td>
+    </tr>
+    <tr>
+      <td>Exported Word doc (images optimised at source)</td>
+      <td>500 KB–3 MB</td>
+      <td>300 KB–2 MB</td>
+      <td>200 KB–800 KB</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>When quality loss is acceptable and when it is not</h2>
+
+<p>
+  Compressing images inside a PDF degrades quality. How much matters depends on the use case:
+</p>
+
+<p>
+  <strong>Forms, applications, basic correspondence</strong> — moderate compression is fine.
+  The recipient needs to read text and see basic images clearly. 150 DPI JPG compression at
+  75–85% quality is invisible at normal screen viewing sizes and on A4 printing.
+</p>
+
+<p>
+  <strong>Technical diagrams and engineering drawings</strong> — quality matters more here.
+  Line drawings can become visibly blurry at aggressive compression settings. Use conservative
+  compression or, if possible, keep text and vector elements as vectors (use PDF/A export from
+  CAD software rather than printing to PDF).
+</p>
+
+<p>
+  <strong>Legal or contractual documents</strong> — the content must be legible and unambiguous.
+  Keep a full-quality original. The compressed version sent for review or submission is a copy;
+  the executed original should be preserved at full fidelity.
+</p>
+
+<p>
+  <strong>Medical imaging embedded in a PDF</strong> — do not compress these. Clinical imaging
+  has specific requirements; a compressed JPG of a scan is not suitable for clinical use.
+  For administrative documents (referral letters with embedded images), moderate compression
+  is usually fine.
+</p>
+
+<h2>A quick checklist for hitting 1MB</h2>
+
+<ol>
+  <li>Start with browser-based metadata removal — fast, lossless, covers text-heavy PDFs</li>
+  <li>If the source document exists, re-export from the source application with image quality
+  set to "Standard" rather than "Best"</li>
+  <li>If the PDF is a scan and must be under 1MB, use Ghostscript's <code>/ebook</code> preset
+  (150 DPI, ~70% JPEG quality)</li>
+  <li>Test readability at your target file size before submitting — open the compressed version
+  at 100% zoom and read a paragraph or examine an image</li>
+  <li>Keep the original; the compressed version is for submission only</li>
+</ol>
+
+<h2>What "under 1MB" actually looks like for text documents</h2>
+
+<p>
+  A 1MB text PDF is large by the standards of text-only documents. A typical A4 page of body text
+  runs about 10–30KB in a well-exported PDF. A 30-page report with no images should comfortably
+  fit under 500KB. If a text-only document is larger than 1MB, the most common cause is embedded
+  fonts that were not subset (the full font file was embedded rather than only the characters used).
+  PDF editors and Ghostscript can subset fonts during optimisation.
+</p>
+
+<p>
+  The 1MB limits that cause problems in practice are almost always imposed on documents containing
+  images — passport-style photos, scanned signatures, certificates, and multi-page scans. For those,
+  the approaches above give you the tools to hit any reasonable target.
+</p>
+
+</BlogLayout>

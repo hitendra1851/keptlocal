@@ -60,8 +60,23 @@ const schema = {
 
     <!-- Author card -->
     <div class="flex items-start gap-5 p-6 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper-dark)] mb-12">
-      <div class="w-16 h-16 rounded-full bg-[var(--color-accent-tint)] border-2 border-[var(--color-accent)] flex items-center justify-center shrink-0">
-        <span class="font-display text-2xl text-[var(--color-accent)] tracking-tight">HP</span>
+      <div class="relative w-16 h-16 shrink-0">
+        <img
+          id="author-photo"
+          src="/images/hitendra-patel.jpg"
+          alt="Hitendra Patel — founder of keptlocal"
+          width="64"
+          height="64"
+          class="w-16 h-16 rounded-full border-2 border-[var(--color-accent)] object-cover"
+          onerror="this.style.display='none';document.getElementById('author-initials').style.display='flex'"
+        />
+        <div
+          id="author-initials"
+          style="display:none"
+          class="w-16 h-16 rounded-full bg-[var(--color-accent-tint)] border-2 border-[var(--color-accent)] items-center justify-center absolute inset-0"
+        >
+          <span class="font-display text-2xl text-[var(--color-accent)] tracking-tight">HP</span>
+        </div>
       </div>
       <div class="flex-1">
         <div class="font-medium text-[var(--color-ink)] text-lg leading-tight">Hitendra Patel</div>
@@ -119,7 +134,7 @@ const schema = {
 
       <h2>What is available today</h2>
       <p>
-        keptlocal currently has <strong>22 tools across two categories</strong>, all fully client-side:
+        keptlocal currently has <strong>27 tools across two categories</strong>, all fully client-side:
       </p>
       <p><strong>PDF tools</strong></p>
       <ul>
@@ -137,6 +152,7 @@ const schema = {
         <li><a href="/tools/pdf-to-text">PDF to Text</a> — extract readable text from any PDF</li>
         <li><a href="/tools/jpg-to-pdf">JPG to PDF</a> — combine images into a PDF</li>
         <li><a href="/tools/pdf-page-count">PDF Info Viewer</a> — page count, dimensions, metadata</li>
+        <li><a href="/tools/protect-pdf">Protect PDF</a> — add AES-128 password encryption</li>
       </ul>
       <p><strong>Image tools</strong></p>
       <ul>
@@ -148,6 +164,13 @@ const schema = {
         <li><a href="/tools/flip-image">Flip Image</a> — horizontal or vertical mirror</li>
         <li><a href="/tools/grayscale-image">Grayscale Image</a> — convert colour photos to black and white</li>
         <li><a href="/tools/image-to-base64">Image to Base64</a> — generate data URIs for HTML/CSS/JSON</li>
+        <li><a href="/tools/remove-image-exif">Remove Image EXIF</a> — strip GPS and metadata from photos</li>
+      </ul>
+      <p><strong>Utility tools</strong></p>
+      <ul>
+        <li><a href="/tools/qr-code-generator">QR Code Generator</a> — generate QR codes privately, no account needed</li>
+        <li><a href="/tools/password-generator">Password Generator</a> — cryptographically secure passwords</li>
+        <li><a href="/tools/word-counter">Word Counter</a> — count words, characters, and reading time</li>
       </ul>
       <p>
         The <a href="/blog">blog</a> covers practical guides on PDF workflows, image formats,

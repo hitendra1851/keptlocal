@@ -53,6 +53,38 @@ const tool = tools.find((t) => t.slug === "add-page-numbers-pdf")!;
       <li><strong>Password-protected PDFs:</strong> must be unlocked before use. The tool will fail on PDFs that restrict content editing.</li>
     </ul>
 
+    <h2>Page number position: which to choose</h2>
+    <p>
+      Position is mostly a convention question rather than a technical one, but it matters for readability and the type of document you are producing.
+    </p>
+    <ul>
+      <li><strong>Bottom center:</strong> The default for most documents. Readers expect it, and it does not compete visually with the document's header or sidebar content. Works for reports, proposals, academic papers, and general business documents.</li>
+      <li><strong>Bottom right:</strong> Standard for legal filings and court documents in many jurisdictions. When a reader holds a document in their right hand, the bottom-right corner is the first place they look to orient a page. Most legal formatting guides specify bottom right.</li>
+      <li><strong>Bottom left:</strong> Less common. Sometimes used in multi-column layouts where the right side of the page carries other content. Avoid for documents readers will print and bind on the left edge — the page number lands near the binding and may be obscured.</li>
+      <li><strong>Top center / top right:</strong> Used in long technical documents, manuals, and textbooks where the reader is expected to flip pages quickly. Top placement allows orientation at a glance without flipping to the foot of the page. Less standard for short business documents.</li>
+    </ul>
+    <p>
+      For most business use — reports, proposals, contracts — bottom center or bottom right is the right choice. When in doubt, check if there is a style guide for the document type you are producing; legal jurisdictions, academic institutions, and government agencies often specify page number placement explicitly.
+    </p>
+
+    <h2>Starting page number: when to use something other than 1</h2>
+    <p>
+      The starting page number option is useful in a few specific scenarios that come up often in practice:
+    </p>
+    <ul>
+      <li><strong>Continuing a series of documents:</strong> If you are producing a report in sections and each section is a separate PDF, number them continuously. If Section 1 is 24 pages, Section 2 should start at page 25. The reader and any table of contents that references page numbers will align correctly.</li>
+      <li><strong>Front matter conventions:</strong> Long documents often use Roman numerals (i, ii, iii) for front matter — table of contents, foreword, executive summary — and Arabic numerals starting at 1 for the body. This tool adds Arabic numerals; apply it separately to the body PDF and handle front matter numbering in your source document before converting to PDF.</li>
+      <li><strong>Inserting pages later:</strong> If you add a new section at the front of an already-numbered document, you may need to re-number the existing pages starting from the offset. Set the starting number to match where the document content begins in the final pagination.</li>
+    </ul>
+
+    <h2>How PDF font embedding affects page number file size</h2>
+    <p>
+      One subtle advantage of using the 14 standard PDF fonts (like Helvetica, which this tool uses) is that they are not embedded in the file — every PDF viewer has them built in. This means adding page numbers to a PDF with this tool increases the file size by essentially nothing. The page number text objects are small, and no additional font data is added to the file.
+    </p>
+    <p>
+      By contrast, tools that use custom fonts for page numbers must embed the entire font file — which can add tens of kilobytes per font. For a document you intend to email or upload to a portal with file size limits, Helvetica page numbers are the efficient choice.
+    </p>
+
     <h2>Privacy compared to other page numbering tools</h2>
     <p>
       Most online PDF tools upload your document to their server to process it. For reports containing financial

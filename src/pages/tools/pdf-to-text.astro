@@ -21,6 +21,20 @@ const tool = tools.find((t) => t.slug === "pdf-to-text")!;
       No file is sent to a server — open DevTools (<code>F12</code>) → Network while extracting to confirm zero upload requests.
     </p>
 
+    <h2>Text PDFs vs. scanned PDFs: understanding the difference</h2>
+    <p>
+      Not all PDFs contain extractable text. Before running the tool, it helps to know which type you have.
+    </p>
+    <p>
+      A <strong>text-based PDF</strong> has actual text data embedded in the file. When you open it in a PDF viewer and can click-drag to select words, the text is extractable. This includes PDFs created by word processors (Word, Google Docs), design tools (InDesign, Illustrator), presentation software, and most modern office applications. These extract cleanly.
+    </p>
+    <p>
+      An <strong>image-based PDF</strong> — commonly called a scanned PDF — is a sequence of page images with no text layer. When you scan a paper document and save as PDF, each page is a photograph of the paper, not a structured text document. Opening a scanned PDF in a viewer means you are looking at a picture of text, not text itself. You cannot select words, because there are no words to select — only pixels. This tool returns empty output for scanned PDFs.
+    </p>
+    <p>
+      If you are unsure which type you have, try selecting a word in your PDF viewer. If you can highlight it, the PDF has a text layer. If the cursor does not respond to selection, it is likely scanned. The <a href="/tools/pdf-to-jpg">PDF to JPG</a> tool can convert scanned pages to images for use with external OCR services.
+    </p>
+
     <h2>When to extract text from a PDF</h2>
     <ul>
       <li><strong>Copying content into another document</strong> — extract the text from a report or article so you can paste it into a Word document, Google Doc, or email.</li>
@@ -50,6 +64,29 @@ const tool = tools.find((t) => t.slug === "pdf-to-text")!;
       <li><strong>Ligatures and special characters:</strong> some fonts use ligatures (like "fi" rendered as a single glyph) that may not extract correctly. This depends on how the font is embedded in the PDF.</li>
       <li><strong>Password-protected PDFs:</strong> the PDF must be openable without a password. PDFs that restrict content viewing cannot be extracted.</li>
       <li><strong>Large documents:</strong> each page is processed in sequence. Very large PDFs (100+ pages) take a few seconds — you will see progress as each page completes.</li>
+    </ul>
+
+    <h2>Why multi-column layouts extract poorly</h2>
+    <p>
+      PDF does not store text in reading order. Text is stored as a series of positioned drawing instructions: draw this character at coordinate (x, y), draw this character at (x+8, y), and so on. The format was designed for visual rendering, not for text reuse. When extracting text, a parser has to reconstruct reading order from those coordinates — and for complex layouts, that reconstruction is imperfect.
+    </p>
+    <p>
+      A two-column academic paper, for example, may extract with alternating lines from each column: the first line of column one, then the first line of column two, then the second line of column one, and so on. Positionally correct — but unreadable as prose. Tables present the same problem: cells may extract row by row, or in column order, or in the order they were drawn, which may match neither. This is not a flaw in any particular extraction tool. It is a structural limitation of the PDF format itself.
+    </p>
+    <p>
+      For documents with complex layouts, the extracted text is still useful — it contains all the content, just in a non-ideal order. For data extraction purposes (pulling figures or identifiers from a table), searching and parsing the raw extracted text is usually workable. For feeding a large PDF to an AI tool, the reading-order imperfection rarely matters — language models are robust to minor ordering issues in long documents.
+    </p>
+
+    <h2>What you can do with extracted text</h2>
+    <p>
+      Once you have plain text from a PDF, a range of workflows become available:
+    </p>
+    <ul>
+      <li><strong>AI summarisation:</strong> Paste the extracted text into Claude, ChatGPT, or Gemini to get a summary, answer specific questions, or extract structured data. This is often faster than reading a long report. The text extraction removes the need to upload the PDF to the AI service — you paste clean text instead of sending the file.</li>
+      <li><strong>Search and find:</strong> If your PDF viewer's search is slow or unreliable, extract the text and open it in a text editor with fast search. Code editors like VS Code can search across thousands of lines instantly.</li>
+      <li><strong>Translation:</strong> Machine translation services (DeepL, Google Translate) accept plain text but not PDFs directly. Extract first, then translate. The resulting translation is clean text you can paste back into a document.</li>
+      <li><strong>Accessibility:</strong> Plain text is the most compatible format for screen readers and text-to-speech software. Extracting a PDF's text and reformatting it slightly can make a document accessible to people who cannot use a PDF viewer effectively.</li>
+      <li><strong>Data pipelines:</strong> Developers processing reports, invoices, or filings programmatically often need a quick way to inspect a PDF's text content before writing a parser. This tool lets you see what the text layer contains without writing any code.</li>
     </ul>
 
     <h2>Privacy compared to other PDF-to-text tools</h2>

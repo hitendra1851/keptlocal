@@ -21,9 +21,17 @@ class Config:
 
 
 LIVE_TOOLS = [
-    "merge-pdf", "split-pdf", "pdf-to-jpg", "jpg-to-pdf",
+    # PDF tools
+    "merge-pdf", "split-pdf", "pdf-to-jpg", "pdf-to-png", "jpg-to-pdf",
     "rotate-pdf", "reorder-pdf", "watermark-pdf", "pdf-page-count",
+    "compress-pdf", "delete-pages-pdf", "add-page-numbers-pdf",
+    "pdf-to-text", "unlock-pdf", "protect-pdf",
+    # Image tools
     "compress-image", "resize-image", "convert-image", "crop-image",
+    "rotate-image", "flip-image", "grayscale-image",
+    "image-to-base64", "remove-image-exif",
+    # Utility tools
+    "qr-code-generator", "password-generator", "word-counter",
 ]
 
 TARGET_KEYWORDS = [
@@ -99,6 +107,96 @@ TARGET_KEYWORDS = [
     "crop image in browser",
     "free online image cropper",
     "trim image online no signup",
+    # pdf-to-png
+    "pdf to png free online",
+    "convert pdf to png browser",
+    "pdf to png without uploading",
+    "pdf pages to png image",
+    "pdf to png no signup",
+    # compress-pdf
+    "compress pdf online free",
+    "reduce pdf file size browser",
+    "compress pdf without uploading",
+    "make pdf smaller free",
+    "reduce pdf size no signup",
+    # delete-pages-pdf
+    "delete pages from pdf free",
+    "remove pdf pages online",
+    "delete pdf pages without uploading",
+    "remove pages from pdf browser",
+    "delete pages pdf no signup",
+    # add-page-numbers-pdf
+    "add page numbers to pdf free",
+    "number pdf pages online",
+    "add page numbers pdf browser",
+    "stamp page numbers pdf free",
+    "pdf page numbering tool online",
+    # pdf-to-text
+    "extract text from pdf free",
+    "pdf to text online no upload",
+    "copy text from pdf browser",
+    "pdf text extractor free",
+    "pdf to text no signup",
+    # unlock-pdf
+    "remove pdf password free",
+    "unlock pdf online no upload",
+    "pdf password remover browser",
+    "unlock pdf without uploading",
+    "remove pdf password no signup",
+    # protect-pdf
+    "add password to pdf free",
+    "protect pdf online no upload",
+    "encrypt pdf browser",
+    "password protect pdf free",
+    "lock pdf online free",
+    # rotate-image
+    "rotate image online free",
+    "rotate photo without uploading",
+    "rotate image browser",
+    "rotate jpg free online no signup",
+    "turn image 90 degrees online",
+    # flip-image
+    "flip image online free",
+    "mirror image browser",
+    "flip photo without uploading",
+    "horizontal flip image free",
+    "flip jpg online no signup",
+    # grayscale-image
+    "convert image to grayscale free",
+    "black and white image converter online",
+    "grayscale photo browser no upload",
+    "image to grayscale no signup",
+    "convert photo to black white free",
+    # image-to-base64
+    "image to base64 converter free",
+    "convert image to base64 online",
+    "base64 encode image browser",
+    "image to data uri free",
+    "base64 image converter no upload",
+    # remove-image-exif
+    "remove exif data free online",
+    "strip image metadata browser",
+    "remove gps from photo free",
+    "delete image exif no upload",
+    "photo metadata remover online",
+    # qr-code-generator
+    "qr code generator free no signup",
+    "create qr code online free",
+    "qr code maker browser",
+    "generate qr code no tracking",
+    "free qr code creator no account",
+    # password-generator
+    "strong password generator free",
+    "random password generator online",
+    "secure password generator browser",
+    "password generator no signup",
+    "generate strong password free",
+    # word-counter
+    "word counter online free",
+    "count words online no upload",
+    "character counter browser",
+    "word count tool free no signup",
+    "word and character counter online",
 ]
 
 COMPETITORS = [
@@ -116,6 +214,8 @@ KNOWN_DIRECTORIES = [
     {"name": "AlternativeTo", "url": "https://alternativeto.net", "submit_url": "https://alternativeto.net/user-apps/"},
     {"name": "BetaList", "url": "https://betalist.com", "submit_url": "https://betalist.com/submit"},
     {"name": "Prototypr", "url": "https://prototypr.io", "submit_url": "https://prototypr.io/toolbox/"},
+    {"name": "ScrollLaunch", "url": "https://scrolllaunch.com", "submit_url": "https://scrolllaunch.com/submit"},
+    {"name": "resource.fyi", "url": "https://resource.fyi", "submit_url": "https://resource.fyi/submit"},
 ]
 
 SITE_DESCRIPTION = (

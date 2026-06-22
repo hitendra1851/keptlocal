@@ -1,4 +1,4 @@
-name: Email Daily Marketing Report
+name: Email Weekly Marketing Report
 
 on:
   push:

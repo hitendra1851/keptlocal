@@ -214,15 +214,15 @@ resource "aws_security_group" "agent" {
   }
 }
 
-# ── EventBridge Scheduler — daily 8:30am IST (3:00 UTC) ─────────────────────
+# ── EventBridge Scheduler — every Saturday 8:30am IST (3:00 UTC) ────────────
 
-resource "aws_scheduler_schedule" "daily" {
-  name       = "keptlocal-daily-marketing"
+resource "aws_scheduler_schedule" "weekly" {
+  name       = "keptlocal-weekly-marketing"
   group_name = "default"
 
   flexible_time_window { mode = "OFF" }
 
-  schedule_expression          = "cron(0 3 * * ? *)"
+  schedule_expression          = "cron(0 3 ? * SAT *)"
   schedule_expression_timezone = "UTC"
 
   target {

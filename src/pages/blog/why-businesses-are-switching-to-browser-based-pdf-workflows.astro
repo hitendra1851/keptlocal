@@ -1,0 +1,197 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Why Businesses Are Switching to Browser-Based PDF Workflows"
+  description="'Offline PDF workflows' sounds like desktop software. Browser-based processing goes further — no install, no upload, no trust required. Here is what the difference means in practice."
+  publishDate="2026-06-22"
+  readTime={8}
+  tags={["PDF", "Privacy"]}
+  toolName="Browse all tools"
+>
+
+<p class="lead">
+  iLovePDF recently published a piece on why businesses are moving to offline PDF workflows. The framing
+  is correct — organisations with sensitive documents are right to be wary of cloud PDF tools. But what
+  they describe as "offline" is mostly desktop software like Adobe Acrobat: installed locally, but often
+  connected to cloud storage, update services, and telemetry by default. Browser-based PDF processing is
+  a distinct category, and for many business use cases it is the more practical and more private option.
+</p>
+
+<h2>What "offline PDF workflow" actually means</h2>
+
+<p>
+  When vendors talk about offline PDF tools, they typically mean one of three things:
+</p>
+
+<ul>
+  <li><strong>Desktop software</strong> — Adobe Acrobat, Foxit, PDF-XChange. Installed locally, processes
+  files on your machine. Most connect to the internet for licensing, updates, and optional cloud features.</li>
+  <li><strong>Command-line tools</strong> — Ghostscript, pdftk, qpdf. Run locally, no network access.
+  Powerful but require technical setup.</li>
+  <li><strong>Browser-based tools</strong> — run in your browser using JavaScript and WebAssembly. No
+  install, no upload, no server contact. Your files stay on your device.</li>
+</ul>
+
+<p>
+  The distinction matters because "offline" and "private" are not the same thing. Desktop software that
+  auto-uploads recent documents to a connected cloud account is not meaningfully more private than a cloud
+  tool. The question is not where the software runs — it is where your files go.
+</p>
+
+<h2>Why desktop software is not always truly private</h2>
+
+<p>
+  Adobe Acrobat sends anonymous usage data by default and connects to Adobe servers for licensing validation.
+  The Creative Cloud version syncs files to Adobe Document Cloud unless you disable that setting explicitly.
+  This is not a criticism of Adobe specifically — it is the standard model for subscription software. But
+  it means "installed locally" does not automatically mean "your files stay local."
+</p>
+
+<p>
+  Microsoft Office's PDF export (via Save As PDF) is genuinely local — but editing a received PDF in Word
+  triggers a cloud conversion step if you have Microsoft 365 connected. Again, not a scandal, just worth
+  knowing if you are handling documents under a data handling policy.
+</p>
+
+<p>
+  Browser-based tools are architecturally different. When a tool runs in the browser, it can only access
+  your network if it makes an outbound request. You can observe every network request in real time by
+  opening DevTools (F12) and watching the Network tab while you process a file. A browser-based tool that
+  makes no upload requests during file processing is verifiably local — not as a matter of policy, but as
+  an observable technical fact.
+</p>
+
+<h2>The business case for browser-based PDF tools</h2>
+
+<p>
+  For organisations evaluating PDF workflow tools, browser-based processing has several structural
+  advantages that desktop software cannot match:
+</p>
+
+<p>
+  <strong>No deployment or IT overhead.</strong> Desktop PDF software requires installation, licence
+  management, and update policies. In organisations with managed devices, rolling out a new application
+  requires procurement approval, compatibility testing, and IT ticketing. A browser-based tool requires
+  none of that — employees use it from any machine, immediately.
+</p>
+
+<p>
+  <strong>No file size limits or quota management.</strong> Subscription PDF tools often impose daily page
+  limits or file size caps on lower tiers. Browser-based tools process files in the browser using available
+  RAM — a 200MB PDF on a machine with 8GB of RAM processes without issue, with no quota counting.
+</p>
+
+<p>
+  <strong>Works on any device.</strong> Desktop tools require separate licences for Windows and Mac and
+  typically have no mobile version. Browser-based tools work on any device with a modern browser —
+  including tablets and Chromebooks where desktop software cannot be installed.
+</p>
+
+<p>
+  <strong>No vendor lock-in.</strong> When a software vendor changes pricing or discontinues a product,
+  migrating away from a deeply integrated desktop tool is painful. Browser-based tools have no local state
+  to migrate — you simply use a different tool.
+</p>
+
+<h2>Use cases where this matters most</h2>
+
+<p>
+  <strong>Legal and compliance teams.</strong> Contracts, NDAs, court filings, and regulatory submissions
+  often contain information that should not pass through third-party servers. Browser-based processing
+  means the content never leaves the employee's device, making compliance with document handling policies
+  straightforward. There is no "we uploaded the contract to a server in an unknown jurisdiction for 24 hours"
+  to explain during an audit.
+</p>
+
+<p>
+  <strong>Finance and HR departments.</strong> Salary information, financial statements, and personal
+  employee records are typically subject to data handling requirements. Browser-based PDF tools process
+  this data locally — the file enters browser memory, is transformed, and the result downloads. The server
+  sees only the page load, not the document content.
+</p>
+
+<p>
+  <strong>Healthcare organisations.</strong> Patient records, referral letters, and insurance submissions
+  fall under strict data regulations in most jurisdictions (HIPAA in the US, GDPR Article 9 in the EU).
+  A browser-based tool that demonstrably never uploads files is a simpler compliance story than a cloud
+  PDF tool requiring a Business Associate Agreement or Data Processing Agreement.
+</p>
+
+<p>
+  <strong>Remote workers handling sensitive documents.</strong> An employee working from a café who needs
+  to quickly merge two contract PDFs faces a real choice: wait until they are on a corporate VPN to access
+  desktop tools, or use a browser-based tool that processes everything locally regardless of the network
+  they are on.
+</p>
+
+<h2>The verification advantage</h2>
+
+<p>
+  Every reputable cloud PDF tool includes a privacy policy that says files are deleted within a few hours.
+  You cannot verify this claim — you are taking the vendor at their word. With a browser-based tool, you
+  can verify the technical facts yourself in under 30 seconds:
+</p>
+
+<ol>
+  <li>Open DevTools in your browser (F12 on Windows, Cmd+Option+I on Mac)</li>
+  <li>Click the Network tab</li>
+  <li>Drop a file into the tool and process it</li>
+  <li>Watch the Network tab — you will see the initial page load requests, then nothing further during processing</li>
+</ol>
+
+<p>
+  This is an audit trail that does not require trusting a privacy policy. For organisations that need to
+  demonstrate due diligence in their document handling, "we used a tool that makes no network requests
+  during file processing, verifiable in browser DevTools" is a considerably stronger position than "the
+  vendor's policy says they delete files within 24 hours."
+</p>
+
+<h2>What you give up with browser-based tools</h2>
+
+<p>
+  Browser-based processing has real limitations worth acknowledging:
+</p>
+
+<p>
+  <strong>True image recompression.</strong> Browser-based PDF compression removes metadata and unused
+  objects but cannot deeply recompress embedded images the way Ghostscript can. If you need to reduce a
+  scanned PDF from 20MB to under 1MB, you need a server-side tool or a local Ghostscript installation.
+</p>
+
+<p>
+  <strong>PDF to Word conversion.</strong> Converting a PDF to an editable Word document with accurate
+  layout preservation requires layout analysis that is difficult to run in a browser. Desktop tools
+  (Adobe Acrobat) and cloud services are more reliable for complex documents.
+</p>
+
+<p>
+  <strong>OCR for scanned documents.</strong> Optical character recognition for scanned PDFs typically
+  requires a neural model that is too large to load in a browser at reasonable speed. Server-side OCR
+  produces better results.
+</p>
+
+<p>
+  For these specific use cases — heavy compression, format conversion, OCR — server-side tools remain the
+  pragmatic choice. The right workflow for most organisations is a hybrid: browser-based tools for the 80%
+  of everyday PDF tasks (merge, split, rotate, reorder, watermark, page numbering, password protection),
+  and server-side tools for the specific operations that genuinely need them.
+</p>
+
+<h2>Getting started</h2>
+
+<p>
+  The tools most businesses need day-to-day are all available client-side: merging documents for a
+  signature bundle, splitting a received PDF into individual pages, rotating a scanned invoice, adding
+  page numbers to a report, and password-protecting a file before emailing it. All of these run in
+  your browser at <a href="/tools">keptlocal.com</a> — no account, no upload, no file size limit.
+</p>
+
+<p>
+  For the specific tasks that need server-side processing, use the right tool and be deliberate about
+  which documents you send to cloud services. The goal is not to avoid cloud tools entirely — it is to
+  make a conscious decision about which documents leave your device and which do not.
+</p>
+
+</BlogLayout>

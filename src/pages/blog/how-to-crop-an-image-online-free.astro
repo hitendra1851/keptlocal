@@ -1,0 +1,167 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Crop an Image Online for Free (No Upload Required)"
+  description="Most online image croppers upload your photo to a server to process it. Here is how to crop images entirely in your browser — faster, private, and no account needed."
+  publishDate="2026-06-22"
+  readTime={6}
+  tags={["Images"]}
+  toolSlug="crop-image"
+  toolName="Crop Image"
+  toolTagline="Crop any image with a free-form or fixed-ratio selection — no upload, no signup."
+>
+
+<p class="lead">
+  Cropping is the most common image edit. You need a passport photo at exactly 35×45mm, a LinkedIn
+  headshot at square ratio, a product image at 4:3, or just to remove empty space from the edges of a
+  screenshot. Most free online tools handle this fine — but they upload your photo to a server to do it.
+  For casual screenshots that is not a concern. For photos that contain location data, recognisable faces,
+  or anything sensitive, it is worth knowing you have a faster, more private alternative.
+</p>
+
+<h2>How to crop an image in your browser — step by step</h2>
+
+<ol>
+  <li>Open <a href="/tools/crop-image">keptlocal's Crop Image tool</a>.</li>
+  <li>Drop your image onto the upload zone, or click to browse. JPG, PNG, and WebP are all supported.</li>
+  <li>A selection box appears on the image. Drag the corners and edges to define the area you want to keep.
+  Move the selection without resizing by dragging from its centre.</li>
+  <li>To constrain to a fixed ratio — square, 4:3, 16:9, or passport — select it from the ratio menu.
+  The selection will snap to that ratio as you resize it.</li>
+  <li>Click <strong>Crop</strong>. The cropped image downloads immediately. Nothing is sent to a server.</li>
+</ol>
+
+<p>
+  You can verify this yourself: open DevTools (F12) → Network tab, then crop an image. You will see the
+  initial page load and nothing further — no upload, no external request during processing.
+</p>
+
+<h2>Free-form vs. fixed-ratio cropping</h2>
+
+<p>
+  <strong>Free-form cropping</strong> lets you draw any rectangular selection without constraint. Use this
+  when you are cropping to remove content rather than to meet a dimensional specification — trimming a
+  border from a scan, removing a distracting element from one side of a photo, or cutting a specific region
+  out of a screenshot.
+</p>
+
+<p>
+  <strong>Fixed-ratio cropping</strong> locks the selection to a specific width-to-height ratio. The
+  selection stays at that ratio as you resize it — dragging a corner makes the box larger or smaller while
+  keeping the proportions constant. Use this when the image needs to fit a specific format: a social media
+  post, a form photo, or a template slot with defined dimensions.
+</p>
+
+<h2>Common crop ratios and when to use them</h2>
+
+<ul>
+  <li><strong>1:1 (square)</strong> — Instagram posts, profile photos, avatar icons, product thumbnails
+  on square-grid layouts. Virtually every social platform uses square images somewhere in its interface.</li>
+  <li><strong>4:3</strong> — traditional photo format, most monitor displays before widescreen became
+  standard. Still widely used for product photography and web layouts where images sit inside cards.</li>
+  <li><strong>16:9</strong> — widescreen video thumbnails (YouTube, Vimeo), presentation slides, blog post
+  featured images on most modern themes. If you are making a cover image for a YouTube video, this is the
+  ratio to use.</li>
+  <li><strong>3:2</strong> — the native ratio of most DSLR cameras and the 35mm film format. If you are
+  cropping a DSLR photo and want to maintain the original proportions while just removing the edges, 3:2
+  keeps the image looking like it was shot at that size.</li>
+  <li><strong>A4 (approximately 1:1.414)</strong> — useful when preparing an image to fill a page that
+  will be printed at A4. Ensures the image fills the page without distortion or cropping at print time.</li>
+  <li><strong>Passport (35×45mm, approximately 7:9)</strong> — the standard size for passport and visa
+  photos in most countries. The face should occupy 70–80% of the frame height. Note that official passport
+  photos have additional requirements (neutral background, specific lighting, no shadows) that cropping
+  alone does not guarantee — check your country's specification before submitting.</li>
+</ul>
+
+<h2>Getting precise pixel dimensions</h2>
+
+<p>
+  Fixed-ratio cropping controls proportions but not absolute size. If a form requires an image of exactly
+  800×600 pixels, crop to 4:3 ratio first, then use the <a href="/tools/resize-image">Resize Image tool</a>
+  to set the exact pixel dimensions. Cropping followed by resizing is the correct two-step workflow for
+  meeting precise dimensional specifications.
+</p>
+
+<p>
+  Common situations where exact pixel dimensions matter:
+</p>
+
+<ul>
+  <li><strong>Government document portals</strong> — visa applications, ID renewals, and permit forms often
+  specify exact pixel dimensions and file size limits simultaneously. Crop to ratio first, then resize to
+  the required dimensions, then compress if a file size limit applies.</li>
+  <li><strong>E-commerce product images</strong> — Shopify, Amazon, and WooCommerce have image dimension
+  requirements that determine how products display in search results and on product pages.</li>
+  <li><strong>Social media ad formats</strong> — ad platforms specify exact dimensions for creative assets,
+  and images that do not match the spec are automatically cropped by the platform, often in ways that cut
+  off important content.</li>
+  <li><strong>Print templates</strong> — photo book layouts, business card templates, and poster designs
+  require images at specific dimensions and resolutions (typically 300 DPI for print) to avoid blurry output.</li>
+</ul>
+
+<h2>How browser-based image cropping works</h2>
+
+<p>
+  When you load an image in a browser-based crop tool, the image is read into memory using the browser's
+  File API — the same API used to read file contents when you drag a file onto a web page. The selection
+  you draw is tracked as four numbers: x offset, y offset, width, and height, all in pixels relative to
+  the original image at full resolution.
+</p>
+
+<p>
+  When you click Crop, the tool draws the original image onto an off-screen HTML5 canvas at its full
+  resolution, then reads back only the pixel data within your selection using the canvas's
+  <code>drawImage()</code> method with source coordinates. That data is written to a new canvas of the
+  selection's dimensions, then converted to the output format (PNG or JPG) using
+  <code>canvas.toBlob()</code>. The resulting file is offered as a download using a temporary object URL.
+</p>
+
+<p>
+  This entire sequence runs inside the browser's JavaScript engine. There is no HTTP request to any server
+  during the crop operation — the selection, the pixel extraction, and the file encoding all happen locally.
+  For a 5MB JPG, the full crop takes well under a second on a modern device.
+</p>
+
+<h2>Limits and what to expect</h2>
+
+<ul>
+  <li><strong>Very large images</strong> — images above roughly 30–50 megapixels can cause memory pressure
+  in some browsers. This is relevant for high-resolution DSLR images (24MP+). Most phone photos and web
+  images are well within browser limits.</li>
+  <li><strong>Output format follows input</strong> — a JPG input produces a JPG output; PNG in, PNG out.
+  To change format, use the <a href="/tools/convert-image">Convert Image tool</a> before or after cropping.</li>
+  <li><strong>JPEG re-encoding</strong> — cropping a JPG re-encodes the JPEG data, which introduces a
+  small additional generation loss. For most purposes this is imperceptible. If you are making repeated
+  edits to a master image, work from PNG to avoid accumulating losses.</li>
+  <li><strong>EXIF data</strong> — canvas-based processing strips EXIF metadata (camera settings, GPS
+  coordinates, orientation data). If you need to preserve EXIF, use a desktop editor. If you want to
+  strip EXIF for privacy before sharing a photo, the <a href="/tools/remove-image-exif">Remove Image EXIF
+  tool</a> handles that separately.</li>
+  <li><strong>Browser support</strong> — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+</ul>
+
+<h2>Privacy: what happens to your image</h2>
+
+<p>
+  Your image is loaded into browser memory and processed using the HTML5 Canvas API. Nothing is sent to a
+  server at any point. The cropped result is generated entirely in memory and downloaded to your device via
+  the browser's built-in download API.
+</p>
+
+<p>
+  For images that contain sensitive content — identifiable faces, documents with personal information,
+  location-tagged photos — browser-based cropping means the content never leaves your device. A server-based
+  crop tool, by contrast, receives your full original image at their servers, processes it there, and returns
+  the cropped version. The original is stored on their infrastructure for some period defined in their privacy
+  policy — typically a few hours, in practice unverifiable.
+</p>
+
+<p>
+  The difference is structural, not just a matter of trust: a browser-based tool is technically incapable
+  of uploading your file. Open the Network tab in DevTools while using any tool on this site and you will
+  see zero upload activity during file processing.
+</p>
+
+</BlogLayout>

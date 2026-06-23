@@ -1,0 +1,203 @@
+---
+// SVG to PNG — client-side via Canvas API. No upload.
+---
+
+<div id="svg-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Drop zone -->
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/svg+xml,.svg" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+        class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop SVG here, or</p>
+      <button id="browse-btn" type="button"
+        class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+        choose a file
+      </button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">SVG files only. Runs entirely in your browser.</p>
+    </div>
+    <div id="file-ready" class="hidden text-center">
+      <p id="file-name" class="text-sm font-medium text-[var(--color-ink)]"></p>
+      <p id="file-dims" class="text-xs text-[var(--color-ink-muted)] mt-0.5"></p>
+      <button id="change-btn" type="button" class="text-xs text-[var(--color-accent)] mt-1 hover:underline">Change file</button>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div id="options-wrap" class="hidden px-4 pb-4 space-y-3">
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Output width (px)</label>
+        <input id="out-width" type="number" min="1" max="8000"
+          placeholder="Same as SVG"
+          class="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)]" />
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Background</label>
+        <select id="bg-select"
+          class="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="transparent">Transparent</option>
+          <option value="white">White</option>
+          <option value="black">Black</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Scale</label>
+        <select id="scale-select"
+          class="w-full px-3 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="1">1× (original)</option>
+          <option value="2">2× (retina)</option>
+          <option value="3">3× (high-DPI)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div id="preview-wrap" class="hidden">
+      <p class="text-xs text-[var(--color-ink-muted)] mb-2">Preview</p>
+      <div class="rounded-lg border border-[var(--color-rule)] overflow-hidden flex items-center justify-center p-3"
+        style="background-image:repeating-conic-gradient(#e8e0d5 0% 25%,transparent 0% 50%);background-size:16px 16px">
+        <img id="preview-img" src="" alt="SVG preview" class="max-h-40 max-w-full" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <p id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload an SVG file to convert.</p>
+    <button id="convert-btn" type="button" class="btn-primary" disabled>
+      <span id="btn-label">Convert to PNG</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+let svgFile   = null;
+let svgText   = '';
+let origW     = 0;
+let origH     = 0;
+
+const fileInput   = document.getElementById('file-input');
+const dropZone    = document.getElementById('drop-zone');
+const previewImg  = document.getElementById('preview-img');
+
+document.getElementById('browse-btn').addEventListener('click', () => fileInput.click());
+document.getElementById('change-btn').addEventListener('click', () => reset());
+fileInput.addEventListener('change', e => { if (e.target.files[0]) load(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && (f.type === 'image/svg+xml' || f.name.endsWith('.svg'))) load(f);
+});
+
+async function load(file) {
+  svgFile = file;
+  svgText = await file.text();
+
+  // Parse viewBox / width / height
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(svgText, 'image/svg+xml');
+  const svgEl  = xmlDoc.querySelector('svg');
+  let w = parseFloat(svgEl?.getAttribute('width')  || 0);
+  let h = parseFloat(svgEl?.getAttribute('height') || 0);
+  if ((!w || !h)) {
+    const vb = (svgEl?.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
+    if (vb.length >= 4) { w = vb[2]; h = vb[3]; }
+  }
+  origW = w || 800;
+  origH = h || 600;
+
+  // Show UI
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('file-ready').classList.remove('hidden');
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-dims').textContent = `${Math.round(origW)} × ${Math.round(origH)} px`;
+  document.getElementById('out-width').placeholder = `${Math.round(origW)} (same as SVG)`;
+  document.getElementById('options-wrap').classList.remove('hidden');
+
+  // Preview
+  const blob = new Blob([svgText], { type: 'image/svg+xml' });
+  const url  = URL.createObjectURL(blob);
+  previewImg.onload = () => URL.revokeObjectURL(url);
+  previewImg.src = url;
+  document.getElementById('preview-wrap').classList.remove('hidden');
+
+  document.getElementById('convert-btn').disabled = false;
+  document.getElementById('status-msg').textContent =
+    `SVG loaded — ${Math.round(origW)}×${Math.round(origH)}px. Ready to convert.`;
+}
+
+function reset() {
+  svgFile = null; svgText = ''; origW = 0; origH = 0;
+  fileInput.value = '';
+  document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('file-ready').classList.add('hidden');
+  document.getElementById('options-wrap').classList.add('hidden');
+  document.getElementById('preview-wrap').classList.add('hidden');
+  document.getElementById('convert-btn').disabled = true;
+  document.getElementById('status-msg').textContent = 'Upload an SVG file to convert.';
+}
+
+document.getElementById('convert-btn').addEventListener('click', async () => {
+  const btn     = document.getElementById('convert-btn');
+  const label   = document.getElementById('btn-label');
+  const spinner = document.getElementById('spinner');
+  const status  = document.getElementById('status-msg');
+
+  btn.disabled = true; label.textContent = 'Converting…'; spinner.classList.remove('hidden');
+  status.textContent = 'Rendering…';
+
+  try {
+    const scale     = parseInt(document.getElementById('scale-select').value) || 1;
+    const widthIn   = parseInt(document.getElementById('out-width').value) || origW;
+    const ratio     = widthIn / origW;
+    const outW      = Math.round(origW * ratio * scale);
+    const outH      = Math.round(origH * ratio * scale);
+
+    // Inject explicit w/h into SVG so the Image renders at the right size
+    const modified  = svgText
+      .replace(/<svg([^>]*)>/, (m, attrs) => {
+        attrs = attrs.replace(/\s*width="[^"]*"/, '').replace(/\s*height="[^"]*"/, '');
+        return `<svg${attrs} width="${outW}" height="${outH}">`;
+      });
+
+    const blob  = new Blob([modified], { type: 'image/svg+xml' });
+    const url   = URL.createObjectURL(blob);
+    const img   = new Image();
+    img.src     = url;
+    await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+    URL.revokeObjectURL(url);
+
+    const cv    = document.createElement('canvas');
+    cv.width    = outW;
+    cv.height   = outH;
+    const c     = cv.getContext('2d');
+    const bg    = document.getElementById('bg-select').value;
+    if (bg !== 'transparent') { c.fillStyle = bg; c.fillRect(0, 0, outW, outH); }
+    c.drawImage(img, 0, 0, outW, outH);
+
+    const pngBlob = await new Promise(r => cv.toBlob(r, 'image/png'));
+    const dlUrl   = URL.createObjectURL(pngBlob);
+    Object.assign(document.createElement('a'), {
+      href: dlUrl,
+      download: svgFile.name.replace(/\.svg$/i, '.png'),
+    }).click();
+    setTimeout(() => URL.revokeObjectURL(dlUrl), 15000);
+
+    status.textContent = `Done — ${outW}×${outH}px PNG downloaded.`;
+  } catch (err) {
+    console.error(err);
+    status.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false; label.textContent = 'Convert to PNG'; spinner.classList.add('hidden');
+  }
+});
+</script>

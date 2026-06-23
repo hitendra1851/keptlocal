@@ -1,0 +1,95 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import SvgToPng from "../../components/tools/SvgToPng.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "svg-to-png")!;
+---
+
+<ToolLayout tool={tool}>
+  <SvgToPng slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert SVG to PNG</h2>
+    <ol>
+      <li>Drop your SVG file onto the upload area, or click to browse. The SVG is loaded and its natural dimensions are displayed.</li>
+      <li>Set the output width in pixels if you need a specific size — leave it blank to keep the SVG's original dimensions. Choose a scale multiplier (1×, 2×, or 3×) for retina and high-DPI displays.</li>
+      <li>Select a background. SVGs often have transparent backgrounds — choose transparent to preserve that, or white or black if the PNG will be used in a context that does not support transparency.</li>
+      <li>Click <strong>Convert to PNG</strong>. The PNG downloads immediately. Nothing is sent to a server.</li>
+    </ol>
+    <p>
+      You can verify this yourself: open DevTools → Network while converting. You will see the initial page load and no further requests — the conversion runs entirely in your browser using the Canvas API.
+    </p>
+
+    <h2>When to convert SVG to PNG</h2>
+    <ul>
+      <li><strong>Sending files to people who cannot open SVG.</strong> SVG is a vector format that most image viewers, email clients, and non-technical tools cannot display. Converting to PNG creates a universally compatible raster image that opens in any photo viewer, browser, and image processing app.</li>
+      <li><strong>Uploading to platforms that do not accept SVG.</strong> Social media platforms (Instagram, Twitter, LinkedIn, Facebook), e-commerce platforms (Shopify, Amazon), and many CMS platforms reject SVG uploads for security reasons. PNG is the safe, accepted format for rasterized graphics.</li>
+      <li><strong>Using vector artwork at a fixed size.</strong> When you know the exact pixel dimensions needed — a 1200×630px Open Graph image, a 400×400px avatar, a 300×250px ad banner — converting the SVG to PNG at that exact size produces a pixel-perfect output without the complexity of CSS scaling or browser rendering differences.</li>
+      <li><strong>Creating retina-ready assets.</strong> Use the 2× or 3× scale option to export a PNG at double or triple the display size. Serve the 2× version on retina screens for sharp graphics on high-DPI displays.</li>
+      <li><strong>Preparing icons for use in apps and documents.</strong> App icons, document templates, and presentation slides often need raster formats. Converting SVG icons to PNG at the required sizes (16×16, 32×32, 64×64, 128×128, 512×512) is a common workflow in design and development.</li>
+      <li><strong>Archiving vector files with a visual reference.</strong> Keeping a PNG alongside an SVG in a design archive provides a quick visual preview without needing an SVG-capable viewer.</li>
+    </ul>
+
+    <h2>SVG vs. PNG: understanding the trade-off</h2>
+    <p>
+      SVG (Scalable Vector Graphics) stores images as mathematical descriptions of shapes, paths, and text. An SVG of a circle is literally an XML element describing the circle's position, radius, and fill colour. This means SVG files are infinitely scalable — zoom in as far as you like and the edges remain perfectly sharp.
+    </p>
+    <p>
+      PNG (Portable Network Graphics) stores images as a grid of pixels. Every pixel has an explicit colour value. At any fixed display size, a PNG looks identical to the SVG — but if you zoom in beyond 100%, you will see individual pixels. At the right size, the difference is invisible. At the wrong size (especially for icons that must render at multiple sizes), the difference is significant.
+    </p>
+    <p>
+      The correct workflow for icons and logos is to keep the master file as SVG and export PNG versions at each required size. Never generate the PNG at a small size and try to scale it up — always export from the SVG at the target size.
+    </p>
+
+    <h2>Output size and the scale option</h2>
+    <p>
+      The width field sets the output size in CSS pixels. On a standard display, 1 CSS pixel = 1 device pixel. On a retina display (2× device pixel ratio), 1 CSS pixel = 4 device pixels (2×2). An image displayed at 200px CSS width on a retina screen needs 400 actual pixels to appear sharp.
+    </p>
+    <p>
+      The scale multiplier handles this: if you need a PNG to display at 200px on a retina screen, set the output width to 200 and the scale to 2×. The result is a 400×400px PNG that will appear perfectly sharp on retina and standard displays alike.
+    </p>
+    <p>
+      Common size guidelines:
+    </p>
+    <ul>
+      <li><strong>Open Graph / social sharing images:</strong> 1200×630px, scale 1×</li>
+      <li><strong>Twitter card images:</strong> 1200×600px, scale 1×</li>
+      <li><strong>Favicon:</strong> export at 16×16, 32×32, 48×48, and 512×512 separately, then use an ICO generator</li>
+      <li><strong>App icon (iOS):</strong> 1024×1024px, scale 1× (Apple's App Store submission size)</li>
+      <li><strong>Standard web image:</strong> use 2× scale for any image that will appear at less than half the SVG's natural width on screen</li>
+    </ul>
+
+    <h2>How browser-based SVG to PNG conversion works</h2>
+    <p>
+      The conversion uses a two-step process that runs entirely in your browser:
+    </p>
+    <p>
+      First, the SVG text is loaded into an <code>&lt;img&gt;</code> element via a blob URL (<code>URL.createObjectURL</code>). The browser's built-in SVG renderer parses the SVG XML, lays out the vector elements, applies styles, and rasterises the result at the requested pixel dimensions. This is the same rendering engine used to display SVG images on web pages — it correctly handles paths, gradients, filters, text, and most SVG features.
+    </p>
+    <p>
+      Second, the rendered image is drawn onto an HTML5 <code>&lt;canvas&gt;</code> element using <code>ctx.drawImage()</code>. The canvas provides access to the pixel data, which is then exported to PNG format using <code>canvas.toBlob('image/png')</code>. The PNG blob is offered as a download via a temporary object URL.
+    </p>
+    <p>
+      The canvas step also applies the background colour option: before drawing the SVG, the canvas is either left transparent (default) or filled with the chosen colour. This is why the transparent option preserves SVG transparency while the white and black options produce a solid-background PNG.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>External resources.</strong> SVG files can reference external images, fonts, or stylesheets. Because the conversion runs locally in your browser without fetching network resources, external references in the SVG may not render. Self-contained SVGs (no external resources) convert reliably; SVGs that reference fonts or assets hosted at external URLs may render with fallbacks.</li>
+      <li><strong>Complex filters and effects.</strong> Most SVG filters (blur, drop shadow, colour matrix) render correctly in modern browsers. Very complex filter chains or browser-specific SVG extensions may produce different output than an SVG editor or server-side renderer would produce.</li>
+      <li><strong>Text rendering.</strong> SVG text uses fonts available in your browser. If the SVG specifies a font by name that is not installed on your device, the browser substitutes a fallback font. For consistent text rendering across devices, use SVG text-as-paths (convert text to outlines in your vector editor before exporting).</li>
+      <li><strong>Maximum canvas size.</strong> Browsers impose a maximum canvas size (typically 16,384×16,384px on most platforms). Very large output dimensions may fail silently or produce a blank image on some browsers.</li>
+      <li><strong>Output is always PNG.</strong> This tool converts SVG to PNG. For other output formats, use the <a href="/tools/convert-image">Convert Image tool</a> to convert the PNG further.</li>
+      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your SVG</h2>
+    <p>
+      Your SVG file is read into browser memory using the File API and converted to PNG using the Canvas API. Nothing is sent to a server. The PNG output is created in browser memory and downloaded directly to your device.
+    </p>
+    <p>
+      SVG files sometimes contain embedded business logic, proprietary design assets, or sensitive schematic information. Browser-based conversion means that content never leaves your device — open DevTools → Network while converting to confirm zero outbound activity.
+    </p>
+  </Fragment>
+</ToolLayout>

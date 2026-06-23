@@ -1,0 +1,79 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import SignPdf from "../../components/tools/SignPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "sign-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <SignPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to sign a PDF in your browser</h2>
+    <ol>
+      <li><strong>Create your signature.</strong> Use the Draw tab to sign with your mouse or finger on a touchscreen. Alternatively, switch to the Type tab and type your name — it will render in a handwriting-style italic font.</li>
+      <li><strong>Upload your PDF.</strong> Drop the document onto the upload area or click to browse. Any standard PDF is supported.</li>
+      <li><strong>Set the placement.</strong> Choose which page to sign (first page, last page, or all pages), where on the page the signature should appear, and how large it should be.</li>
+      <li><strong>Click Sign PDF.</strong> Your signature is stamped onto the document in the browser. The signed PDF downloads automatically with "-signed" added to the filename.</li>
+    </ol>
+    <p>
+      Nothing is sent to a server at any point. Open DevTools → Network while signing to confirm: you will see the initial page load and zero further upload requests.
+    </p>
+
+    <h2>When to use a browser-based PDF signature</h2>
+    <ul>
+      <li><strong>Signing contracts and agreements.</strong> Most day-to-day contractual documents — freelance agreements, NDAs, offer letters, lease agreements — do not require a legally certified digital signature. A visual signature image stamped onto the PDF is sufficient and is the same approach used by many e-signature platforms under the hood.</li>
+      <li><strong>Approving documents for internal use.</strong> Review and approval workflows where the signature indicates sign-off rather than legal binding — expense reports, policy documents, internal memos — are well suited to a fast browser-based tool.</li>
+      <li><strong>Adding a consistent signature to multiple pages.</strong> The "all pages" option stamps your signature on every page, useful for initialing multi-page documents or marking each page as reviewed.</li>
+      <li><strong>Signing documents received by email.</strong> Download the PDF attachment, sign it in your browser, and email it back — without printing, scanning, or installing software.</li>
+      <li><strong>Privacy-sensitive documents.</strong> Contracts often contain sensitive personal or financial information. A browser-based tool that never uploads the file is structurally safer than cloud e-signature services for documents you would prefer not to store on third-party servers.</li>
+    </ul>
+
+    <h2>Is a browser-stamped signature legally valid?</h2>
+    <p>
+      This is the question most people have, and the honest answer is: it depends on the jurisdiction and the use case.
+    </p>
+    <p>
+      In most jurisdictions — including the US (ESIGN Act), EU (eIDAS), UK (Electronic Communications Act), and India (IT Act) — an electronic signature is valid if both parties consent to electronic signatures and the signature is attributable to the signer. A visual signature image placed on a PDF can meet this standard for most commercial agreements.
+    </p>
+    <p>
+      Where a browser-stamped signature is <em>not</em> sufficient: documents that legally require a wet signature (most jurisdictions require original signatures for wills, property transfers, and certain government filings), documents requiring a Qualified Electronic Signature (QES) under eIDAS, and court filings in jurisdictions with specific submission requirements.
+    </p>
+    <p>
+      For high-stakes contracts where the validity of the signature may be litigated, use a certified e-signature service (DocuSign, Adobe Sign) that creates a tamper-evident audit trail with cryptographic timestamps. For everything else — which is the vast majority of day-to-day business signing — a visual signature on a PDF is the standard approach used throughout industry.
+    </p>
+
+    <h2>How the signing works technically</h2>
+    <p>
+      When you draw on the canvas, each mouse or touch movement is recorded as a series of line segments and rendered using the browser's Canvas 2D API. The completed signature drawing is exported as a PNG image using <code>canvas.toBlob()</code>.
+    </p>
+    <p>
+      For typed signatures, the text is rendered onto an off-screen canvas at high resolution using the browser's native text rendering with a serif italic font. This produces a clean, scalable PNG from the type.
+    </p>
+    <p>
+      The PDF is loaded and parsed by <a href="https://pdf-lib.js.org/" target="_blank" rel="noopener">pdf-lib</a>, a JavaScript library that runs entirely in your browser. The signature PNG is embedded into the PDF using pdf-lib's <code>embedPng()</code> method, which stores the image data inside the PDF file structure. The image is then drawn at the specified position on the target pages using <code>page.drawImage()</code>. The modified PDF is serialised using <code>pdfDoc.save()</code> and downloaded via a temporary object URL.
+    </p>
+    <p>
+      The entire operation — canvas rendering, PNG export, PDF loading, image embedding, and PDF re-serialisation — runs inside your browser's JavaScript engine. No file data leaves your device.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Signature quality from drawing.</strong> The quality of a drawn signature depends on your input device. A trackpad or finger produces adequate results; a stylus produces the best results. For the cleanest signature image, draw slowly and at a reasonable size.</li>
+      <li><strong>Signature position cannot be dragged interactively.</strong> Position is set via the dropdown selector (bottom right, bottom left, bottom center, top right). For precise positioning, use a full PDF editor after signing to move the signature image.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be signed directly. Unlock the PDF first using the <a href="/tools/unlock-pdf">Unlock PDF tool</a>, then sign the unlocked copy.</li>
+      <li><strong>Large PDFs.</strong> There is no hard file size limit. The practical ceiling is your device's available RAM — most laptops handle files up to a few hundred MB without issue.</li>
+      <li><strong>No cryptographic tamper-evidence.</strong> The signature is a visual image embedded in the PDF. It does not add PDF-level cryptographic signatures (PAdES, PKCS#7) that lock the document against further modification. If tamper-evidence is required, use Adobe Acrobat or a certified e-signature service.</li>
+      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. Canvas drawing works on touchscreen devices including iPhone and Android.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your PDF and signature</h2>
+    <p>
+      Your PDF and your signature image are processed entirely within your browser. Neither the document contents nor the signature drawing are transmitted to any server. The signed PDF is created in browser memory and downloaded directly to your device.
+    </p>
+    <p>
+      This is architecturally different from cloud e-signature services, which necessarily receive your document at their servers to process it, store it for their audit trail, and retain it according to their data retention policy. For documents containing sensitive personal, financial, or contractual information, browser-based signing eliminates that data exposure entirely.
+    </p>
+  </Fragment>
+</ToolLayout>

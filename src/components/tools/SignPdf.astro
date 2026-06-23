@@ -1,0 +1,298 @@
+---
+// Sign PDF — client-side via pdf-lib. Signature drawn on canvas or typed as text.
+---
+
+<div id="sign-pdf-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: Signature -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 1 — Create signature</p>
+
+    <!-- Tab buttons -->
+    <div class="flex gap-2 mb-3">
+      <button id="tab-draw" type="button"
+        class="text-xs px-3 py-1.5 rounded-full border border-[var(--color-accent)] bg-[var(--color-accent)] text-white transition-colors">
+        Draw
+      </button>
+      <button id="tab-type" type="button"
+        class="text-xs px-3 py-1.5 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)] transition-colors">
+        Type
+      </button>
+    </div>
+
+    <!-- Draw panel -->
+    <div id="draw-panel">
+      <canvas id="sig-canvas"
+        class="w-full rounded-lg border border-[var(--color-rule)] bg-white cursor-crosshair touch-none"
+        style="height:110px"></canvas>
+      <button id="clear-canvas" type="button"
+        class="mt-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] transition-colors">
+        Clear canvas
+      </button>
+    </div>
+
+    <!-- Type panel -->
+    <div id="type-panel" class="hidden">
+      <input id="sig-text" type="text" placeholder="Type your name…"
+        class="w-full px-3 py-3 border border-[var(--color-rule)] rounded-lg bg-white text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus:outline-none focus:border-[var(--color-accent)] text-2xl italic"
+        style="font-family: Georgia, 'Times New Roman', serif" />
+      <p class="text-xs text-[var(--color-ink-muted)] mt-1.5">Rendered as a handwriting-style signature on the PDF.</p>
+    </div>
+  </div>
+
+  <!-- Step 2: PDF -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 2 — Upload PDF</p>
+    <input type="file" id="pdf-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="pdf-drop" class="drop-zone">
+      <div id="pdf-empty">
+        <p class="text-[var(--color-ink-soft)] mb-1 text-sm">Drop PDF here, or</p>
+        <button id="pdf-browse" type="button"
+          class="text-[var(--color-accent)] underline underline-offset-4 font-medium text-sm hover:no-underline">
+          choose a file
+        </button>
+      </div>
+      <div id="pdf-ready" class="hidden text-center">
+        <p id="pdf-name" class="text-sm font-medium text-[var(--color-ink)]"></p>
+        <button id="pdf-change" type="button" class="text-xs text-[var(--color-accent)] mt-1 hover:underline">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Placement -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 3 — Placement</p>
+    <div class="grid grid-cols-3 gap-3">
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Page</label>
+        <select id="page-select"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="last">Last page</option>
+          <option value="first">First page</option>
+          <option value="all">All pages</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Position</label>
+        <select id="pos-select"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="bottom-right">Bottom right</option>
+          <option value="bottom-left">Bottom left</option>
+          <option value="bottom-center">Bottom center</option>
+          <option value="top-right">Top right</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Size</label>
+        <select id="size-select"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="90">Small</option>
+          <option value="140" selected>Medium</option>
+          <option value="200">Large</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <p id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Draw or type a signature, then upload a PDF.</p>
+    <button id="sign-btn" type="button" class="btn-primary" disabled>
+      <span id="sign-label">Sign PDF</span>
+      <svg id="sign-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
+
+// ── Canvas drawing ────────────────────────────────────────────────────────────
+const canvas = document.getElementById('sig-canvas');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+let hasMark = false;
+
+function initCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = 110 * dpr;
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#1a3d2b';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+initCanvas();
+new ResizeObserver(initCanvas).observe(canvas);
+
+function pt(e) {
+  const r = canvas.getBoundingClientRect();
+  const s = e.touches ? e.touches[0] : e;
+  return [s.clientX - r.left, s.clientY - r.top];
+}
+
+canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(...pt(e)); });
+canvas.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  ctx.lineTo(...pt(e)); ctx.stroke();
+  hasMark = true; updateReady();
+});
+canvas.addEventListener('mouseup', () => { drawing = false; });
+canvas.addEventListener('mouseleave', () => { drawing = false; });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); ctx.moveTo(...pt(e)); }, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!drawing) return;
+  ctx.lineTo(...pt(e)); ctx.stroke();
+  hasMark = true; updateReady();
+}, { passive: false });
+canvas.addEventListener('touchend', () => { drawing = false; });
+
+document.getElementById('clear-canvas').addEventListener('click', () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasMark = false; updateReady();
+});
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+let activeTab = 'draw';
+
+function switchTab(tab) {
+  activeTab = tab;
+  const isDraw = tab === 'draw';
+  document.getElementById('draw-panel').classList.toggle('hidden', !isDraw);
+  document.getElementById('type-panel').classList.toggle('hidden', isDraw);
+
+  ['tab-draw', 'tab-type'].forEach(id => {
+    const active = (id === 'tab-' + tab);
+    const el = document.getElementById(id);
+    el.classList.toggle('bg-[var(--color-accent)]', active);
+    el.classList.toggle('text-white', active);
+    el.classList.toggle('border-[var(--color-accent)]', active);
+    el.classList.toggle('border-[var(--color-rule)]', !active);
+    el.classList.toggle('text-[var(--color-ink-muted)]', !active);
+  });
+  updateReady();
+}
+
+document.getElementById('tab-draw').addEventListener('click', () => switchTab('draw'));
+document.getElementById('tab-type').addEventListener('click', () => switchTab('type'));
+document.getElementById('sig-text').addEventListener('input', updateReady);
+
+// ── PDF upload ────────────────────────────────────────────────────────────────
+let pdfFile = null;
+const pdfInput = document.getElementById('pdf-input');
+const pdfDrop  = document.getElementById('pdf-drop');
+
+document.getElementById('pdf-browse').addEventListener('click', () => pdfInput.click());
+document.getElementById('pdf-change').addEventListener('click', () => clearPdf());
+pdfInput.addEventListener('change', e => setPdf(e.target.files[0]));
+pdfDrop.addEventListener('dragover', e => { e.preventDefault(); pdfDrop.classList.add('drag-over'); });
+pdfDrop.addEventListener('dragleave', () => pdfDrop.classList.remove('drag-over'));
+pdfDrop.addEventListener('drop', e => {
+  e.preventDefault(); pdfDrop.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f?.type === 'application/pdf' || f?.name?.endsWith('.pdf')) setPdf(f);
+});
+
+function setPdf(file) {
+  pdfFile = file;
+  document.getElementById('pdf-name').textContent = file.name;
+  document.getElementById('pdf-empty').classList.add('hidden');
+  document.getElementById('pdf-ready').classList.remove('hidden');
+  updateReady();
+}
+function clearPdf() {
+  pdfFile = null; pdfInput.value = '';
+  document.getElementById('pdf-empty').classList.remove('hidden');
+  document.getElementById('pdf-ready').classList.add('hidden');
+  updateReady();
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+function sigOk() {
+  return activeTab === 'draw' ? hasMark : document.getElementById('sig-text').value.trim().length > 0;
+}
+function updateReady() {
+  const ok = sigOk() && !!pdfFile;
+  document.getElementById('sign-btn').disabled = !ok;
+  const msg = !sigOk() ? 'Draw or type a signature above.'
+    : !pdfFile ? 'Upload a PDF to sign.'
+    : 'Ready — click Sign PDF.';
+  document.getElementById('status-msg').textContent = msg;
+}
+
+// ── Signature → PNG bytes ─────────────────────────────────────────────────────
+async function sigPngBytes() {
+  let src;
+  if (activeTab === 'draw') {
+    src = canvas;
+  } else {
+    const text = document.getElementById('sig-text').value.trim();
+    src = document.createElement('canvas');
+    src.width = 520; src.height = 110;
+    const c = src.getContext('2d');
+    c.font = "italic 60px Georgia, 'Times New Roman', serif";
+    c.fillStyle = '#1a3d2b';
+    c.textBaseline = 'middle';
+    c.fillText(text, 12, 55);
+  }
+  return new Promise(resolve =>
+    src.toBlob(b => b.arrayBuffer().then(resolve), 'image/png')
+  );
+}
+
+// ── Sign ──────────────────────────────────────────────────────────────────────
+document.getElementById('sign-btn').addEventListener('click', async () => {
+  const btn     = document.getElementById('sign-btn');
+  const label   = document.getElementById('sign-label');
+  const spinner = document.getElementById('sign-spinner');
+  const status  = document.getElementById('status-msg');
+
+  btn.disabled = true; label.textContent = 'Signing…'; spinner.classList.remove('hidden');
+  status.textContent = 'Processing…';
+
+  try {
+    const [pdfBuf, pngBuf] = await Promise.all([pdfFile.arrayBuffer(), sigPngBytes()]);
+    const pdfDoc  = await PDFDocument.load(pdfBuf);
+    const sigImg  = await pdfDoc.embedPng(pngBuf);
+    const sigW    = parseInt(document.getElementById('size-select').value);
+    const sigH    = Math.round(sigW * (sigImg.height / sigImg.width));
+    const margin  = 24;
+    const pages   = pdfDoc.getPages();
+    const which   = document.getElementById('page-select').value;
+    const targets = which === 'first' ? [pages[0]] : which === 'all' ? pages : [pages[pages.length - 1]];
+    const pos     = document.getElementById('pos-select').value;
+
+    for (const page of targets) {
+      const { width, height } = page.getSize();
+      let x, y;
+      if      (pos === 'bottom-right')  { x = width - sigW - margin; y = margin; }
+      else if (pos === 'bottom-left')   { x = margin;                 y = margin; }
+      else if (pos === 'bottom-center') { x = (width - sigW) / 2;     y = margin; }
+      else                              { x = width - sigW - margin;  y = height - sigH - margin; }
+      page.drawImage(sigImg, { x, y, width: sigW, height: sigH });
+    }
+
+    const out  = await pdfDoc.save();
+    const url  = URL.createObjectURL(new Blob([out], { type: 'application/pdf' }));
+    const a    = Object.assign(document.createElement('a'), { href: url, download: pdfFile.name.replace(/\.pdf$/i, '-signed.pdf') });
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    status.textContent = 'Signed PDF downloaded.';
+  } catch (err) {
+    console.error(err);
+    status.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false; label.textContent = 'Sign PDF'; spinner.classList.add('hidden');
+    updateReady();
+  }
+});
+
+window.addEventListener('beforeunload', e => {
+  if (pdfFile) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>

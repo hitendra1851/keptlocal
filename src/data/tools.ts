@@ -775,6 +775,48 @@ export const tools: Tool[] = [
       { q: "What formats are supported?", a: "JPG and PNG. HEIC files should be converted to JPG first using the Convert Image tool." },
     ],
   },
+  // --- PDF: Sign ---
+  {
+    slug: "sign-pdf",
+    name: "Sign PDF",
+    shortName: "Sign PDF",
+    pageTitle: "Sign PDF Online — No Upload",
+    description: "Draw or type a signature and stamp it onto a PDF — entirely in your browser.",
+    longDescription: "Sign a PDF without uploading it — draw your signature on a canvas or type it, choose page and position, and download the signed file instantly. Nothing leaves your device.",
+    category: "PDF",
+    icon: "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z",
+    status: "live",
+    keywords: ["sign pdf", "add signature to pdf", "e-sign pdf free", "sign pdf without uploading", "pdf signature online free"],
+    faq: [
+      { q: "Are my files uploaded to a server?", a: "No. Everything runs in your browser using pdf-lib and the Canvas API. Your PDF and your signature never leave your device — open DevTools → Network while signing to confirm zero upload requests." },
+      { q: "Is this legally valid?", a: "For most commercial agreements, a visual signature image on a PDF meets the electronic signature requirements under the US ESIGN Act, EU eIDAS (simple electronic signature), and equivalent legislation in most countries. For documents requiring a certified digital signature (QES) or specific legal formalities (wills, property transfers), use a certified e-signature provider." },
+      { q: "Can I use a touchscreen to draw my signature?", a: "Yes. Canvas drawing works on touchscreen devices including iPhone and iPad (Safari 15+) and Android (Chrome 90+). Sign with your finger or stylus." },
+      { q: "What if my PDF is password-protected?", a: "Unlock the PDF first using the Unlock PDF tool, then sign the unlocked copy." },
+      { q: "Does this add a cryptographic digital signature?", a: "No. The signature is a visual image embedded in the PDF — not a PAdES/PKCS#7 cryptographic signature that locks the document against modification. For tamper-evident signing with an audit trail, use Adobe Acrobat or a certified e-signature service." },
+      { q: "Is there a file size limit?", a: "No hard limit. The practical ceiling is your device's available RAM." },
+    ],
+  },
+  // --- Image: SVG to PNG ---
+  {
+    slug: "svg-to-png",
+    name: "SVG to PNG",
+    shortName: "SVG → PNG",
+    pageTitle: "SVG to PNG — Free, No Upload",
+    description: "Convert SVG files to PNG images at any size — entirely in your browser.",
+    longDescription: "Convert SVG to PNG free in your browser — no upload, no signup, no account. Set output width, choose background (transparent, white, or black), and export at 1×, 2×, or 3× for retina screens.",
+    category: "Image",
+    icon: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4",
+    status: "live",
+    keywords: ["svg to png", "convert svg to png free", "svg to png online no upload", "svg to raster image browser", "export svg as png free"],
+    faq: [
+      { q: "Are my files uploaded to a server?", a: "No. Conversion uses the browser's Canvas API entirely locally. Your SVG never leaves your device — open DevTools → Network while converting to confirm zero upload requests." },
+      { q: "Why does the text in my SVG look different?", a: "SVG text renders using fonts available in your browser. If the SVG specifies a font not installed on your device, the browser substitutes a fallback. Convert text to paths (outlines) in your vector editor before exporting for consistent cross-device rendering." },
+      { q: "Why do external resources in my SVG not appear?", a: "SVG files can reference images, fonts, or stylesheets at external URLs. Browser-based conversion does not fetch external resources. Self-contained SVGs convert reliably; SVGs with external references may render with fallbacks." },
+      { q: "What does the scale option do?", a: "Scale 1× outputs the SVG at its natural pixel dimensions. Scale 2× outputs at double the dimensions — correct for retina displays where 1 CSS pixel maps to 4 device pixels. Use 2× for all web images intended for retina screens." },
+      { q: "Can I set an exact pixel size?", a: "Yes. Enter the target width in pixels. The height scales proportionally. Leave it blank to use the SVG's natural dimensions." },
+      { q: "What background options are available?", a: "Transparent (preserves SVG transparency), white, or black. Choose based on where the PNG will be used — transparent for overlays, white for documents, black for dark backgrounds." },
+    ],
+  },
   // --- Utility tools ---
   {
     slug: "qr-code-generator",

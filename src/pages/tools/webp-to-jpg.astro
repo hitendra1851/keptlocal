@@ -1,0 +1,77 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import WebpToJpg from "../../components/tools/WebpToJpg.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "webp-to-jpg")!;
+---
+
+<ToolLayout tool={tool}>
+  <WebpToJpg slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert WebP to JPG</h2>
+    <ol>
+      <li>Drop your WebP files onto the upload area, or click to browse. Multiple files are supported.</li>
+      <li>Choose a JPG quality setting. <em>Balanced (85%)</em> is the right choice for most images. Use <em>High (95%)</em> for images where visual fidelity is important.</li>
+      <li>Click <strong>Convert to JPG</strong>. Files convert instantly in your browser.</li>
+      <li>Download converted files individually or use <strong>Download ZIP</strong> for a batch.</li>
+    </ol>
+    <p>
+      No files leave your device. The conversion runs entirely using the Canvas API in your browser.
+    </p>
+
+    <h2>Why WebP files need converting</h2>
+    <p>
+      WebP is a modern image format developed by Google and released in 2010. It achieves better compression than JPG for equivalent visual quality — typically 25–35% smaller files. All major browsers support WebP, which is why web developers use it extensively for faster-loading websites.
+    </p>
+    <p>
+      The problem is that WebP support outside of web browsers is inconsistent. Windows Photos supports WebP since Windows 10 build 1809, but only when the WebP Image Extensions are installed from the Microsoft Store. macOS Preview supports WebP from macOS Ventura (2022), but older macOS versions do not. Many Android image viewers, email clients, and desktop applications do not open WebP files.
+    </p>
+    <p>
+      When you download an image from a website, save a screenshot, or receive a file from someone, it may be in WebP format. If the recipient's software cannot open it, conversion to JPG — the universally supported format — resolves the compatibility issue immediately.
+    </p>
+
+    <h2>When to convert WebP to JPG</h2>
+    <ul>
+      <li><strong>Images downloaded from websites.</strong> Most images served on modern websites are in WebP format for performance reasons. When you save these to disk and try to open them in image editing software, email them, or upload them elsewhere, you may encounter compatibility issues. Converting to JPG provides universal compatibility.</li>
+      <li><strong>Sharing with software that cannot open WebP.</strong> Many image editing applications, document editors, and legacy software tools do not support WebP. JPG is the safe, widely compatible choice.</li>
+      <li><strong>Uploading to platforms that require JPG.</strong> Some content management platforms, e-commerce systems, and marketplace upload forms reject WebP files or have inconsistent handling. JPG is universally accepted.</li>
+      <li><strong>Sending in email or messaging apps.</strong> Some email clients and messaging applications do not correctly preview or open WebP attachments. Converting to JPG ensures the recipient sees the image regardless of their software.</li>
+      <li><strong>Long-term storage.</strong> JPG has been the universal photographic image standard since 1992 and its readability is guaranteed indefinitely. WebP, while well-supported in browsers, has less certain long-term software support for offline viewing tools.</li>
+    </ul>
+
+    <h2>WebP vs. JPG: compression and compatibility</h2>
+    <p>
+      WebP uses more sophisticated compression algorithms than JPEG — it applies both lossy and lossless techniques and can encode transparency (unlike JPG). For web delivery, WebP is clearly superior: smaller files, equivalent quality, and transparency support. For universal sharing and compatibility, JPG wins on reach.
+    </p>
+    <p>
+      The format choice is a context decision, not a quality decision. For images that will be viewed in a web browser, WebP is better. For images that will be shared with people using a range of different software, emailed as attachments, or uploaded to arbitrary platforms, JPG's universal support makes it the practical choice.
+    </p>
+    <p>
+      When converting from WebP to JPG, any transparent areas in the source WebP become white in the output. JPG does not support transparency. If the WebP contains transparency that matters (a logo, a cutout), and you need to preserve it, use PNG as the output format instead — our <a href="/tools/convert-image">Convert Image tool</a> handles WebP-to-PNG conversion.
+    </p>
+
+    <h2>How browser-based WebP to JPG conversion works</h2>
+    <p>
+      Modern browsers have built-in WebP decoding support. This tool takes advantage of that: each WebP file is loaded into an <code>&lt;img&gt;</code> element (which the browser decodes natively), drawn onto an HTML5 canvas, and then exported as JPEG using <code>canvas.toBlob('image/jpeg', quality)</code>. No external decoding library is needed — your browser does all the work locally.
+    </p>
+    <p>
+      Before encoding to JPEG, the canvas is filled with white. This correctly handles WebP transparency: transparent pixels become white rather than producing artefacts. The JPEG is then created in memory and offered as a download.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Transparent areas become white.</strong> JPG does not support transparency. WebP images with transparent backgrounds will have a white background in the converted JPG.</li>
+      <li><strong>Animated WebP.</strong> Animated WebP files contain multiple frames. This tool converts only the first frame — the static image. Full animated WebP conversion is not supported.</li>
+      <li><strong>File size may increase.</strong> WebP is often smaller than equivalent JPG because its compression is more efficient. The converted JPG may be larger than the source WebP at the same quality level — this is expected. You are trading file size for compatibility.</li>
+      <li><strong>Very large files.</strong> The practical ceiling is your device's available RAM. High-resolution images may take a moment to process.</li>
+      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your files</h2>
+    <p>
+      Your WebP files are loaded into browser memory and converted using the Canvas API. The JPG output is created in memory and downloaded directly to your device. No files are sent to any server at any point.
+    </p>
+  </Fragment>
+</ToolLayout>

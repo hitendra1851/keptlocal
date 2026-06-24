@@ -1,0 +1,81 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import AddImageToPdf from "../../components/tools/AddImageToPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "add-image-to-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <AddImageToPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to add an image to a PDF</h2>
+    <ol>
+      <li><strong>Upload your PDF.</strong> Drop it onto the first upload area or click to browse. Any standard PDF is supported.</li>
+      <li><strong>Upload the image to insert.</strong> JPG and PNG images are supported. The image will be embedded directly into the PDF without quality loss.</li>
+      <li><strong>Set the placement.</strong> Choose which page to insert the image on (first, last, or all pages), where on the page it should appear, how wide it should be in points, and how much margin to leave around it.</li>
+      <li>Click <strong>Add Image to PDF</strong>. The modified PDF downloads immediately with "-with-image" added to the filename.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using pdf-lib. Your PDF and your image are never sent to a server.
+    </p>
+
+    <h2>When to add an image to a PDF</h2>
+    <ul>
+      <li><strong>Adding a company logo to a document.</strong> Insert a logo onto an invoice, report, letterhead, or proposal. The image embeds at full quality — no pixelation or re-encoding.</li>
+      <li><strong>Adding a signature image.</strong> If you have a scanned or exported signature image, you can insert it directly onto the relevant page of a contract or agreement. For a more streamlined signing experience, the <a href="/tools/sign-pdf">Sign PDF tool</a> handles signature creation and placement together.</li>
+      <li><strong>Adding a photo to a form or document.</strong> ID cards, application forms, passports, and similar documents sometimes require a photo to be attached. Inserting the photo onto the PDF page produces a complete document ready to submit.</li>
+      <li><strong>Branding documents before sharing.</strong> Insert a watermark image, banner, or branded header onto PDF pages before distributing them. For repeated branding across many pages, the "all pages" option applies the image to every page in one step.</li>
+      <li><strong>Annotating with reference images.</strong> Insert a diagram, chart, or reference photo onto a page to provide visual context alongside existing text content.</li>
+      <li><strong>Inserting a stamp or approval mark.</strong> Stamp an "Approved", "Reviewed", or custom mark image onto document pages as part of a review workflow.</li>
+    </ul>
+
+    <h2>How placement works</h2>
+    <p>
+      PDF coordinates are measured in points (1 point = 1/72 inch), with the origin at the bottom-left corner of the page. The width setting controls the horizontal size of the image in PDF points. The height is calculated automatically from the image's aspect ratio — so the image never gets stretched or distorted.
+    </p>
+    <p>
+      The position options (top left, top center, top right, center, bottom left, bottom center, bottom right) place the image relative to the page boundaries, offset inward by the margin value you set. A margin of 20 points (about 7mm) keeps the image away from the page edge, which is appropriate for most printing contexts.
+    </p>
+    <p>
+      For a standard A4 page (595 × 842 points), a 150-point-wide image takes up roughly 5cm of width. A 300-point-wide image takes up roughly 10cm. Use these rough guidelines: small for logos and stamps (80–150pt), medium for photos and reference images (150–250pt), large for full-width images or diagrams (300pt+).
+    </p>
+
+    <h2>Image format support and quality</h2>
+    <p>
+      This tool supports JPG and PNG images. Both formats are embedded directly into the PDF using pdf-lib's native embedding methods — <code>pdfDoc.embedJpg()</code> for JPG images and <code>pdfDoc.embedPng()</code> for PNG images. The image data is embedded as-is, without re-encoding or quality loss.
+    </p>
+    <p>
+      A JPG embedded in a PDF remains a JPG — the PDF merely stores the compressed JPEG bytes. A PNG embedded in a PDF is stored as PNG data. Neither format is re-compressed or degraded during embedding. The quality of the inserted image in the output PDF is identical to the source image you uploaded.
+    </p>
+    <p>
+      If your image is in another format (WebP, HEIC, BMP, TIFF), convert it to JPG or PNG first using the <a href="/tools/convert-image">Convert Image tool</a>, then use this tool to insert it into the PDF.
+    </p>
+
+    <h2>How pdf-lib embeds images</h2>
+    <p>
+      pdf-lib is a pure-JavaScript PDF library that runs entirely in the browser. When you embed an image, pdf-lib reads the image file's binary data, wraps it in a PDF XObject (a self-contained reusable resource), and registers it in the PDF's resource dictionary. The page then references this XObject with a drawing instruction that positions and sizes it at the specified coordinates.
+    </p>
+    <p>
+      The modified PDF is serialised by <code>pdfDoc.save()</code> and the result is offered as a download. The original PDF is not modified — the output is a new file created in browser memory.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>JPG and PNG only.</strong> WebP, HEIC, BMP, TIFF, and SVG are not directly supported. Convert to JPG or PNG first using the <a href="/tools/convert-image">Convert Image tool</a> or the <a href="/tools/svg-to-png">SVG to PNG tool</a>.</li>
+      <li><strong>Position is preset-based.</strong> The tool places images at one of seven preset positions. For pixel-precise positioning, use a full PDF editor after inserting the image.</li>
+      <li><strong>Image is placed on top of existing content.</strong> If the chosen position overlaps existing text or graphics on the page, the image will cover that content. Check the output and adjust the size or margin if needed.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be modified. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first.</li>
+      <li><strong>Large images.</strong> Very large PNG files embedded in PDFs produce large PDF outputs. For best results, resize the image to approximately the dimensions you need before embedding — an image displayed at 150pt wide does not need to be 4000 pixels wide.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your files</h2>
+    <p>
+      Your PDF and your image are both loaded into browser memory and processed by pdf-lib running locally in your browser. The output PDF is created in memory and downloaded directly to your device. Neither your PDF contents nor your image are transmitted to any server at any point.
+    </p>
+    <p>
+      This is relevant when inserting sensitive images — signatures, photos, logos, internal documents — into confidential PDFs. Local processing means none of that content leaves your device.
+    </p>
+  </Fragment>
+</ToolLayout>

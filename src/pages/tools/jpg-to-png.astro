@@ -1,0 +1,71 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import JpgToPng from "../../components/tools/JpgToPng.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "jpg-to-png")!;
+---
+
+<ToolLayout tool={tool}>
+  <JpgToPng slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert JPG to PNG</h2>
+    <ol>
+      <li>Drop your JPG or JPEG files onto the upload area, or click to browse. Multiple files are supported.</li>
+      <li>Click <strong>Convert to PNG</strong>. Each file is converted in your browser instantly.</li>
+      <li>Download the PNG files individually, or use <strong>Download ZIP</strong> to get all converted files in one archive.</li>
+    </ol>
+    <p>
+      No quality setting is needed — PNG output is always lossless. Conversion runs entirely in your browser using the Canvas API.
+    </p>
+
+    <h2>When to convert JPG to PNG</h2>
+    <ul>
+      <li><strong>Editing and re-saving images without quality loss.</strong> Every time you save a JPEG, it re-encodes and loses a small amount of detail. If you are going to edit an image multiple times — cropping, adjusting, annotating — convert to PNG first and keep the working file as PNG. Only convert back to JPG for the final output when file size matters.</li>
+      <li><strong>Adding a transparent background.</strong> JPG does not support transparency. If you need to make parts of the image transparent — for a logo cutout, a product photo on a clear background, or any compositing work — you must work in PNG (or another format with alpha channel support). Converting from JPG to PNG is the first step.</li>
+      <li><strong>Screenshots and UI work.</strong> Screenshots are typically saved as PNG for lossless quality. If you have a JPG screenshot and need to annotate it, add elements, or use it as a layer in a design, converting to PNG preserves the sharpness of text and UI elements.</li>
+      <li><strong>Using images in presentations and documents.</strong> Some presentation software and document editors handle PNG better than JPG for images that contain text, diagrams, or sharp edges. PNG preserves these without JPEG compression artefacts.</li>
+      <li><strong>Archiving originals losslessly.</strong> If you have JPG images that have already been compressed and you want to prevent any further quality loss on subsequent saves, converting to PNG locks in the current quality without further degradation on re-save.</li>
+    </ul>
+
+    <h2>JPG to PNG: what the conversion actually does</h2>
+    <p>
+      Converting from JPG to PNG does not recover quality that JPEG compression already removed — that information is gone. What it does is create a lossless copy of the current state of the JPG. Future edits and saves of this PNG will not cause further quality degradation.
+    </p>
+    <p>
+      Think of it this way: a JPG is like a photocopy that slightly reduces quality each time you copy it. Converting to PNG takes the current photocopy and freezes it in lossless form — so future copies of the PNG are perfect copies of that state.
+    </p>
+    <p>
+      The PNG output will be significantly larger than the source JPG. This is expected: PNG stores every pixel without lossy compression, while JPG discards data to achieve smaller files. A 300 KB JPG might become a 2 MB PNG — same visual content, lossless storage.
+    </p>
+    <p>
+      The converted PNG will not have a transparent background — the JPG's white or coloured background pixels become PNG pixels of the same colour. To create transparent cutouts, you need an image editor with selection tools after the conversion.
+    </p>
+
+    <h2>How the conversion works technically</h2>
+    <p>
+      Each JPG file is loaded into an <code>&lt;img&gt;</code> element. The browser decodes the JPEG, applying all its decompression algorithms. The decoded pixel data is then drawn onto an HTML5 canvas using <code>ctx.drawImage()</code>. The canvas stores pixels in raw RGBA format — lossless, uncompressed.
+    </p>
+    <p>
+      The canvas is then exported to PNG format using <code>canvas.toBlob('image/png')</code>. PNG compression is lossless: the resulting file encodes every pixel exactly. The PNG blob is offered as a download via a temporary object URL.
+    </p>
+    <p>
+      The entire operation runs in your browser. No files are uploaded or sent anywhere.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Output PNG is larger than the source JPG.</strong> PNG lossless compression is less aggressive than JPEG lossy compression. Expect the PNG to be 4–10× larger than the JPG. This is correct behaviour — not a problem with the tool.</li>
+      <li><strong>JPEG quality is already baked in.</strong> Any JPEG compression artefacts in the source file (blocking, ringing around edges, colour banding) will be visible in the PNG output. Converting to PNG does not fix or hide pre-existing JPEG artefacts.</li>
+      <li><strong>No transparency.</strong> JPG files do not contain transparency information. The converted PNG will have a solid background (whatever colour the JPG background is). Creating transparency requires a separate masking step in an image editor.</li>
+      <li><strong>Very large images.</strong> High-resolution JPGs may take a moment to process. The practical ceiling is your device's available RAM.</li>
+      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your files</h2>
+    <p>
+      Your JPG files are read into browser memory using the File API and converted using the Canvas API. The PNG output is created in memory and downloaded directly to your device. No files leave your device at any point — open DevTools → Network during conversion to confirm zero outbound activity.
+    </p>
+  </Fragment>
+</ToolLayout>

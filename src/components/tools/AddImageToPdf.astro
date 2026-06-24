@@ -1,0 +1,216 @@
+---
+// Add Image to PDF — pdf-lib embedJpg/embedPng. No upload.
+---
+
+<div id="addimg-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: PDF -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 1 — Upload PDF</p>
+    <input type="file" id="pdf-input" accept="application/pdf,.pdf" class="hidden" />
+    <div id="pdf-drop" class="drop-zone">
+      <div id="pdf-empty" class="text-center py-2">
+        <p class="text-[var(--color-ink-soft)] text-sm mb-1">Drop PDF here, or</p>
+        <button id="pdf-browse" type="button"
+          class="text-[var(--color-accent)] underline underline-offset-4 font-medium text-sm hover:no-underline">choose a file</button>
+      </div>
+      <div id="pdf-ready" class="hidden text-center">
+        <p id="pdf-name" class="text-sm font-medium text-[var(--color-ink)]"></p>
+        <button id="pdf-change" type="button" class="text-xs text-[var(--color-accent)] mt-1 hover:underline">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Image -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 2 — Upload image to insert</p>
+    <input type="file" id="img-input" accept="image/jpeg,image/png,.jpg,.jpeg,.png" class="hidden" />
+    <div id="img-drop" class="drop-zone">
+      <div id="img-empty" class="text-center py-2">
+        <p class="text-[var(--color-ink-soft)] text-sm mb-1">Drop JPG or PNG here, or</p>
+        <button id="img-browse" type="button"
+          class="text-[var(--color-accent)] underline underline-offset-4 font-medium text-sm hover:no-underline">choose a file</button>
+      </div>
+      <div id="img-ready" class="hidden text-center">
+        <p id="img-name" class="text-sm font-medium text-[var(--color-ink)]"></p>
+        <button id="img-change" type="button" class="text-xs text-[var(--color-accent)] mt-1 hover:underline">Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Options -->
+  <div class="p-4 border-b border-[var(--color-rule)]">
+    <p class="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wide mb-3">Step 3 — Placement</p>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Page</label>
+        <select id="page-select"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="last">Last page</option>
+          <option value="first">First page</option>
+          <option value="all">All pages</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Position</label>
+        <select id="pos-select"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="top-left">Top left</option>
+          <option value="top-center">Top center</option>
+          <option value="top-right">Top right</option>
+          <option value="center">Center</option>
+          <option value="bottom-left">Bottom left</option>
+          <option value="bottom-center">Bottom center</option>
+          <option value="bottom-right" selected>Bottom right</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Width (px)</label>
+        <input id="img-width" type="number" min="10" max="2000" value="150"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]" />
+      </div>
+      <div>
+        <label class="text-xs text-[var(--color-ink-muted)] block mb-1">Margin (px)</label>
+        <input id="img-margin" type="number" min="0" max="200" value="20"
+          class="w-full px-2 py-2 border border-[var(--color-rule)] rounded-lg text-sm bg-[var(--color-paper)] text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-accent)]" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <p id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload a PDF and an image to insert.</p>
+    <button id="add-btn" type="button" class="btn-primary" disabled>
+      <span id="btn-label">Add Image to PDF</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
+
+let pdfFile = null;
+let imgFile = null;
+
+const pdfInput = document.getElementById('pdf-input');
+const pdfDrop  = document.getElementById('pdf-drop');
+const imgInput = document.getElementById('img-input');
+const imgDrop  = document.getElementById('img-drop');
+const addBtn   = document.getElementById('add-btn');
+const statusMsg = document.getElementById('status-msg');
+
+// PDF handlers
+document.getElementById('pdf-browse').addEventListener('click', () => pdfInput.click());
+document.getElementById('pdf-change').addEventListener('click', () => clearPdf());
+pdfInput.addEventListener('change', e => setPdf(e.target.files[0]));
+pdfDrop.addEventListener('dragover', e => { e.preventDefault(); pdfDrop.classList.add('drag-over'); });
+pdfDrop.addEventListener('dragleave', () => pdfDrop.classList.remove('drag-over'));
+pdfDrop.addEventListener('drop', e => {
+  e.preventDefault(); pdfDrop.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f?.type === 'application/pdf' || f?.name?.endsWith('.pdf')) setPdf(f);
+});
+
+// Image handlers
+document.getElementById('img-browse').addEventListener('click', () => imgInput.click());
+document.getElementById('img-change').addEventListener('click', () => clearImg());
+imgInput.addEventListener('change', e => setImg(e.target.files[0]));
+imgDrop.addEventListener('dragover', e => { e.preventDefault(); imgDrop.classList.add('drag-over'); });
+imgDrop.addEventListener('dragleave', () => imgDrop.classList.remove('drag-over'));
+imgDrop.addEventListener('drop', e => {
+  e.preventDefault(); imgDrop.classList.remove('drag-over');
+  const f = e.dataTransfer.files[0];
+  if (f && /image\/(jpeg|png)/.test(f.type)) setImg(f);
+});
+
+function setPdf(f) {
+  pdfFile = f;
+  document.getElementById('pdf-name').textContent = f.name;
+  document.getElementById('pdf-empty').classList.add('hidden');
+  document.getElementById('pdf-ready').classList.remove('hidden');
+  updateReady();
+}
+function clearPdf() {
+  pdfFile = null; pdfInput.value = '';
+  document.getElementById('pdf-empty').classList.remove('hidden');
+  document.getElementById('pdf-ready').classList.add('hidden');
+  updateReady();
+}
+function setImg(f) {
+  imgFile = f;
+  document.getElementById('img-name').textContent = f.name;
+  document.getElementById('img-empty').classList.add('hidden');
+  document.getElementById('img-ready').classList.remove('hidden');
+  updateReady();
+}
+function clearImg() {
+  imgFile = null; imgInput.value = '';
+  document.getElementById('img-empty').classList.remove('hidden');
+  document.getElementById('img-ready').classList.add('hidden');
+  updateReady();
+}
+function updateReady() {
+  addBtn.disabled = !(pdfFile && imgFile);
+  statusMsg.textContent = !pdfFile ? 'Upload a PDF to begin.'
+    : !imgFile ? 'Upload the image to insert.'
+    : 'Ready — click Add Image to PDF.';
+}
+
+addBtn.addEventListener('click', async () => {
+  const btn = addBtn;
+  const label = document.getElementById('btn-label');
+  const spinner = document.getElementById('spinner');
+  btn.disabled = true; label.textContent = 'Processing…'; spinner.classList.remove('hidden');
+  statusMsg.textContent = 'Embedding image…';
+
+  try {
+    const [pdfBuf, imgBuf] = await Promise.all([pdfFile.arrayBuffer(), imgFile.arrayBuffer()]);
+    const pdfDoc = await PDFDocument.load(pdfBuf);
+    const isJpg = imgFile.type === 'image/jpeg' || /\.(jpg|jpeg)$/i.test(imgFile.name);
+    const embeddedImg = isJpg
+      ? await pdfDoc.embedJpg(imgBuf)
+      : await pdfDoc.embedPng(imgBuf);
+
+    const imgW = parseInt(document.getElementById('img-width').value) || 150;
+    const margin = parseInt(document.getElementById('img-margin').value) ?? 20;
+    const imgH = Math.round(imgW * (embeddedImg.height / embeddedImg.width));
+    const pos = document.getElementById('pos-select').value;
+    const which = document.getElementById('page-select').value;
+    const pages = pdfDoc.getPages();
+    const targets = which === 'first' ? [pages[0]] : which === 'all' ? pages : [pages[pages.length - 1]];
+
+    for (const page of targets) {
+      const { width, height } = page.getSize();
+      let x, y;
+      if      (pos === 'top-left')      { x = margin;               y = height - imgH - margin; }
+      else if (pos === 'top-center')    { x = (width - imgW) / 2;   y = height - imgH - margin; }
+      else if (pos === 'top-right')     { x = width - imgW - margin; y = height - imgH - margin; }
+      else if (pos === 'center')        { x = (width - imgW) / 2;   y = (height - imgH) / 2; }
+      else if (pos === 'bottom-left')   { x = margin;               y = margin; }
+      else if (pos === 'bottom-center') { x = (width - imgW) / 2;   y = margin; }
+      else                              { x = width - imgW - margin; y = margin; }
+      page.drawImage(embeddedImg, { x, y, width: imgW, height: imgH });
+    }
+
+    const out = await pdfDoc.save();
+    const url = URL.createObjectURL(new Blob([out], { type: 'application/pdf' }));
+    const outName = pdfFile.name.replace(/\.pdf$/i, '-with-image.pdf');
+    Object.assign(document.createElement('a'), { href: url, download: outName }).click();
+    setTimeout(() => URL.revokeObjectURL(url), 15000);
+    statusMsg.textContent = `Done — ${outName} downloaded.`;
+  } catch (err) {
+    console.error(err);
+    statusMsg.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false; label.textContent = 'Add Image to PDF'; spinner.classList.add('hidden');
+    updateReady();
+  }
+});
+
+window.addEventListener('beforeunload', e => {
+  if (pdfFile || imgFile) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>

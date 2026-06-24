@@ -1,0 +1,83 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import FlattenPdf from "../../components/tools/FlattenPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "flatten-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <FlattenPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to flatten a PDF</h2>
+    <ol>
+      <li>Upload your PDF by dropping it onto the upload area or clicking to browse. Any PDF with form fields or annotations is supported.</li>
+      <li>Review the options. Form field flattening is always applied — it is the core function of this tool. Annotation flattening (comments, highlights, stamps) is enabled by default; uncheck it if you want to keep annotations interactive.</li>
+      <li>Click <strong>Flatten PDF</strong>. The flattened file downloads automatically with "-flattened" added to the filename.</li>
+    </ol>
+    <p>
+      The entire operation runs in your browser using pdf-lib. Your PDF is never sent to a server.
+    </p>
+
+    <h2>What does flattening a PDF mean?</h2>
+    <p>
+      A PDF form contains two distinct layers. The first is the static page content — the background layout, text, images, and formatting that do not change. The second is the interactive layer — form fields (text inputs, checkboxes, radio buttons, dropdowns, signature fields) and annotations (comments, stamps, highlights) that can be interacted with, filled in, or modified.
+    </p>
+    <p>
+      Flattening merges these two layers into one. Every form field's current value is rendered directly onto the page content, and the interactive field is removed. A checkbox that was checked becomes a permanent visual checkmark drawn on the page. A text field that contained "John Smith" becomes static text on the page. The result is a PDF that looks exactly like the filled-out form but has no interactive elements — it is a final, locked version.
+    </p>
+    <p>
+      The flattened PDF can be opened, printed, and viewed in any PDF reader. The content cannot be changed by filling in fields or editing annotations, because those fields no longer exist as interactive elements.
+    </p>
+
+    <h2>When to flatten a PDF</h2>
+    <ul>
+      <li><strong>Before sending a completed form.</strong> Flattening a filled PDF before emailing it or submitting it prevents the recipient from modifying the entered values. The form data is baked into the document permanently.</li>
+      <li><strong>Before archiving signed documents.</strong> If you have signed a PDF using a visual signature (image stamped on the page), flattening removes the interactive signature field and makes the signature part of the permanent page content. This prevents accidental clearing of the signature.</li>
+      <li><strong>Before printing.</strong> Some PDF printers and printing services handle flat PDFs more reliably than forms with interactive elements. Flattening before printing eliminates potential rendering issues where fields appear blank or are displayed incorrectly.</li>
+      <li><strong>Before converting to image.</strong> When converting a PDF to JPG or PNG (using the PDF to JPG tool), form fields may not render correctly — some PDF renderers show empty fields even when they contain data. Flattening first bakes the field values into the page so they render correctly in the converted image.</li>
+      <li><strong>Before combining with other PDFs.</strong> Merging PDFs that contain form fields can cause field name conflicts and interactive inconsistencies. Flattening each form first ensures the Merge PDF tool produces a clean, consistently formatted output.</li>
+      <li><strong>Locking a completed document.</strong> When you want to share a PDF that cannot be edited — a finalized contract, a completed application, a reviewed and approved document — flattening removes editability while preserving the complete visual content.</li>
+    </ul>
+
+    <h2>Flatten vs. protect: which do you need?</h2>
+    <p>
+      Flattening removes interactivity but does not restrict who can open, print, or copy text from the PDF. A flattened PDF is a static document with no access controls.
+    </p>
+    <p>
+      Password protection (available on the <a href="/tools/protect-pdf">Protect PDF tool</a>) controls who can open the document. These two features serve different purposes and can be combined: flatten first to lock in the form data, then protect to control access.
+    </p>
+    <p>
+      Neither flattening nor password protection adds a cryptographic audit trail or digital signature. For documents where you need to prove the document has not been modified since signing, use a certified e-signature service that creates a PAdES/PKCS#7 digital signature. For the vast majority of everyday form submissions and document sharing, flattening is the right choice.
+    </p>
+
+    <h2>How PDF flattening works technically</h2>
+    <p>
+      PDF form fields are stored as AcroForm widgets — PDF objects that describe a field's position, size, type, and current value. When a user fills in a text field, the entered text is stored in the field's value property and rendered visually using an appearance stream.
+    </p>
+    <p>
+      Flattening takes each field's appearance stream — the visual rendering of its current value — and copies it into the page's content stream as static drawing instructions. The AcroForm widget object is then removed. The page now contains exactly what the field looked like, drawn as permanent content, with no associated interactive logic.
+    </p>
+    <p>
+      This tool uses <a href="https://pdf-lib.js.org/" target="_blank" rel="noopener">pdf-lib</a>'s <code>form.flatten()</code> method, which handles this process for all field types — text inputs, checkboxes, radio buttons, dropdowns, list boxes, and signature fields. The operation runs entirely in your browser.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Empty fields become empty static areas.</strong> If a form field has not been filled in, its empty appearance is flattened — a blank space on the page where the field was. This is correct behaviour.</li>
+      <li><strong>Complex appearance streams.</strong> Most standard PDF form fields flatten correctly. Highly customised fields with non-standard appearance streams (common in forms created by enterprise PDF tools) may not render exactly as they appeared in the original viewer.</li>
+      <li><strong>Digital signatures.</strong> Cryptographic PDF digital signatures (PAdES, PKCS#7) are separate from visual appearance and are affected by flattening. If the PDF has been cryptographically signed, flattening may invalidate the digital signature — the signature validates document integrity, and modifying the document structure breaks that validation.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be flattened directly. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first, then flatten the unlocked copy.</li>
+      <li><strong>File size.</strong> Flattened PDFs are typically smaller than the original because AcroForm widget data is removed and replaced with static content. The exact size change depends on the form complexity.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your PDF</h2>
+    <p>
+      Your PDF is loaded into browser memory and processed by pdf-lib running locally. The flattened output is created in memory and downloaded directly to your device. No document data — including any filled-in form values — leaves your device.
+    </p>
+    <p>
+      This is especially relevant for sensitive forms: tax documents, legal agreements, medical intake forms, financial applications. Processing them locally means the values you entered never pass through a third-party server.
+    </p>
+  </Fragment>
+</ToolLayout>

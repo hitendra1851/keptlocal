@@ -1,0 +1,85 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import HeicToJpg from "../../components/tools/HeicToJpg.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "heic-to-jpg")!;
+---
+
+<ToolLayout tool={tool}>
+  <HeicToJpg slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert HEIC to JPG</h2>
+    <ol>
+      <li>Click <strong>choose files</strong> or drop your HEIC photos onto the upload area. You can select multiple files at once.</li>
+      <li>Choose a JPG quality setting. <em>Balanced (85%)</em> is the right choice for most photos — visually indistinguishable from the original at a meaningfully smaller file size. Use <em>High (95%)</em> for photos you plan to print or enlarge.</li>
+      <li>Click <strong>Convert to JPG</strong>. Each file is converted in your browser and a download link appears next to it.</li>
+      <li>Download individual files or click <strong>Download ZIP</strong> to grab all converted images in one archive.</li>
+    </ol>
+    <p>
+      Nothing is sent to a server at any step. Open DevTools → Network while converting to confirm: you will see the initial page load and zero further requests.
+    </p>
+
+    <h2>Why iPhone photos are HEIC by default</h2>
+    <p>
+      Apple adopted HEIC (High Efficiency Image Container) as the default photo format for iPhone and iPad starting with iOS 11 in 2017. The reason was straightforward: HEIC compresses photos to roughly half the file size of JPEG at the same visual quality. For a phone that shoots hundreds of photos a month and has limited storage, that difference is significant.
+    </p>
+    <p>
+      HEIC is part of the HEIF (High Efficiency Image Format) standard developed by the Moving Picture Experts Group — the same organization behind MPEG video. It uses H.265 video codec technology to compress still images. The format also supports 16-bit colour depth (versus JPEG's 8-bit), wide colour gamuts, and features like portrait depth maps that Apple uses for Portrait Mode photos.
+    </p>
+    <p>
+      The problem is compatibility. While Apple devices handle HEIC natively, the rest of the digital world largely does not. Windows requires a paid codec from the Microsoft Store to open HEIC files in Photos. Most Android phones cannot open them. Website upload forms, email clients, and social media platforms reject or fail silently on HEIC uploads. Converting to JPG eliminates all of these friction points.
+    </p>
+
+    <h2>When to convert HEIC to JPG</h2>
+    <ul>
+      <li><strong>Sharing photos with Windows or Android users.</strong> HEIC files either fail to open entirely or require the recipient to install additional software. JPG opens everywhere.</li>
+      <li><strong>Uploading to websites and services.</strong> Most online platforms — including Instagram, Facebook, e-commerce sites, government portals, and job application forms — do not accept HEIC. Converting first prevents failed uploads and cryptic error messages.</li>
+      <li><strong>Sending photos by email.</strong> Some email clients display HEIC correctly inline; many do not. Recipients with older software or non-Apple devices will see a broken attachment. JPG is universally displayed.</li>
+      <li><strong>Editing in non-Apple software.</strong> Adobe Photoshop, Lightroom, and most third-party photo editors can open HEIC, but many free image editors, desktop wallpaper managers, and image viewers cannot. Converting to JPG broadens compatibility to virtually every application.</li>
+      <li><strong>Long-term archiving.</strong> JPG has been the universal standard since 1992 and will remain readable indefinitely. HEIC is newer and its long-term support across all platforms is less certain. For photos you want to access reliably in ten years, JPG is the safer archive format.</li>
+      <li><strong>Batch-converting a camera roll backup.</strong> When moving photos from iPhone to a Windows computer or NAS, batch-converting the HEIC library to JPG first avoids per-photo compatibility issues later.</li>
+    </ul>
+
+    <h2>HEIC vs. JPG: quality and file size</h2>
+    <p>
+      At equivalent visual quality, a HEIC file is typically 40–50% smaller than the equivalent JPG. A photo that takes 4 MB as a JPG may take around 2 MB as HEIC. This compression advantage comes from HEIC's more sophisticated codec, which analyses image structure more deeply than JPEG's 30-year-old algorithm.
+    </p>
+    <p>
+      When you convert HEIC to JPG using this tool, you choose the output quality. At 85% quality, the converted JPG is visually indistinguishable from the original HEIC to most people in most viewing conditions. The file will be larger than the HEIC source — this is expected. You are trading compression efficiency for universal compatibility, which is the entire point of conversion.
+    </p>
+    <p>
+      Converting HEIC to JPG does not degrade image quality in any perceptible way when using 85% or higher quality settings. The original pixel data is decoded from HEIC and re-encoded to JPEG. As long as you choose a high quality setting, the visual result is essentially identical to the original.
+    </p>
+
+    <h2>How browser-based HEIC conversion works</h2>
+    <p>
+      This tool uses <a href="https://github.com/alexcorvi/heic2any" target="_blank" rel="noopener">heic2any</a>, a JavaScript library that decodes the HEIC container format and extracts the image data entirely in your browser. The decoded image is then re-encoded to JPEG using your browser's native image encoder at the quality setting you choose.
+    </p>
+    <p>
+      The entire process runs inside your browser's JavaScript engine. Your photo files are read from disk using the browser File API, processed in memory, and the output JPG is written back to memory and offered as a download. No bytes are transmitted over the network.
+    </p>
+    <p>
+      For batch conversion, each file is processed sequentially. The tool shows progress per file so you can see which photos have completed and download them individually as they finish, or wait for all files to complete and download the ZIP.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>HEIC sequence files.</strong> Some HEIC files contain multiple images (burst photos, live photo frames). The tool extracts and converts the primary image. Sequence frames are not individually exported.</li>
+      <li><strong>EXIF metadata.</strong> The heic2any library may not preserve all EXIF metadata (GPS coordinates, camera settings, date taken) in the converted JPG. If EXIF preservation is critical, use a desktop tool such as ImageMagick, which preserves metadata during HEIC-to-JPG conversion.</li>
+      <li><strong>Portrait Mode depth maps.</strong> Portrait Mode photos embed a depth map as a secondary asset in the HEIC container. The converted JPG contains the primary image only — the depth map and bokeh processing are not preserved in the JPG output.</li>
+      <li><strong>File size increase.</strong> The converted JPG will be larger than the HEIC source at equivalent visual quality. This is inherent to the JPEG format's less efficient compression — it is not a flaw in the conversion.</li>
+      <li><strong>Large batch conversions.</strong> Processing many high-resolution photos sequentially takes time. For 50+ photos, expect several minutes. The tool processes files one at a time to avoid exhausting browser memory.</li>
+      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your photos</h2>
+    <p>
+      Your HEIC photos are loaded into browser memory using the File API and converted using the heic2any library running locally. The JPG output is created in browser memory and downloaded directly to your device. Nothing leaves your device — no photos, no metadata, no filenames.
+    </p>
+    <p>
+      This matters for personal photos. Unlike online conversion services that receive your files at their servers and retain them according to their data retention policies, browser-based conversion means your photos never leave your device. If you are converting photos that contain sensitive content — medical images, private personal moments, location-tagged photos — local conversion is the appropriate choice.
+    </p>
+  </Fragment>
+</ToolLayout>

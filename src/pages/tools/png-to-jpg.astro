@@ -1,0 +1,72 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PngToJpg from "../../components/tools/PngToJpg.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "png-to-jpg")!;
+---
+
+<ToolLayout tool={tool}>
+  <PngToJpg slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert PNG to JPG</h2>
+    <ol>
+      <li>Drop your PNG files onto the upload area, or click to browse. Multiple files are supported.</li>
+      <li>Choose a JPG quality setting. <em>Balanced (85%)</em> produces files that are visually indistinguishable from the PNG at a significantly smaller size. <em>High (95%)</em> is appropriate for photos or images you plan to print.</li>
+      <li>Click <strong>Convert to JPG</strong>. Each file converts immediately in your browser.</li>
+      <li>Download individual JPG files via the links that appear next to each file, or click <strong>Download ZIP</strong> to grab all results at once.</li>
+    </ol>
+    <p>
+      Conversion runs entirely in your browser using the Canvas API. Open DevTools → Network while converting to confirm zero outbound requests.
+    </p>
+
+    <h2>When to convert PNG to JPG</h2>
+    <ul>
+      <li><strong>Reducing file size for web and email.</strong> PNG uses lossless compression, which is great for quality but produces larger files than JPG for photographic content. A photo saved as PNG might be 3–5 MB; the same photo as a JPG at 85% quality might be 300–600 KB with no visible quality difference. Smaller files load faster, use less bandwidth, and stay under email attachment limits.</li>
+      <li><strong>Uploading to platforms that prefer JPG.</strong> Some content management systems, social media platforms, and file upload forms either require JPG or handle JPG more reliably than PNG for photographic content.</li>
+      <li><strong>Sending photos that do not need transparency.</strong> If the PNG does not use a transparent background, there is no reason to keep it as PNG. Converting to JPG reduces the file size without any quality trade-off for the intended use.</li>
+      <li><strong>Compressing screenshots for sharing.</strong> Screenshots are often saved as PNG. For sharing in chat or email where pixel-perfect accuracy is not required, converting to JPG at 85% quality produces a much smaller file.</li>
+      <li><strong>Reducing storage use in bulk.</strong> Photo archives saved as PNG take considerably more disk space than the equivalent JPGs. Batch-converting a PNG archive to JPG can recover substantial storage.</li>
+    </ul>
+
+    <h2>PNG vs. JPG: understanding the trade-offs</h2>
+    <p>
+      PNG (Portable Network Graphics) is a lossless format — every pixel in the output file is identical to the input. PNG also supports transparent backgrounds (alpha channel), which JPG does not. PNG is the right choice for images that need transparency (logos, icons, UI elements), contain sharp text or fine lines (diagrams, screenshots, infographics), or need to be edited and re-saved multiple times without quality loss.
+    </p>
+    <p>
+      JPG (Joint Photographic Experts Group) uses lossy compression — it discards some image data that human vision is unlikely to notice, producing much smaller files. JPG is the right choice for photographs, images with complex colour gradients, and any image where file size matters and pixel-perfect accuracy does not. JPG does not support transparency.
+    </p>
+    <p>
+      The key decision point: if your PNG has a transparent background that you need to preserve, do not convert it to JPG — the transparency will become a white background. If the PNG is a photograph or an opaque image, converting to JPG will dramatically reduce file size with minimal visible quality loss.
+    </p>
+    <p>
+      When this tool converts PNG to JPG, it fills transparent areas with white before encoding to JPG. This is the correct approach — it ensures no unexpected colour bleeding or artefacts at transparent regions.
+    </p>
+
+    <h2>How browser-based PNG to JPG conversion works</h2>
+    <p>
+      The conversion uses the browser's Canvas API — the same API used by browser-based games and image editors. Each PNG file is loaded into an HTML <code>&lt;img&gt;</code> element, drawn onto an HTML5 canvas, and then exported to JPEG format using <code>canvas.toBlob('image/jpeg', quality)</code>.
+    </p>
+    <p>
+      Before drawing the image, the canvas is filled with white. This handles PNG transparency correctly: any transparent pixels in the source become white in the output. The canvas context then renders the PNG image on top of the white background, and the result is encoded to JPEG at the chosen quality level.
+    </p>
+    <p>
+      The entire operation runs inside your browser. No files are sent over the network.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Transparent areas become white.</strong> JPG does not support transparency. Any transparent pixels in the source PNG become white in the JPG output. If you need to preserve transparency, keep the file as PNG or convert to WebP.</li>
+      <li><strong>File size depends on content.</strong> A PNG containing a simple flat-colour logo may convert to a JPG that is actually larger at certain quality settings, because JPEG's compression is optimised for photographic content. For photos, the size reduction is significant. For flat graphics, the reduction is smaller.</li>
+      <li><strong>Quality settings affect file size, not dimensions.</strong> The output JPG has the same pixel dimensions as the source PNG. Only the encoding quality — and therefore the file size — changes.</li>
+      <li><strong>Very large images.</strong> High-resolution PNGs (50 MP+) may take a few seconds to process. The practical ceiling is your device's available RAM.</li>
+      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your files</h2>
+    <p>
+      Your PNG files are read into browser memory using the File API and converted using the Canvas API. The JPG output is created in browser memory and downloaded directly to your device. Nothing is transmitted to a server — open DevTools → Network while converting to confirm zero outbound activity.
+    </p>
+  </Fragment>
+</ToolLayout>

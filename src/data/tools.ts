@@ -922,6 +922,98 @@ export const tools: Tool[] = [
       { q: "Is there a file size limit?", a: "No hard limit. Very large PNG images embedded in PDFs can produce large output files. Resize the image to approximately the dimensions you need before embedding for best results." },
     ],
   },
+  // --- PDF: Fill Form ---
+  {
+    slug: "fill-pdf-form",
+    name: "Fill PDF Form",
+    shortName: "Fill PDF Form",
+    pageTitle: "Fill PDF Form Online — No Upload, Free",
+    description: "Fill PDF form fields in your browser — text, checkboxes, dropdowns, radio buttons.",
+    longDescription: "Fill a PDF form without uploading — no signup, no account, no watermark. Detects all form fields automatically. Text, checkboxes, dropdowns, and radio buttons all supported. Optionally flatten to lock values. Files never leave your device.",
+    category: "PDF",
+    icon: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z",
+    status: "live",
+    keywords: [
+      "fill pdf form online",
+      "fill pdf form free",
+      "fill out pdf online no upload",
+      "fill pdf without adobe",
+      "online pdf form filler free",
+      "fill pdf form in browser",
+    ],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Everything runs in your browser using pdf-lib. Your PDF and the values you enter never leave your device — open DevTools → Network while filling to confirm zero upload requests.",
+      },
+      {
+        q: "What types of form fields are supported?",
+        a: "Text fields (single-line and multiline), checkboxes, radio button groups, and dropdowns. Signature fields and button fields are shown but cannot be filled — use the Sign PDF tool for signatures.",
+      },
+      {
+        q: "What does 'flatten after filling' do?",
+        a: "Flattening converts each field's value to static page content and removes the interactive form layer. The PDF looks identical but the fields can no longer be edited. This is recommended before sending completed forms.",
+      },
+      {
+        q: "What if no fields are detected?",
+        a: "The PDF may not contain actual fillable form fields — it might be a scanned form (an image of a form), a flat PDF, or a form where the fields are already flattened. This tool only works with PDFs that contain AcroForm fields.",
+      },
+      {
+        q: "Can I fill a password-protected PDF?",
+        a: "No. Encrypted PDFs cannot be read or modified. Use the Unlock PDF tool to remove the password first, then fill the form.",
+      },
+      {
+        q: "Will calculated fields (auto-totals) work?",
+        a: "Probably not. Some PDF forms use embedded JavaScript to auto-calculate fields based on other values. Browser-based filling does not run PDF JavaScript, so calculated fields will remain empty or show their previous value. Fill them manually.",
+      },
+    ],
+  },
+  // --- PDF: Crop ---
+  {
+    slug: "crop-pdf",
+    name: "Crop PDF",
+    shortName: "Crop PDF",
+    pageTitle: "Crop PDF — Remove Margins, No Upload",
+    description: "Crop margins from every PDF page — uniform or individual sides, entirely in your browser.",
+    longDescription: "Crop a PDF without uploading — no signup, no account, no watermark. Set margins in mm, apply to all pages, and download the cropped PDF instantly. Uniform or individual side control. Files never leave your device.",
+    category: "PDF",
+    icon: "M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4",
+    status: "live",
+    keywords: [
+      "crop pdf",
+      "crop pdf online free",
+      "remove margins from pdf",
+      "crop pdf pages browser",
+      "crop pdf without uploading",
+      "trim pdf margins free",
+    ],
+    faq: [
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. Cropping runs entirely in your browser using pdf-lib. Your PDF never leaves your device — open DevTools → Network while processing to confirm zero upload requests.",
+      },
+      {
+        q: "Does cropping reduce the file size?",
+        a: "Not significantly. The crop tool sets a CropBox — the visible region PDF viewers display. The content outside the CropBox is hidden but remains in the file. True file size reduction requires permanently deleting the cropped content, which requires a full PDF editor.",
+      },
+      {
+        q: "Can I crop different amounts from each side?",
+        a: "Yes. Switch from Uniform to Individual sides to set separate top, right, bottom, and left margins in millimetres.",
+      },
+      {
+        q: "What margin values should I use to remove standard document margins?",
+        a: "For typical A4 or Letter documents with 20–25 mm margins, cropping 15–20 mm on all sides removes most of the blank margin. For scanner border removal, 5–8 mm is usually enough.",
+      },
+      {
+        q: "Can I undo the crop?",
+        a: "The original file on your device is untouched. The output PDF has a CropBox applied, which any full PDF editor (Adobe Acrobat, PDF-XChange) can remove to restore the full page view. The content is not deleted.",
+      },
+      {
+        q: "Does this work on all pages, or can I crop specific pages?",
+        a: "Currently the tool applies the same crop to all pages. For selective page cropping, use Split PDF to extract the pages you want to crop, crop them, then use Merge PDF to recombine.",
+      },
+    ],
+  },
   // --- Image: SVG to PNG ---
   {
     slug: "svg-to-png",

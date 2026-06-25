@@ -1,0 +1,86 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import FillPdfForm from "../../components/tools/FillPdfForm.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "fill-pdf-form")!;
+---
+
+<ToolLayout tool={tool}>
+  <FillPdfForm slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to fill a PDF form</h2>
+    <ol>
+      <li><strong>Upload your PDF form.</strong> Drop the file onto the upload area or click to browse. The tool reads all form fields automatically — text inputs, checkboxes, radio buttons, and dropdowns will all appear.</li>
+      <li><strong>Fill in the fields.</strong> Each detected field is displayed with its name and an appropriate input control. Type text, check boxes, or select options as needed.</li>
+      <li><strong>Choose whether to flatten.</strong> Flattening bakes the entered values into the page content and removes the interactive fields, preventing the recipient from changing the values. Leave it enabled unless you specifically want the form to stay editable after downloading.</li>
+      <li>Click <strong>Fill & download PDF</strong>. The filled form downloads immediately with "-filled" added to the filename.</li>
+    </ol>
+    <p>
+      Everything runs in your browser using pdf-lib. Your PDF and the data you enter never leave your device.
+    </p>
+
+    <h2>When to fill a PDF form online</h2>
+    <ul>
+      <li><strong>PDF forms without desktop software.</strong> If you do not have Adobe Acrobat or a PDF editor installed, filling forms in a browser is the simplest option. This tool works directly in Chrome, Firefox, Safari, or Edge — no installation needed.</li>
+      <li><strong>Filling forms on shared or managed devices.</strong> On a work computer where you cannot install software, or a shared device like a library computer or school machine, a browser-based tool lets you fill and download without leaving anything installed.</li>
+      <li><strong>Quick one-off forms.</strong> For government forms, job applications, tax worksheets, and other single-use forms, opening a dedicated app and navigating its interface takes longer than uploading and filling directly.</li>
+      <li><strong>Forms with sensitive information.</strong> When the form contains private data — tax details, medical history, legal information, personal identification — filling it in a tool that processes locally means the values you type are never sent to any server. This tool is built for exactly this case.</li>
+      <li><strong>Filling forms before sending.</strong> The most common workflow: fill the form, flatten it (so values cannot be changed), and email or upload the completed document.</li>
+    </ul>
+
+    <h2>Types of form fields this tool handles</h2>
+    <p>
+      PDF forms use the AcroForm specification, which defines several field types. This tool handles the most common ones:
+    </p>
+    <ul>
+      <li><strong>Text fields.</strong> Single-line and multiline text inputs. The tool shows multiline fields as resizable text areas and single-line fields as regular inputs. You can type any text value.</li>
+      <li><strong>Checkboxes.</strong> Boolean fields that can be checked or unchecked. Each checkbox is shown with its field name and a toggle.</li>
+      <li><strong>Radio buttons.</strong> Groups where one option from several can be selected. The tool shows all available options and lets you choose one.</li>
+      <li><strong>Dropdowns.</strong> Select fields with a fixed list of options. The tool renders these as a standard dropdown with all available choices.</li>
+    </ul>
+    <p>
+      Signature fields and button fields are read-only in this tool — they are shown but cannot be filled. For signing documents, use the <a href="/tools/sign-pdf">Sign PDF tool</a>, which lets you draw or type a signature and place it on the page.
+    </p>
+
+    <h2>What flattening does to a filled form</h2>
+    <p>
+      When you fill a PDF form and leave it interactive, the entered values are stored in the AcroForm layer — a set of annotations and form objects that sit on top of the page content. A recipient with a PDF editor can open the form and change every field.
+    </p>
+    <p>
+      Flattening takes each field's current value and draws it permanently onto the page as static content. The interactive AcroForm layer is then removed entirely. The filled PDF looks identical — the values are visible — but the fields no longer exist as editable elements.
+    </p>
+    <p>
+      This is the right choice when you are submitting a form to someone else and want the values locked. It prevents accidental or intentional modification of what you submitted. The one downside is that a flattened form cannot be re-edited — if you need to change values, go back to the original PDF and re-fill it.
+    </p>
+
+    <h2>How pdf-lib reads and writes form fields</h2>
+    <p>
+      pdf-lib is a JavaScript library for reading and manipulating PDFs, running entirely in the browser via WebAssembly-compatible JavaScript. When you upload a PDF, the tool calls <code>form.getFields()</code> to retrieve all AcroForm field objects from the document structure.
+    </p>
+    <p>
+      Each field object exposes its type (<code>PDFTextField</code>, <code>PDFCheckBox</code>, <code>PDFRadioGroup</code>, <code>PDFDropdown</code>), its current value, and in the case of radio groups and dropdowns, the available options. The tool builds a dynamic form UI from this data.
+    </p>
+    <p>
+      When you click "Fill & download PDF", the tool loads the original PDF bytes again and applies your values using typed accessors: <code>form.getTextField('name').setText('value')</code> for text fields, <code>form.getCheckBox('name').check()</code> for checkboxes, and so on. If flattening is enabled, <code>form.flatten()</code> converts all fields to static page content before saving.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>The PDF must have actual form fields.</strong> Scanned forms, forms that look like fillable but are just images of printed forms, and flat PDFs with no AcroForm layer will not work — the tool will report "no fillable fields found".</li>
+      <li><strong>Password-protected PDFs.</strong> Encrypted PDFs that require a password to open cannot be read by this tool. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first to remove the password, then fill the form.</li>
+      <li><strong>Signature fields.</strong> Digital signature fields (PAdES/PKCS#7 cryptographic signatures) cannot be filled or applied with this tool. For a visual signature image, use the <a href="/tools/sign-pdf">Sign PDF tool</a> separately.</li>
+      <li><strong>Complex calculated fields.</strong> Some PDF forms use JavaScript to auto-populate fields based on other values (for example, calculating totals). Browser-based filling does not run embedded PDF JavaScript, so calculated fields may remain blank or show their previous value after filling. Fill them manually.</li>
+      <li><strong>Appearance fidelity.</strong> pdf-lib generates standard appearance streams for filled fields. Most PDF viewers render these correctly. Highly customised field appearances (unusual fonts, non-standard widgets) may look slightly different from the original form's styling.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your data</h2>
+    <p>
+      Your PDF and everything you type into the form fields are processed entirely in browser memory by pdf-lib running locally. The completed form is created in memory and downloaded directly to your device. No data leaves your device at any point — not the PDF contents, not the values you enter, nothing.
+    </p>
+    <p>
+      This is especially important for forms containing sensitive information: tax identification numbers, dates of birth, medical history, bank account details, legal declarations. Local processing means none of this passes through a third-party server, is logged, or is retained anywhere.
+    </p>
+  </Fragment>
+</ToolLayout>

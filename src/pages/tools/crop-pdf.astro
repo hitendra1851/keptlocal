@@ -1,0 +1,89 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import CropPdf from "../../components/tools/CropPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "crop-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <CropPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to crop a PDF</h2>
+    <ol>
+      <li><strong>Upload your PDF.</strong> Drop the file onto the upload area or click to browse. Any standard PDF is supported.</li>
+      <li><strong>Set crop margins.</strong> Choose Uniform to crop the same amount from all sides, or switch to Individual sides to set different top, right, bottom, and left margins. Enter values in millimetres.</li>
+      <li>Click <strong>Crop & download PDF</strong>. The cropped PDF downloads immediately with "-cropped" added to the filename.</li>
+    </ol>
+    <p>
+      The tool runs entirely in your browser using pdf-lib. Your PDF is never uploaded or sent to a server.
+    </p>
+
+    <h2>When to crop a PDF</h2>
+    <ul>
+      <li><strong>Removing excess white margins.</strong> Many PDFs generated from Word documents, LaTeX, or presentation software have generous margins that waste space on screen and on paper. Cropping reduces the visible margin area, making the content fill more of the viewport or printed page.</li>
+      <li><strong>Fitting documents to screen readers and tablets.</strong> On e-readers and tablets with limited screen real estate, a PDF with large margins can make text uncomfortably small. Cropping the margins makes the content larger without changing the actual font size.</li>
+      <li><strong>Preparing documents for projection.</strong> When displaying a PDF on a projector or presentation screen, removing blank margins lets the content fill more of the projected area.</li>
+      <li><strong>Removing headers and footers.</strong> Set top or bottom margins large enough to exclude repeating header or footer content — page numbers, running titles, or branding — from the visible area.</li>
+      <li><strong>Focusing on specific content zones.</strong> Academic papers, legal documents, and scanned books often have annotations, stamps, or binder margins outside the main content area. Cropping removes these from the visible page without deleting any content.</li>
+      <li><strong>Standardising margin sizes before printing.</strong> When printing a PDF on paper, consistent margins produce better results. Cropping reduces the source margins before the printer adds its own margins.</li>
+    </ul>
+
+    <h2>Crop box vs. actual trimming: what this tool does</h2>
+    <p>
+      PDF documents support several box types that control how the page is displayed and printed. The <strong>MediaBox</strong> is the full extent of the page — everything the PDF contains. The <strong>CropBox</strong> is the region the viewer shows by default.
+    </p>
+    <p>
+      This tool sets the CropBox on every page to exclude the margins you specify. When you open the resulting PDF in a viewer, you see only the content within the CropBox. The content outside it is hidden but remains in the file — the file size does not change significantly, because the original page data is preserved.
+    </p>
+    <p>
+      This is distinct from true trimming, where content outside the margins is permanently deleted. True trimming reduces file size and is not reversible. CropBox-based cropping is reversible — a PDF editor can remove the CropBox to restore the full page view. For documents where you want to truly eliminate the outside content (scanned pages with visible scan borders, for example), a desktop PDF editor with a "flatten and trim" operation is the right tool.
+    </p>
+    <p>
+      For most use cases — reducing visible margins, improving screen display, preparing for projection — CropBox cropping is exactly what you need.
+    </p>
+
+    <h2>Understanding PDF page dimensions</h2>
+    <p>
+      PDF pages are measured in points, where 72 points equal one inch. Common page sizes:
+    </p>
+    <ul>
+      <li><strong>A4:</strong> 595 × 842 points (210 × 297 mm, approximately 8.27 × 11.69 inches)</li>
+      <li><strong>US Letter:</strong> 612 × 792 points (216 × 279 mm, 8.5 × 11 inches)</li>
+      <li><strong>A5:</strong> 420 × 595 points (148 × 210 mm)</li>
+      <li><strong>Legal:</strong> 612 × 1008 points (216 × 356 mm, 8.5 × 14 inches)</li>
+    </ul>
+    <p>
+      This tool accepts margin values in millimetres because most people think in mm rather than PDF points. The conversion is straightforward: 1 mm equals approximately 2.83 points. A 10 mm margin on an A4 page leaves 190 mm of visible width and 277 mm of visible height — removing about 4.8% from each side.
+    </p>
+    <p>
+      As a practical guide: 5 mm is a very light trim (removes scan borders and minor excess whitespace), 10–15 mm removes standard margins to fill screen space, and 25+ mm crops deep into the content area (useful for targeting a specific zone of the page).
+    </p>
+
+    <h2>How PDF cropping works technically</h2>
+    <p>
+      This tool uses pdf-lib's <code>page.setCropBox(x, y, width, height)</code> method on each page. The parameters define the bottom-left corner of the visible area (in PDF coordinates, where the origin is at the bottom-left of the full page) and the width and height of the visible region.
+    </p>
+    <p>
+      PDF coordinates place the origin at the bottom-left of the MediaBox. The Y axis increases upward. This means that to crop the top margin, the CropBox height is reduced. To crop the bottom margin, the CropBox's Y origin is moved upward. The tool handles this coordinate mapping automatically — you enter intuitive top/right/bottom/left values and the tool converts them to the correct PDF coordinate offsets.
+    </p>
+    <p>
+      The tool uses <code>page.getMediaBox()</code> as the basis for the new CropBox, so it crops relative to the full page extent regardless of any pre-existing CropBox setting. The modified PDF is saved with <code>pdfDoc.save()</code> and offered as a download.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Content is hidden, not deleted.</strong> File size will not decrease significantly. The original page content remains in the PDF. Open the file in a full PDF editor to see and restore the full page if needed.</li>
+      <li><strong>Margins too large.</strong> If the crop values exceed the page dimensions (the resulting CropBox would have zero or negative dimensions), those pages are skipped and a warning is shown. Reduce the margin values for those pages.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be modified. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first.</li>
+      <li><strong>Mixed page sizes.</strong> For PDFs with pages of different dimensions (for example, a portrait report with a landscape appendix), the uniform margin value is applied to all pages. The same 10 mm margin crops less proportionally from a large page than a small one. Use the same values intentionally or crop each section separately.</li>
+      <li><strong>Scanned PDFs with irregular borders.</strong> Scanned documents often have slightly uneven borders from the scanner. A 5–8 mm uniform crop removes most scanner border artefacts without cutting into the content.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your PDF</h2>
+    <p>
+      Your PDF is loaded into browser memory and processed by pdf-lib running locally on your device. The cropped output is created in memory and downloaded directly to you. The file content is never transmitted to any server.
+    </p>
+  </Fragment>
+</ToolLayout>

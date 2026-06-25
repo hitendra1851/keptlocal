@@ -1,0 +1,293 @@
+---
+---
+
+<div id="crop-pdf-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: Upload -->
+  <div id="step-upload">
+    <div id="drop-zone" class="drop-zone m-4">
+      <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+      <div id="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+          <path d="M7 16V4a1 1 0 011-1h12M17 8v12a1 1 0 01-1 1H4" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+        <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+          choose a file from your device
+        </button>
+        <p class="text-xs text-[var(--color-ink-muted)] mt-4">
+          Removes margins from every page. Files never leave your browser.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Crop settings -->
+  <div id="step-settings" class="hidden">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-rule)]">
+      <div class="min-w-0">
+        <p id="filename-display" class="text-sm font-medium text-[var(--color-ink)] truncate max-w-xs"></p>
+        <p id="info-display" class="text-xs text-[var(--color-ink-muted)] mt-0.5"></p>
+      </div>
+      <button type="button" id="change-file-btn" class="ml-4 shrink-0 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] underline underline-offset-2">
+        Change file
+      </button>
+    </div>
+
+    <div class="px-4 py-5 space-y-5">
+      <!-- Crop mode -->
+      <div>
+        <p class="text-sm font-medium text-[var(--color-ink)] mb-2">Crop margins</p>
+        <div class="flex gap-5 mb-4">
+          <label class="flex items-center gap-1.5 text-sm text-[var(--color-ink)] cursor-pointer">
+            <input type="radio" name="crop-mode" id="mode-uniform" value="uniform" checked class="accent-[var(--color-accent)]" />
+            Uniform (all sides)
+          </label>
+          <label class="flex items-center gap-1.5 text-sm text-[var(--color-ink)] cursor-pointer">
+            <input type="radio" name="crop-mode" id="mode-individual" value="individual" class="accent-[var(--color-accent)]" />
+            Individual sides
+          </label>
+        </div>
+
+        <!-- Uniform input -->
+        <div id="uniform-inputs">
+          <div class="flex items-center gap-3">
+            <input
+              type="number"
+              id="margin-all"
+              min="0"
+              max="150"
+              value="10"
+              step="0.5"
+              class="w-28 px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+            />
+            <span class="text-sm text-[var(--color-ink-muted)]">mm on all sides</span>
+          </div>
+        </div>
+
+        <!-- Individual inputs -->
+        <div id="individual-inputs" class="hidden">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-[var(--color-ink-muted)] mb-1">Top (mm)</label>
+              <input type="number" id="margin-top" min="0" max="150" value="10" step="0.5"
+                class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-xs text-[var(--color-ink-muted)] mb-1">Right (mm)</label>
+              <input type="number" id="margin-right" min="0" max="150" value="10" step="0.5"
+                class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-xs text-[var(--color-ink-muted)] mb-1">Bottom (mm)</label>
+              <input type="number" id="margin-bottom" min="0" max="150" value="10" step="0.5"
+                class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-xs text-[var(--color-ink-muted)] mb-1">Left (mm)</label>
+              <input type="number" id="margin-left" min="0" max="150" value="10" step="0.5"
+                class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent" />
+            </div>
+          </div>
+        </div>
+
+        <p class="text-xs text-[var(--color-ink-muted)] mt-3">
+          A4 is 210 × 297 mm · Letter is 216 × 279 mm · 25.4 mm = 1 inch
+        </p>
+      </div>
+
+      <!-- Note about crop vs trim -->
+      <div class="text-xs text-[var(--color-ink-muted)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-md px-3 py-2.5">
+        Cropping sets the visible area. Content outside the crop box is hidden but not deleted — the file size may not change significantly. To permanently trim content, use a PDF editor after cropping.
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]">
+      Upload a PDF to set crop margins.
+    </div>
+    <button type="button" id="crop-btn" class="btn-primary" disabled>
+      <span id="crop-btn-label">Crop & download PDF</span>
+      <svg id="crop-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  import { PDFDocument } from 'https://esm.sh/pdf-lib@1.17.1';
+
+  const MM_TO_PT = 2.8346;
+
+  let pdfBytes = null;
+  let pdfName = '';
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $('drop-zone');
+  const fileInput = $('file-input');
+
+  const setStatus = (msg, isError = false) => {
+    const el = $('status-msg');
+    el.textContent = msg;
+    el.style.color = isError ? 'var(--color-warn)' : '';
+  };
+
+  const fmtSize = (b) =>
+    b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
+
+  const getMargins = () => {
+    const isUniform = $('mode-uniform').checked;
+    if (isUniform) {
+      const v = parseFloat($('margin-all').value) || 0;
+      return { top: v, right: v, bottom: v, left: v };
+    }
+    return {
+      top: parseFloat($('margin-top').value) || 0,
+      right: parseFloat($('margin-right').value) || 0,
+      bottom: parseFloat($('margin-bottom').value) || 0,
+      left: parseFloat($('margin-left').value) || 0,
+    };
+  };
+
+  // ---- Mode toggle ----
+  document.querySelectorAll('input[name="crop-mode"]').forEach((r) => {
+    r.addEventListener('change', () => {
+      const isUniform = $('mode-uniform').checked;
+      $('uniform-inputs').classList.toggle('hidden', !isUniform);
+      $('individual-inputs').classList.toggle('hidden', isUniform);
+    });
+  });
+
+  // ---- Upload ----
+  $('browse-btn').addEventListener('click', () => fileInput.click());
+
+  $('change-file-btn').addEventListener('click', () => {
+    pdfBytes = null;
+    pdfName = '';
+    $('step-settings').classList.add('hidden');
+    $('step-upload').classList.remove('hidden');
+    $('crop-btn').disabled = true;
+    setStatus('Upload a PDF to set crop margins.');
+  });
+
+  dropZone.addEventListener('click', (e) => {
+    if (e.target === dropZone || e.target.closest('#empty-state')) fileInput.click();
+  });
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragging'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragging'));
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+    const file = e.dataTransfer?.files?.[0];
+    if (file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
+      loadPdf(file);
+    } else {
+      setStatus('Please drop a PDF file.', true);
+    }
+  });
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) loadPdf(file);
+    fileInput.value = '';
+  });
+
+  async function loadPdf(file) {
+    setStatus('Reading PDF...');
+    try {
+      pdfBytes = await file.arrayBuffer();
+      pdfName = file.name;
+
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const pageCount = pdfDoc.getPageCount();
+
+      $('filename-display').textContent = pdfName;
+      $('info-display').textContent = `${pageCount} page${pageCount !== 1 ? 's' : ''} · ${fmtSize(file.size)}`;
+
+      $('step-upload').classList.add('hidden');
+      $('step-settings').classList.remove('hidden');
+      $('crop-btn').disabled = false;
+
+      setStatus('Set crop margins, then click "Crop & download PDF".');
+    } catch (err) {
+      console.error(err);
+      setStatus(`Could not read PDF: ${err?.message || 'invalid file'}`, true);
+      pdfBytes = null;
+    }
+  }
+
+  // ---- Crop & download ----
+  $('crop-btn').addEventListener('click', async () => {
+    if (!pdfBytes || processing) return;
+
+    const margins = getMargins();
+    if (Object.values(margins).every((v) => v === 0)) {
+      setStatus('Set at least one margin value greater than 0.', true);
+      return;
+    }
+
+    processing = true;
+    $('crop-btn').disabled = true;
+    $('crop-spinner').classList.remove('hidden');
+    $('crop-btn-label').textContent = 'Cropping...';
+    setStatus('Applying crop box in your browser...');
+
+    try {
+      const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const pages = pdfDoc.getPages();
+      let skipped = 0;
+
+      for (const page of pages) {
+        const mb = page.getMediaBox();
+        const topPt = margins.top * MM_TO_PT;
+        const rightPt = margins.right * MM_TO_PT;
+        const bottomPt = margins.bottom * MM_TO_PT;
+        const leftPt = margins.left * MM_TO_PT;
+
+        const x = mb.x + leftPt;
+        const y = mb.y + bottomPt;
+        const w = mb.width - leftPt - rightPt;
+        const h = mb.height - bottomPt - topPt;
+
+        if (w <= 0 || h <= 0) {
+          skipped++;
+          continue;
+        }
+
+        page.setCropBox(x, y, w, h);
+      }
+
+      const out = await pdfDoc.save();
+      const base = pdfName.replace(/\.pdf$/i, '');
+      const blob = new Blob([out], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${base}-cropped.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      const msg = skipped > 0
+        ? `Done. Downloaded cropped PDF. ${skipped} page${skipped !== 1 ? 's' : ''} skipped (margins too large).`
+        : 'Done. Your cropped PDF has been downloaded.';
+      setStatus(msg);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || 'could not crop PDF'}`, true);
+    } finally {
+      processing = false;
+      $('crop-spinner').classList.add('hidden');
+      $('crop-btn-label').textContent = 'Crop & download PDF';
+      $('crop-btn').disabled = false;
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ''; }
+  });
+</script>

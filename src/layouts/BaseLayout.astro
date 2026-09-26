@@ -3,6 +3,7 @@ import "../styles/global.css";
 import "@fontsource-variable/fraunces/opsz.css";
 import "@fontsource-variable/dm-sans/index.css";
 import frauncesLatin from "@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url";
+import dmSansLatin from "@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url";
 
 export interface Props {
   title: string;
@@ -31,8 +32,18 @@ const orgSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "keptlocal",
-  url: siteUrl,
+  url: `${siteUrl}/`,
   "@id": `${siteUrl}/#org`,
+  sameAs: [
+    "https://www.linkedin.com/in/hitendrapatel2",
+    "https://medium.com/@hitendra.patel2986",
+  ],
+  founder: {
+    "@type": "Person",
+    "@id": `${siteUrl}/about/#person`,
+    name: "Hitendra Patel",
+    url: `${siteUrl}/about/`,
+  },
   logo: {
     "@type": "ImageObject",
     url: `${siteUrl}/logo.png`,
@@ -86,6 +97,7 @@ const schemaArray = Array.isArray(schema)
 
     <!-- Fonts are self-hosted via @fontsource-variable (no third-party render-blocking CSS) -->
     <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
 
     <!-- Theme color matches paper -->
     <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)" />

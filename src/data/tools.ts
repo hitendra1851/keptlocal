@@ -404,7 +404,7 @@ export const tools: Tool[] = [
     slug: "convert-image",
     name: "Convert Image",
     shortName: "Convert Image",
-    pageTitle: "Convert Image — HEIC to JPG and More",
+    pageTitle: "Convert Image — JPG, PNG, WebP and More",
     description: "Convert HEIC, JPG, PNG, WebP, and AVIF images — including iPhone HEIC photos — entirely in your browser.",
     longDescription: "Convert images between JPG, PNG, WebP and more, free in your browser — no upload needed. Drop files, pick a format and download instantly.",
     category: "Image",

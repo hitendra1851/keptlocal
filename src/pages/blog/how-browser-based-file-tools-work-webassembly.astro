@@ -6,15 +6,16 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   title="How Browser-Based File Tools Actually Work (WebAssembly Explained)"
   description="Modern browsers can run PDF processing, image compression and file conversion at near-native speed without a server. A plain-English explanation."
   publishDate="2026-05-23"
+  modifiedDate="2026-09-26"
   readTime={8}
   tags={["Technical"]}
   toolSlug="merge-pdf"
   toolName="Try a tool"
-  toolTagline="See WebAssembly in action — any keptlocal tool processes files without a server."
+  toolTagline="See in-browser processing in action — any keptlocal tool processes files without a server."
 >
 
 <p class="lead">
-  A few years ago, the idea of merging PDFs, compressing images, or converting HEIC photos in a browser — with no server, no download, no waiting — would have seemed implausible. Today it works on any modern phone or laptop. The technology that made this possible is WebAssembly, and understanding how it works explains why browser-based tools are now genuinely competitive with desktop software.
+  A few years ago, the idea of merging PDFs, compressing images, or converting HEIC photos in a browser — with no server, no download, no waiting — would have seemed implausible. Today it works on any modern phone or laptop. Two technologies made this possible: fast modern JavaScript engines and, for heavier jobs such as HEIC decoding, WebAssembly. Understanding how they work explains why browser-based tools are now genuinely competitive with desktop software.
 </p>
 
 <h2>The old model: why browsers needed servers</h2>

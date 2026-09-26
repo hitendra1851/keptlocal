@@ -7,6 +7,7 @@ export interface Props {
   title: string;
   description: string;
   publishDate: string;    // ISO 8601 e.g. "2026-05-23"
+  modifiedDate?: string;  // ISO 8601; set only when the post content was really updated
   readTime: number;       // minutes
   tags?: string[];
   canonical?: string;
@@ -15,7 +16,7 @@ export interface Props {
   toolTagline?: string;   // one-liner shown in the CTA
 }
 
-const { title, description, publishDate, readTime, tags = [], canonical, toolSlug, toolName, toolTagline } = Astro.props;
+const { title, description, publishDate, modifiedDate, readTime, tags = [], canonical, toolSlug, toolName, toolTagline } = Astro.props;
 const toolHref = toolSlug ? `/tools/${toolSlug}/` : "/tools/";
 
 const siteUrl = "https://keptlocal.com";
@@ -24,6 +25,9 @@ const pageUrl  = canonical ?? `${siteUrl}${Astro.url.pathname}`;
 const dateObj    = new Date(publishDate);
 const dateDisplay = dateObj.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 const dateIso    = dateObj.toISOString();
+const modObj     = modifiedDate ? new Date(modifiedDate) : null;
+const modIso     = modObj ? modObj.toISOString() : dateIso;
+const modDisplay = modObj ? modObj.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "";
 
 const metaTitle = `${title} | keptlocal`;
 
@@ -35,20 +39,21 @@ const schema = [
     description,
     url: pageUrl,
     datePublished: dateIso,
-    dateModified: dateIso,
+    dateModified: modIso,
+    image: `${siteUrl}/og-default.png`,
     author: {
       "@type": "Person",
+      "@id": `${siteUrl}/about/#person`,
       name: "Hitendra Patel",
       url: `${siteUrl}/about/`,
       jobTitle: "Senior Technical Lead",
       worksFor: { "@type": "Organization", name: "Vohra Wound Physicians" },
+      sameAs: [
+        "https://www.linkedin.com/in/hitendrapatel2",
+        "https://medium.com/@hitendra.patel2986",
+      ],
     },
-    publisher: {
-      "@type": "Organization",
-      name: "keptlocal",
-      url: siteUrl,
-      logo: { "@type": "ImageObject", url: `${siteUrl}/logo.png` },
-    },
+    publisher: { "@id": `${siteUrl}/#org` },
     mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
   },
   {
@@ -81,7 +86,7 @@ const schema = [
       <article class="md:col-span-2">
         <!-- Meta -->
         <div class="flex items-center gap-3 text-xs text-[var(--color-ink-muted)] mb-4 flex-wrap">
-          <time datetime={dateIso}>{dateDisplay}</time>
+          <time datetime={dateIso}>{dateDisplay}</time>{modifiedDate && <> · Updated <time datetime={modIso}>{modDisplay}</time></>}
           <span>·</span>
           <span>{readTime} min read</span>
           {tags.length > 0 && (

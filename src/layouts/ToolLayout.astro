@@ -159,9 +159,9 @@ if (tool.faq.length > 0) {
           <div class="ad-slot" data-ad-position="sidebar" style="min-height: 250px;"></div>
           {relatedTools.length > 0 && (
             <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-              <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">
+              <h3 class="font-medium text-sm text-[var(--color-ink)] mb-3">
                 More {tool.category} tools
-              </h4>
+              </h3>
               <ul class="space-y-2">
                 {relatedTools.map((t) => (
                   <li>
@@ -178,7 +178,7 @@ if (tool.faq.length > 0) {
           )}
           {relatedPosts.length > 0 && (
             <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-              <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">From the blog</h4>
+              <h3 class="font-medium text-sm text-[var(--color-ink)] mb-3">From the blog</h3>
               <ul class="space-y-2">
                 {relatedPosts.map((p) => (
                   <li>
@@ -195,7 +195,7 @@ if (tool.faq.length > 0) {
           )}
 
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
+            <h3 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h3>
             <ol class="text-sm text-[var(--color-ink-soft)] space-y-2 list-decimal pl-4">
               <li>Open browser DevTools (F12)</li>
               <li>Switch to the Network tab</li>

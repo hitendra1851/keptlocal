@@ -154,14 +154,14 @@ const schema = [
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
             {toolSlug ? (
               <>
-                <h4 class="font-medium text-sm text-[var(--color-ink)] mb-1">{toolName || "Try the tool"}</h4>
+                <h3 class="font-medium text-sm text-[var(--color-ink)] mb-1">{toolName || "Try the tool"}</h3>
                 {toolTagline && <p class="text-xs text-[var(--color-ink-muted)] mb-2">{toolTagline}</p>}
                 <p class="text-xs text-[var(--color-ink-muted)] mb-3">Free. No upload. Runs in your browser.</p>
                 <a href={toolHref} class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4 font-medium">Use {toolName} →</a>
               </>
             ) : (
               <>
-                <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Privacy-first tools</h4>
+                <h3 class="font-medium text-sm text-[var(--color-ink)] mb-3">Privacy-first tools</h3>
                 <p class="text-xs text-[var(--color-ink-muted)] mb-3">All keptlocal tools run entirely in your browser. Files never leave your device.</p>
                 <a href="/tools/" class="text-xs text-[var(--color-accent)] hover:underline underline-offset-4">Browse all tools →</a>
               </>
@@ -169,7 +169,7 @@ const schema = [
           </div>
 
           <div class="p-5 rounded-lg border border-[var(--color-rule)] bg-[var(--color-paper-dark)]">
-            <h4 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h4>
+            <h3 class="font-medium text-sm text-[var(--color-ink)] mb-3">Verify it's local</h3>
             <ol class="text-xs text-[var(--color-ink-muted)] space-y-1.5 list-decimal pl-4">
               <li>Open DevTools (F12)</li>
               <li>Switch to the Network tab</li>

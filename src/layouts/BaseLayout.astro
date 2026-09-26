@@ -3,7 +3,6 @@ import "../styles/global.css";
 import "@fontsource-variable/fraunces/opsz.css";
 import "@fontsource-variable/dm-sans/index.css";
 import frauncesLatin from "@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2?url";
-import dmSansLatin from "@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2?url";
 
 export interface Props {
   title: string;
@@ -97,7 +96,6 @@ const schemaArray = Array.isArray(schema)
 
     <!-- Fonts are self-hosted via @fontsource-variable (no third-party render-blocking CSS) -->
     <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={dmSansLatin} as="font" type="font/woff2" crossorigin />
 
     <!-- Theme color matches paper -->
     <meta name="theme-color" content="#faf8f3" media="(prefers-color-scheme: light)" />
@@ -123,12 +121,21 @@ const schemaArray = Array.isArray(schema)
     />
 
     <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YGS0FP9RG4"></script>
+    <!-- Loaded after the page's load event so the 174 KB gtag.js does not compete with
+         rendering (measured effect on mobile LCP). Events queued in dataLayer are still sent. -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-YGS0FP9RG4', { anonymize_ip: true });
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-YGS0FP9RG4';
+          document.head.appendChild(s);
+        }, 0);
+      });
     </script>
 
     {/* AdSense: add the adsbygoogle.js script here once approved, with the real

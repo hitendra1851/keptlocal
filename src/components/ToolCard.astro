@@ -4,7 +4,7 @@ export interface Props { tool: Tool }
 const { tool } = Astro.props;
 const isLive = tool.status === "live";
 const Tag = isLive ? "a" : "div";
-const href = isLive ? `/tools/${tool.slug}` : undefined;
+const href = isLive ? `/tools/${tool.slug}/` : undefined;
 ---
 
 <Tag

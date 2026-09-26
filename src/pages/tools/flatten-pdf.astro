@@ -46,7 +46,7 @@ const tool = tools.find((t) => t.slug === "flatten-pdf")!;
       Flattening removes interactivity but does not restrict who can open, print, or copy text from the PDF. A flattened PDF is a static document with no access controls.
     </p>
     <p>
-      Password protection (available on the <a href="/tools/protect-pdf">Protect PDF tool</a>) controls who can open the document. These two features serve different purposes and can be combined: flatten first to lock in the form data, then protect to control access.
+      Password protection (available on the <a href="/tools/protect-pdf/">Protect PDF tool</a>) controls who can open the document. These two features serve different purposes and can be combined: flatten first to lock in the form data, then protect to control access.
     </p>
     <p>
       Neither flattening nor password protection adds a cryptographic audit trail or digital signature. For documents where you need to prove the document has not been modified since signing, use a certified e-signature service that creates a PAdES/PKCS#7 digital signature. For the vast majority of everyday form submissions and document sharing, flattening is the right choice.
@@ -68,7 +68,7 @@ const tool = tools.find((t) => t.slug === "flatten-pdf")!;
       <li><strong>Empty fields become empty static areas.</strong> If a form field has not been filled in, its empty appearance is flattened — a blank space on the page where the field was. This is correct behaviour.</li>
       <li><strong>Complex appearance streams.</strong> Most standard PDF form fields flatten correctly. Highly customised fields with non-standard appearance streams (common in forms created by enterprise PDF tools) may not render exactly as they appeared in the original viewer.</li>
       <li><strong>Digital signatures.</strong> Cryptographic PDF digital signatures (PAdES, PKCS#7) are separate from visual appearance and are affected by flattening. If the PDF has been cryptographically signed, flattening may invalidate the digital signature — the signature validates document integrity, and modifying the document structure breaks that validation.</li>
-      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be flattened directly. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first, then flatten the unlocked copy.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be flattened directly. Use the <a href="/tools/unlock-pdf/">Unlock PDF tool</a> first, then flatten the unlocked copy.</li>
       <li><strong>File size.</strong> Flattened PDFs are typically smaller than the original because AcroForm widget data is removed and replaced with static content. The exact size change depends on the form complexity.</li>
     </ul>
 

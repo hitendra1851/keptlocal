@@ -52,7 +52,7 @@ const tool = tools.find((t) => t.slug === "pdf-to-png")!;
     <ul>
       <li><strong>Memory:</strong> high-resolution canvases consume significant RAM. A large A3 page at 3× scale can require 200–400 MB of RAM. If the browser tab crashes on a large PDF, reduce the scale to Standard or High.</li>
       <li><strong>Fonts:</strong> pdf.js embeds and renders fonts from the PDF. PDFs that reference system fonts not embedded in the file may render with substituted fonts, which can change text layout slightly. This is a pdf.js limitation, not a keptlocal limitation.</li>
-      <li><strong>Password-protected PDFs:</strong> only PDFs openable without a password. Use the <a href="/tools/unlock-pdf">Unlock PDF</a> tool first.</li>
+      <li><strong>Password-protected PDFs:</strong> only PDFs openable without a password. Use the <a href="/tools/unlock-pdf/">Unlock PDF</a> tool first.</li>
       <li><strong>Very long documents:</strong> processing is sequential — each page renders before the next begins. A 100-page document at Best quality may take 30–60 seconds depending on your device's CPU speed.</li>
     </ul>
 

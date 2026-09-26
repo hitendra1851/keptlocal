@@ -24,7 +24,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>How to crop an image in your browser — step by step</h2>
 
 <ol>
-  <li>Open <a href="/tools/crop-image">keptlocal's Crop Image tool</a>.</li>
+  <li>Open <a href="/tools/crop-image/">keptlocal's Crop Image tool</a>.</li>
   <li>Drop your image onto the upload zone, or click to browse. JPG, PNG, and WebP are all supported.</li>
   <li>A selection box appears on the image. Drag the corners and edges to define the area you want to keep.
   Move the selection without resizing by dragging from its centre.</li>
@@ -79,7 +79,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 
 <p>
   Fixed-ratio cropping controls proportions but not absolute size. If a form requires an image of exactly
-  800×600 pixels, crop to 4:3 ratio first, then use the <a href="/tools/resize-image">Resize Image tool</a>
+  800×600 pixels, crop to 4:3 ratio first, then use the <a href="/tools/resize-image/">Resize Image tool</a>
   to set the exact pixel dimensions. Cropping followed by resizing is the correct two-step workflow for
   meeting precise dimensional specifications.
 </p>
@@ -131,13 +131,13 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   in some browsers. This is relevant for high-resolution DSLR images (24MP+). Most phone photos and web
   images are well within browser limits.</li>
   <li><strong>Output format follows input</strong> — a JPG input produces a JPG output; PNG in, PNG out.
-  To change format, use the <a href="/tools/convert-image">Convert Image tool</a> before or after cropping.</li>
+  To change format, use the <a href="/tools/convert-image/">Convert Image tool</a> before or after cropping.</li>
   <li><strong>JPEG re-encoding</strong> — cropping a JPG re-encodes the JPEG data, which introduces a
   small additional generation loss. For most purposes this is imperceptible. If you are making repeated
   edits to a master image, work from PNG to avoid accumulating losses.</li>
   <li><strong>EXIF data</strong> — canvas-based processing strips EXIF metadata (camera settings, GPS
   coordinates, orientation data). If you need to preserve EXIF, use a desktop editor. If you want to
-  strip EXIF for privacy before sharing a photo, the <a href="/tools/remove-image-exif">Remove Image EXIF
+  strip EXIF for privacy before sharing a photo, the <a href="/tools/remove-image-exif/">Remove Image EXIF
   tool</a> handles that separately.</li>
   <li><strong>Browser support</strong> — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
 </ul>

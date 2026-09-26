@@ -80,7 +80,7 @@ const tool = tools.find((t) => t.slug === "svg-to-png")!;
       <li><strong>Complex filters and effects.</strong> Most SVG filters (blur, drop shadow, colour matrix) render correctly in modern browsers. Very complex filter chains or browser-specific SVG extensions may produce different output than an SVG editor or server-side renderer would produce.</li>
       <li><strong>Text rendering.</strong> SVG text uses fonts available in your browser. If the SVG specifies a font by name that is not installed on your device, the browser substitutes a fallback font. For consistent text rendering across devices, use SVG text-as-paths (convert text to outlines in your vector editor before exporting).</li>
       <li><strong>Maximum canvas size.</strong> Browsers impose a maximum canvas size (typically 16,384×16,384px on most platforms). Very large output dimensions may fail silently or produce a blank image on some browsers.</li>
-      <li><strong>Output is always PNG.</strong> This tool converts SVG to PNG. For other output formats, use the <a href="/tools/convert-image">Convert Image tool</a> to convert the PNG further.</li>
+      <li><strong>Output is always PNG.</strong> This tool converts SVG to PNG. For other output formats, use the <a href="/tools/convert-image/">Convert Image tool</a> to convert the PNG further.</li>
     </ul>
 
     <h2>Why this stays off a server</h2>

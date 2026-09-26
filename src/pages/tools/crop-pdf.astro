@@ -76,7 +76,7 @@ const tool = tools.find((t) => t.slug === "crop-pdf")!;
     <ul>
       <li><strong>Content is hidden, not deleted.</strong> File size will not decrease significantly. The original page content remains in the PDF. Open the file in a full PDF editor to see and restore the full page if needed.</li>
       <li><strong>Margins too large.</strong> If the crop values exceed the page dimensions (the resulting CropBox would have zero or negative dimensions), those pages are skipped and a warning is shown. Reduce the margin values for those pages.</li>
-      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be modified. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be modified. Use the <a href="/tools/unlock-pdf/">Unlock PDF tool</a> first.</li>
       <li><strong>Mixed page sizes.</strong> For PDFs with pages of different dimensions (for example, a portrait report with a landscape appendix), the uniform margin value is applied to all pages. The same 10 mm margin crops less proportionally from a large page than a small one. Use the same values intentionally or crop each section separately.</li>
       <li><strong>Scanned PDFs with irregular borders.</strong> Scanned documents often have slightly uneven borders from the scanner. A 5–8 mm uniform crop removes most scanner border artefacts without cutting into the content.</li>
     </ul>

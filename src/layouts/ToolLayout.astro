@@ -64,7 +64,11 @@ const blogMap: Record<string, { slug: string; title: string }[]> = {
 };
 const relatedPosts = blogMap[tool.slug] ?? [];
 
-const title = `${tool.pageTitle || tool.name} — Free & Private | keptlocal`;
+const baseTitle = tool.pageTitle || tool.name;
+// Skip the "Free & Private" suffix when the title already says "Free" or would pass ~60 chars.
+const fullTitle = `${baseTitle} — Free & Private | keptlocal`;
+const alreadyFree = baseTitle.toLowerCase().includes("free");
+const title = alreadyFree || fullTitle.length > 60 ? `${baseTitle} | keptlocal` : fullTitle;
 const description = tool.longDescription || tool.description;
 
 // Schema: WebApplication + FAQPage + BreadcrumbList
@@ -74,7 +78,7 @@ const schema: Record<string, unknown>[] = [
     "@type": "WebApplication",
     name: tool.name,
     description,
-    url: `https://keptlocal.com/tools/${tool.slug}`,
+    url: `https://keptlocal.com/tools/${tool.slug}/`,
     applicationCategory: tool.category === "PDF" || tool.category === "Utility" ? "UtilitiesApplication" : "MultimediaApplication",
     operatingSystem: "Any (Web Browser)",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -86,8 +90,8 @@ const schema: Record<string, unknown>[] = [
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: "https://keptlocal.com/" },
-      { "@type": "ListItem", position: 2, name: `${tool.category} Tools`, item: `https://keptlocal.com/#${tool.category.toLowerCase()}` },
-      { "@type": "ListItem", position: 3, name: tool.name, item: `https://keptlocal.com/tools/${tool.slug}` },
+      { "@type": "ListItem", position: 2, name: `${tool.category} Tools`, item: "https://keptlocal.com/tools/" },
+      { "@type": "ListItem", position: 3, name: tool.name, item: `https://keptlocal.com/tools/${tool.slug}/` },
     ],
   },
 ];
@@ -162,7 +166,7 @@ if (tool.faq.length > 0) {
                 {relatedTools.map((t) => (
                   <li>
                     <a
-                      href={`/tools/${t.slug}`}
+                      href={`/tools/${t.slug}/`}
                       class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4"
                     >
                       {t.name}
@@ -179,7 +183,7 @@ if (tool.faq.length > 0) {
                 {relatedPosts.map((p) => (
                   <li>
                     <a
-                      href={`/blog/${p.slug}`}
+                      href={`/blog/${p.slug}/`}
                       class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4 leading-snug block"
                     >
                       {p.title}

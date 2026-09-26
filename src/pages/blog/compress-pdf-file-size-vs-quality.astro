@@ -72,11 +72,11 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </p>
 
 <p>
-  What browser-based tools like <a href="/tools/compress-image">keptlocal's Compress Image</a> can do: compress individual images using the Canvas API and JPEG encoder built into the browser. This works well for image files and for PDFs where the dominant content is photographs.
+  What browser-based tools like <a href="/tools/compress-image/">keptlocal's Compress Image</a> can do: compress individual images using the Canvas API and JPEG encoder built into the browser. This works well for image files and for PDFs where the dominant content is photographs.
 </p>
 
 <p>
-  For aggressive PDF-level compression — downsampling embedded images, applying Ghostscript-style linearisation, stripping metadata across a complex document — a desktop tool or a server-side compressor is the right choice. When using a server-side compressor, be aware of the <a href="/blog/why-pdf-tools-should-not-upload-your-files">privacy implications of uploading</a> discussed elsewhere on this site.
+  For aggressive PDF-level compression — downsampling embedded images, applying Ghostscript-style linearisation, stripping metadata across a complex document — a desktop tool or a server-side compressor is the right choice. When using a server-side compressor, be aware of the <a href="/blog/why-pdf-tools-should-not-upload-your-files/">privacy implications of uploading</a> discussed elsewhere on this site.
 </p>
 
 <h2>Choosing a target file size</h2>
@@ -109,7 +109,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 <h2>The workflow that works</h2>
 
 <ol>
-  <li><strong>Identify what is making the file large.</strong> Open the PDF properties (File → Properties in Adobe Reader, or inspect via our <a href="/tools/pdf-page-count">PDF Info Viewer</a>). If the file is under 5 MB, it may not need compression at all — check the target limit first.</li>
+  <li><strong>Identify what is making the file large.</strong> Open the PDF properties (File → Properties in Adobe Reader, or inspect via our <a href="/tools/pdf-page-count/">PDF Info Viewer</a>). If the file is under 5 MB, it may not need compression at all — check the target limit first.</li>
   <li><strong>Try lossless options first.</strong> Remove unnecessary metadata and apply stream compression before touching image quality. Many tools can reduce file size 20–40% losslessly.</li>
   <li><strong>Set the minimum quality that meets your use case.</strong> If the document will be read on screen only, 150 DPI and 75% JPEG quality is the sweet spot. Aggressive settings below 100 DPI or below 60% quality introduce visible degradation.</li>
   <li><strong>Test the result before distributing.</strong> Open the compressed file, zoom to 100%, and look at a text-heavy region and an image-heavy region. If both look acceptable, the compression is fine. If either shows artefacts, reduce the compression level.</li>
@@ -117,7 +117,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 </ol>
 
 <p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
-  Working with individual images rather than a whole PDF? Try the <a href="/tools/compress-image" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal Compress Image tool</a> — runs in your browser with no upload required.
+  Working with individual images rather than a whole PDF? Try the <a href="/tools/compress-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal Compress Image tool</a> — runs in your browser with no upload required.
 </p>
 
 </BlogLayout>

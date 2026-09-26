@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "Page not found — keptlocal";
+const description = "That page doesn't exist. Try one of our free, private PDF and image tools.";
+
+const popular = [
+  { name: "Merge PDF", href: "/tools/merge-pdf/" },
+  { name: "Split PDF", href: "/tools/split-pdf/" },
+  { name: "Compress PDF", href: "/tools/compress-pdf/" },
+  { name: "PDF to JPG", href: "/tools/pdf-to-jpg/" },
+  { name: "HEIC to JPG", href: "/tools/heic-to-jpg/" },
+  { name: "Compress Image", href: "/tools/compress-image/" },
+];
+---
+
+<BaseLayout title={title} description={description} noindex={true}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <p class="text-sm text-[var(--color-ink-muted)] mb-2">404</p>
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-4">
+      Page not found
+    </h1>
+    <p class="text-lg text-[var(--color-ink-soft)] mb-10 leading-relaxed">
+      That page doesn't exist, or it moved. Your files were never involved. Nothing was uploaded.
+      Try one of these instead.
+    </p>
+
+    <div class="prose-doc">
+      <h2>Popular tools</h2>
+      <ul>
+        {popular.map((t) => <li><a href={t.href}>{t.name}</a></li>)}
+      </ul>
+
+      <h2>Or browse</h2>
+      <ul>
+        <li><a href="/tools/">All tools</a></li>
+        <li><a href="/blog/">Blog and guides</a></li>
+        <li><a href="/">Home</a></li>
+      </ul>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

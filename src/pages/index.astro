@@ -14,9 +14,20 @@ const liveCount = tools.filter((t) => t.status === "live").length;
 const title = "keptlocal — Private PDF & image tools that run in your browser";
 const description =
   "Merge, split, compress, and convert files without uploading anything. Free, fast, no signup. Your files. Kept local.";
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://keptlocal.com/#website",
+  url: "https://keptlocal.com/",
+  name: "keptlocal",
+  description,
+  inLanguage: "en",
+  publisher: { "@id": "https://keptlocal.com/#org" },
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={websiteSchema}>
   <Header />
 
   <main>
@@ -37,7 +48,7 @@ const description =
           </h1>
           <p class="text-lg text-[var(--color-ink-soft)] leading-relaxed max-w-md reveal" style="animation-delay: 0.1s">
             Free PDF and image tools that run entirely in your browser.
-            No uploads. No accounts. No tracking.
+            No file uploads. No accounts. Your files are never tracked.
           </p>
 
           <div class="mt-6 flex flex-wrap gap-x-7 gap-y-1.5 text-sm reveal" style="animation-delay: 0.13s">
@@ -263,7 +274,7 @@ const description =
             someone else's pipeline, where it can be logged, cached, or stored longer than promised.
           </p>
           <p>
-            keptlocal works differently. The tools run inside your browser using WebAssembly.
+            keptlocal works differently. The tools run inside your browser using JavaScript libraries and native browser APIs.
             Your file enters memory, gets modified, and the result downloads —
             <em class="font-display not-italic text-[var(--color-ink)]">without
             a single byte ever leaving your device</em>.

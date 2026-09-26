@@ -29,7 +29,13 @@ const orgSchema = {
   "@type": "Organization",
   name: "keptlocal",
   url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
+  "@id": `${siteUrl}/#org`,
+  logo: {
+    "@type": "ImageObject",
+    url: `${siteUrl}/logo.png`,
+    width: 512,
+    height: 512,
+  },
   description:
     "Private, browser-only PDF and image tools. Your files never leave your device.",
 };
@@ -52,6 +58,11 @@ const schemaArray = Array.isArray(schema)
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Google Search Console verification: go to search.google.com/search-console,
+         add https://keptlocal.com as a URL-prefix property, choose the "HTML tag"
+         verification method, and paste the content value below. -->
+    <!-- <meta name="google-site-verification" content="PASTE_YOUR_CODE_HERE" /> -->
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
@@ -110,10 +121,9 @@ const schemaArray = Array.isArray(schema)
       gtag('config', 'G-YGS0FP9RG4', { anonymize_ip: true });
     </script>
 
-    <!-- AdSense placeholder. Replace ca-pub-XXXX once approved.
-         Uncomment after approval:
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-    -->
+    {/* AdSense: add the adsbygoogle.js script here once approved, with the real
+        ca-pub client ID. Do not leave a placeholder-ID script in this file: Astro
+        emits <script> tags even when they are wrapped in an HTML comment. */}
   </head>
   <body class="paper-grain">
     <slot />

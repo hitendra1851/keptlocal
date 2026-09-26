@@ -18,10 +18,10 @@ const tool = tools.find((t) => t.slug === "heic-to-jpg")!;
       <li>Download individual files or click <strong>Download ZIP</strong> to grab all converted images in one archive.</li>
     </ol>
     <p>
-      Nothing is sent to a server at any step. Open DevTools → Network while converting to confirm: you will see the initial page load and zero further requests.
+      Nothing is sent to a server at any step — the whole thing runs through the <code>heic2any</code> library in your browser tab.
     </p>
 
-    <h2>Why iPhone photos are HEIC by default</h2>
+    <h2>Why your iPhone hands you HEIC files in the first place</h2>
     <p>
       Apple adopted HEIC (High Efficiency Image Container) as the default photo format for iPhone and iPad starting with iOS 11 in 2017. The reason was straightforward: HEIC compresses photos to roughly half the file size of JPEG at the same visual quality. For a phone that shoots hundreds of photos a month and has limited storage, that difference is significant.
     </p>
@@ -71,7 +71,6 @@ const tool = tools.find((t) => t.slug === "heic-to-jpg")!;
       <li><strong>Portrait Mode depth maps.</strong> Portrait Mode photos embed a depth map as a secondary asset in the HEIC container. The converted JPG contains the primary image only — the depth map and bokeh processing are not preserved in the JPG output.</li>
       <li><strong>File size increase.</strong> The converted JPG will be larger than the HEIC source at equivalent visual quality. This is inherent to the JPEG format's less efficient compression — it is not a flaw in the conversion.</li>
       <li><strong>Large batch conversions.</strong> Processing many high-resolution photos sequentially takes time. For 50+ photos, expect several minutes. The tool processes files one at a time to avoid exhausting browser memory.</li>
-      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
     <h2>Privacy: what happens to your photos</h2>

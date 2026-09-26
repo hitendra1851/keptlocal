@@ -18,10 +18,10 @@ const tool = tools.find((t) => t.slug === "svg-to-png")!;
       <li>Click <strong>Convert to PNG</strong>. The PNG downloads immediately. Nothing is sent to a server.</li>
     </ol>
     <p>
-      You can verify this yourself: open DevTools → Network while converting. You will see the initial page load and no further requests — the conversion runs entirely in your browser using the Canvas API.
+      The conversion runs entirely in your browser using the Canvas API, so the render happens locally even for SVGs pulled from an internal design system or an unreleased brand asset.
     </p>
 
-    <h2>When to convert SVG to PNG</h2>
+    <h2>Common reasons to rasterize an SVG</h2>
     <ul>
       <li><strong>Sending files to people who cannot open SVG.</strong> SVG is a vector format that most image viewers, email clients, and non-technical tools cannot display. Converting to PNG creates a universally compatible raster image that opens in any photo viewer, browser, and image processing app.</li>
       <li><strong>Uploading to platforms that do not accept SVG.</strong> Social media platforms (Instagram, Twitter, LinkedIn, Facebook), e-commerce platforms (Shopify, Amazon), and many CMS platforms reject SVG uploads for security reasons. PNG is the safe, accepted format for rasterized graphics.</li>
@@ -81,15 +81,11 @@ const tool = tools.find((t) => t.slug === "svg-to-png")!;
       <li><strong>Text rendering.</strong> SVG text uses fonts available in your browser. If the SVG specifies a font by name that is not installed on your device, the browser substitutes a fallback font. For consistent text rendering across devices, use SVG text-as-paths (convert text to outlines in your vector editor before exporting).</li>
       <li><strong>Maximum canvas size.</strong> Browsers impose a maximum canvas size (typically 16,384×16,384px on most platforms). Very large output dimensions may fail silently or produce a blank image on some browsers.</li>
       <li><strong>Output is always PNG.</strong> This tool converts SVG to PNG. For other output formats, use the <a href="/tools/convert-image">Convert Image tool</a> to convert the PNG further.</li>
-      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
-    <h2>Privacy: what happens to your SVG</h2>
+    <h2>Why this stays off a server</h2>
     <p>
-      Your SVG file is read into browser memory using the File API and converted to PNG using the Canvas API. Nothing is sent to a server. The PNG output is created in browser memory and downloaded directly to your device.
-    </p>
-    <p>
-      SVG files sometimes contain embedded business logic, proprietary design assets, or sensitive schematic information. Browser-based conversion means that content never leaves your device — open DevTools → Network while converting to confirm zero outbound activity.
+      SVGs aren't always just icons — plenty carry embedded schematics, proprietary chart data, or a brand's unreleased logo mark. Because the rasterizing happens with the browser's own SVG renderer and canvas, that markup is parsed and drawn locally; it's never packaged into a request to some conversion API sitting on someone else's infrastructure.
     </p>
   </Fragment>
 </ToolLayout>

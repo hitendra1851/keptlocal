@@ -32,7 +32,7 @@ export const tools: Tool[] = [
     faq: [
       {
         q: "Are my files uploaded anywhere?",
-        a: "No. keptlocal runs entirely in your browser using WebAssembly. Your PDFs never touch a server — you can verify this in your browser's Network tab while merging.",
+        a: "No. keptlocal runs entirely in your browser. Your PDFs never touch a server — you can verify this in your browser's Network tab while merging.",
       },
       {
         q: "Is there a file size or page limit?",

@@ -17,8 +17,7 @@ const tool = tools.find((t) => t.slug === "pdf-to-jpg")!;
       <li>Click <strong>Convert & download</strong>. A single PDF page downloads as one <code>.jpg</code> file. Multiple pages are bundled into a ZIP archive automatically.</li>
     </ol>
     <p>
-      The conversion runs entirely in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the HTML5 Canvas API.
-      No file is sent to a server. Open DevTools (<code>F12</code>) and watch the Network tab while converting to confirm there are no upload requests.
+      The conversion runs entirely in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the HTML5 Canvas API — the same rendering pipeline Firefox uses to display PDFs natively.
     </p>
     <p>
       Need just specific pages? Use <a href="/tools/split-pdf">Split PDF</a> to extract them first, then convert.
@@ -55,7 +54,7 @@ const tool = tools.find((t) => t.slug === "pdf-to-jpg")!;
       <li><strong>Transparency:</strong> JPEG does not support transparency. Any transparent areas in the PDF (common in logos and watermarks) are composited onto a white background, matching the default white page colour.</li>
       <li><strong>Password-protected PDFs:</strong> files that require a password to view their content cannot be rendered — unlock them in your PDF reader first.</li>
       <li><strong>Very large PDFs:</strong> rendering is CPU-bound. A 200-page document at Best quality may take 30–60 seconds on a mid-range laptop. The browser tab remains responsive; a progress counter shows each page as it completes.</li>
-      <li><strong>Browser support:</strong> requires Canvas API and WebAssembly. Works in Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
+      <li><strong>Browser support:</strong> requires the Canvas API. Works in Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
     <h2>Privacy: what happens to your PDF</h2>
@@ -66,7 +65,7 @@ const tool = tools.find((t) => t.slug === "pdf-to-jpg")!;
       This distinction matters for PDFs that contain sensitive content: medical scans, legal documents, financial records, ID cards. With server-based converters you are uploading the file and trusting a third party's infrastructure. With keptlocal there is nothing to trust because the file stays local from upload to download.
     </p>
     <p>
-      Competitors including ILovePDF, Smallpdf, and Adobe Acrobat online all upload your file to process it. Their privacy pages commit to file deletion within a set window, but you cannot verify that. On keptlocal, the verification is immediate: open the Network tab and watch zero bytes leave your machine.
+      Competitors including ILovePDF, Smallpdf, and Adobe Acrobat online all upload your file to process it. Their privacy pages commit to file deletion within a set window, but that's a policy promise, not something you can check. This is the one tool-family on keptlocal where that difference is easiest to feel — a 50-page scanned contract that would take real time to upload and download from a server finishes in seconds here, because there's no round trip to wait on.
     </p>
   </Fragment>
 </ToolLayout>

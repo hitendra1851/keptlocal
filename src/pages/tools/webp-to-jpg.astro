@@ -32,7 +32,7 @@ const tool = tools.find((t) => t.slug === "webp-to-jpg")!;
       When you download an image from a website, save a screenshot, or receive a file from someone, it may be in WebP format. If the recipient's software cannot open it, conversion to JPG — the universally supported format — resolves the compatibility issue immediately.
     </p>
 
-    <h2>When to convert WebP to JPG</h2>
+    <h2>Situations where you'll want JPG instead of WebP</h2>
     <ul>
       <li><strong>Images downloaded from websites.</strong> Most images served on modern websites are in WebP format for performance reasons. When you save these to disk and try to open them in image editing software, email them, or upload them elsewhere, you may encounter compatibility issues. Converting to JPG provides universal compatibility.</li>
       <li><strong>Sharing with software that cannot open WebP.</strong> Many image editing applications, document editors, and legacy software tools do not support WebP. JPG is the safe, widely compatible choice.</li>
@@ -66,12 +66,11 @@ const tool = tools.find((t) => t.slug === "webp-to-jpg")!;
       <li><strong>Animated WebP.</strong> Animated WebP files contain multiple frames. This tool converts only the first frame — the static image. Full animated WebP conversion is not supported.</li>
       <li><strong>File size may increase.</strong> WebP is often smaller than equivalent JPG because its compression is more efficient. The converted JPG may be larger than the source WebP at the same quality level — this is expected. You are trading file size for compatibility.</li>
       <li><strong>Very large files.</strong> The practical ceiling is your device's available RAM. High-resolution images may take a moment to process.</li>
-      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
-    <h2>Privacy: what happens to your files</h2>
+    <h2>No server in the loop</h2>
     <p>
-      Your WebP files are loaded into browser memory and converted using the Canvas API. The JPG output is created in memory and downloaded directly to your device. No files are sent to any server at any point.
+      Because your browser can already decode WebP natively, this tool never needs to phone out to a conversion API — the image goes straight from the <code>&lt;img&gt;</code> element to canvas to JPEG blob, all within the page. If the image you're converting was saved from a private listing, an internal dashboard, or anything else you'd rather not hand to a third party, that local-only path is the whole point.
     </p>
   </Fragment>
 </ToolLayout>

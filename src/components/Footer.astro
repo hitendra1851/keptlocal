@@ -4,7 +4,7 @@ const year = new Date().getFullYear();
 
 <footer class="border-t border-[var(--color-rule)] mt-24 bg-[var(--color-paper)]">
   <div class="max-w-6xl mx-auto px-6 py-12">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-10">
       <div class="col-span-2 md:col-span-1">
         <div class="flex items-center gap-2 mb-3">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-[var(--color-accent)]">
@@ -24,14 +24,17 @@ const year = new Date().getFullYear();
       <div>
         <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">PDF Tools</h4>
         <ul class="space-y-2 text-sm">
-          <li><a href="/tools/merge-pdf"      class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Merge PDF</a></li>
-          <li><a href="/tools/split-pdf"      class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Split PDF</a></li>
-          <li><a href="/tools/pdf-to-jpg"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">PDF to JPG</a></li>
-          <li><a href="/tools/jpg-to-pdf"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">JPG to PDF</a></li>
-          <li><a href="/tools/rotate-pdf"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Rotate PDF</a></li>
-          <li><a href="/tools/reorder-pdf"    class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Reorder Pages</a></li>
-          <li><a href="/tools/watermark-pdf"  class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Watermark PDF</a></li>
-          <li><a href="/tools/pdf-page-count" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">PDF Info</a></li>
+          <li><a href="/tools/merge-pdf"        class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Merge PDF</a></li>
+          <li><a href="/tools/split-pdf"        class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Split PDF</a></li>
+          <li><a href="/tools/compress-pdf"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Compress PDF</a></li>
+          <li><a href="/tools/pdf-to-jpg"       class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">PDF to JPG</a></li>
+          <li><a href="/tools/jpg-to-pdf"       class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">JPG to PDF</a></li>
+          <li><a href="/tools/rotate-pdf"       class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Rotate PDF</a></li>
+          <li><a href="/tools/watermark-pdf"    class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Watermark PDF</a></li>
+          <li><a href="/tools/sign-pdf"         class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Sign PDF</a></li>
+          <li><a href="/tools/fill-pdf-form"    class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Fill PDF Form</a></li>
+          <li><a href="/tools/crop-pdf"         class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Crop PDF</a></li>
+          <li><a href="/tools#section-pdf"      class="text-[var(--color-accent)] hover:underline">All PDF tools →</a></li>
         </ul>
       </div>
 
@@ -42,15 +45,29 @@ const year = new Date().getFullYear();
           <li><a href="/tools/resize-image"   class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Resize Image</a></li>
           <li><a href="/tools/convert-image"  class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Convert Image</a></li>
           <li><a href="/tools/crop-image"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Crop Image</a></li>
+          <li><a href="/tools/heic-to-jpg"    class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">HEIC to JPG</a></li>
+          <li><a href="/tools/png-to-jpg"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">PNG to JPG</a></li>
+          <li><a href="/tools/svg-to-png"     class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">SVG to PNG</a></li>
+          <li><a href="/tools/remove-image-exif" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Remove Image EXIF</a></li>
+          <li><a href="/tools#section-image" class="text-[var(--color-accent)] hover:underline">All image tools →</a></li>
         </ul>
       </div>
 
       <div>
-        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">Site</h4>
+        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">Utility &amp; Site</h4>
         <ul class="space-y-2 text-sm">
+          <li><a href="/tools/qr-code-generator" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">QR Code Generator</a></li>
+          <li><a href="/tools/password-generator" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Password Generator</a></li>
+          <li><a href="/tools/word-counter"       class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Word Counter</a></li>
           <li><a href="/tools"   class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">All Tools</a></li>
           <li><a href="/blog"    class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Blog</a></li>
           <li><a href="/about"   class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">About</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] mb-3 font-medium">Legal</h4>
+        <ul class="space-y-2 text-sm">
           <li><a href="/privacy" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Privacy</a></li>
           <li><a href="/terms"   class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Terms</a></li>
           <li><a href="/contact" class="text-[var(--color-ink-soft)] hover:text-[var(--color-ink)]">Contact</a></li>

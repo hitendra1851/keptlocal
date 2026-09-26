@@ -54,7 +54,7 @@ const tool = tools.find((t) => t.slug === "split-pdf")!;
       <li><strong>Password-protected PDFs:</strong> the tool attempts to open encrypted files using the <code>ignoreEncryption</code> flag. If the PDF requires a password to view its content, splitting will fail — unlock it in your PDF reader first and save a new copy.</li>
       <li><strong>Embedded forms and annotations:</strong> copied on a best-effort basis. Complex interactive forms may lose field state in split documents.</li>
       <li><strong>Split-all on large documents:</strong> splitting a 200-page PDF into 200 individual PDFs takes a few seconds and produces a ZIP. Expect 1–3 seconds of processing time per 50 pages on a modern laptop.</li>
-      <li><strong>Browser support:</strong> works in any modern browser — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. Older browsers without WebAssembly support will not work.</li>
+      <li><strong>Browser support:</strong> works in any modern browser — Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. Older browsers without modern JavaScript support will not work.</li>
     </ul>
 
     <h2>Privacy: what happens to your file</h2>

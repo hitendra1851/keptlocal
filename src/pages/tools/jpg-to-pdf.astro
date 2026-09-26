@@ -82,8 +82,8 @@ const tool = tools.find((t) => t.slug === "jpg-to-pdf")!;
 
     <h2>Limits and what to expect</h2>
     <ul>
-      <li><strong>HEIC (iPhone photos):</strong> HEIC is not supported directly. Use our <a href="/tools/convert-image">Convert Image</a> tool to convert HEIC to JPG first, then come back here.</li>
-      <li><strong>File size:</strong> JPG and PNG bytes are embedded as-is, so the output PDF will be roughly the sum of the input image sizes plus a small PDF overhead. Ten 2 MB JPGs produce roughly a 20 MB PDF. Use the <a href="/tools/compress-image">Compress Image</a> tool first if you need a smaller output.</li>
+      <li><strong>HEIC (iPhone photos):</strong> HEIC is not supported directly. Use our <a href="/tools/convert-image/">Convert Image</a> tool to convert HEIC to JPG first, then come back here.</li>
+      <li><strong>File size:</strong> JPG and PNG bytes are embedded as-is, so the output PDF will be roughly the sum of the input image sizes plus a small PDF overhead. Ten 2 MB JPGs produce roughly a 20 MB PDF. Use the <a href="/tools/compress-image/">Compress Image</a> tool first if you need a smaller output.</li>
       <li><strong>Very large images:</strong> images above 20 MP may be slow to embed. Performance is bounded by your device's available RAM.</li>
       <li><strong>Colour profiles:</strong> embedded ICC colour profiles in PNG files are preserved. JPG colour profiles pass through without modification.</li>
       <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>

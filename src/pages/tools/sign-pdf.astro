@@ -62,7 +62,7 @@ const tool = tools.find((t) => t.slug === "sign-pdf")!;
     <ul>
       <li><strong>Signature quality from drawing.</strong> The quality of a drawn signature depends on your input device. A trackpad or finger produces adequate results; a stylus produces the best results. For the cleanest signature image, draw slowly and at a reasonable size.</li>
       <li><strong>Signature position cannot be dragged interactively.</strong> Position is set via the dropdown selector (bottom right, bottom left, bottom center, top right). For precise positioning, use a full PDF editor after signing to move the signature image.</li>
-      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be signed directly. Unlock the PDF first using the <a href="/tools/unlock-pdf">Unlock PDF tool</a>, then sign the unlocked copy.</li>
+      <li><strong>Encrypted PDFs.</strong> Password-protected PDFs cannot be signed directly. Unlock the PDF first using the <a href="/tools/unlock-pdf/">Unlock PDF tool</a>, then sign the unlocked copy.</li>
       <li><strong>Large PDFs.</strong> There is no hard file size limit. The practical ceiling is your device's available RAM — most laptops handle files up to a few hundred MB without issue.</li>
       <li><strong>No cryptographic tamper-evidence.</strong> The signature is a visual image embedded in the PDF. It does not add PDF-level cryptographic signatures (PAdES, PKCS#7) that lock the document against further modification. If tamper-evidence is required, use Adobe Acrobat or a certified e-signature service.</li>
       <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+. Canvas drawing works on touchscreen devices including iPhone and Android.</li>

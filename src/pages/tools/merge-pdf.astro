@@ -53,7 +53,7 @@ const tool = tools.find((t) => t.slug === "merge-pdf")!;
       <li><strong>File size:</strong> no hard limit, but very large documents (~500 MB+) may slow your browser.</li>
       <li><strong>Password-protected PDFs:</strong> we attempt to read encrypted PDFs with the <code>ignoreEncryption</code> flag. If a file requires a password to open the content, the merge may fail — unlock it first using your PDF reader.</li>
       <li><strong>Form fields and annotations:</strong> preserved on a best-effort basis. Complex interactive forms occasionally lose field state during merge.</li>
-      <li><strong>Browser support:</strong> works in any modern browser (Chrome 90+, Firefox 90+, Safari 15+, Edge). Older browsers without WebAssembly support won't work.</li>
+      <li><strong>Browser support:</strong> works in any modern browser (Chrome 90+, Firefox 90+, Safari 15+, Edge). Older browsers without modern JavaScript support won't work.</li>
     </ul>
 
     <h2>Merge PDFs on iPhone, iPad, and Android</h2>

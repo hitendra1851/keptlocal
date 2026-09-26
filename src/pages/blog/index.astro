@@ -190,7 +190,7 @@ const schema = {
   "@type": "Blog",
   name: "keptlocal Blog",
   description,
-  url: "https://keptlocal.com/blog",
+  url: "https://keptlocal.com/blog/",
   publisher: {
     "@type": "Organization",
     name: "keptlocal",
@@ -219,7 +219,7 @@ const schema = {
         const dateDisplay = new Date(post.date).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
         return (
           <a
-            href={`/blog/${post.slug}`}
+            href={`/blog/${post.slug}/`}
             class="group block p-6 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] transition-colors"
           >
             <div class="flex items-center gap-2 mb-3 flex-wrap">

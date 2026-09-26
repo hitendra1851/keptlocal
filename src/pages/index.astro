@@ -14,9 +14,20 @@ const liveCount = tools.filter((t) => t.status === "live").length;
 const title = "keptlocal — Private PDF & image tools that run in your browser";
 const description =
   "Merge, split, compress, and convert files without uploading anything. Free, fast, no signup. Your files. Kept local.";
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://keptlocal.com/#website",
+  url: "https://keptlocal.com/",
+  name: "keptlocal",
+  description,
+  inLanguage: "en",
+  publisher: { "@id": "https://keptlocal.com/#org" },
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} schema={websiteSchema}>
   <Header />
 
   <main>
@@ -37,7 +48,7 @@ const description =
           </h1>
           <p class="text-lg text-[var(--color-ink-soft)] leading-relaxed max-w-md reveal" style="animation-delay: 0.1s">
             Free PDF and image tools that run entirely in your browser.
-            No uploads. No accounts. No tracking.
+            No file uploads. No accounts. Your files are never tracked.
           </p>
 
           <div class="mt-6 flex flex-wrap gap-x-7 gap-y-1.5 text-sm reveal" style="animation-delay: 0.13s">
@@ -47,7 +58,7 @@ const description =
           </div>
 
           <div class="mt-8 flex flex-wrap gap-3 reveal" style="animation-delay: 0.16s">
-            <a href="/tools/merge-pdf" class="btn-primary">
+            <a href="/tools/merge-pdf/" class="btn-primary">
               Try Merge PDF
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M5 12h14M12 5l7 7-7 7" />
@@ -263,7 +274,7 @@ const description =
             someone else's pipeline, where it can be logged, cached, or stored longer than promised.
           </p>
           <p>
-            keptlocal works differently. The tools run inside your browser using WebAssembly.
+            keptlocal works differently. The tools run inside your browser using JavaScript libraries and native browser APIs.
             Your file enters memory, gets modified, and the result downloads —
             <em class="font-display not-italic text-[var(--color-ink)]">without
             a single byte ever leaving your device</em>.
@@ -285,27 +296,27 @@ const description =
           </div>
           <p class="text-sm text-[var(--color-ink-muted)] ml-3">Guides on PDF privacy, image formats, and browser security</p>
         </div>
-        <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4 shrink-0 hidden sm:block">All posts →</a>
+        <a href="/blog/" class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4 shrink-0 hidden sm:block">All posts →</a>
       </div>
       <div class="grid sm:grid-cols-3 gap-5">
-        <a href="/blog/merge-pdf-without-uploading" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+        <a href="/blog/merge-pdf-without-uploading/" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
           <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">PDF · 8 min read</div>
           <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">How to Merge PDFs Without Uploading Them</h3>
           <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">Why uploading to a PDF tool is riskier than you think — and how to do it entirely in your browser.</p>
         </a>
-        <a href="/blog/heic-to-jpg-iphone-photo-problem" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+        <a href="/blog/heic-to-jpg-iphone-photo-problem/" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
           <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">Images · 6 min read</div>
           <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">HEIC to JPG: The iPhone Photo Problem</h3>
           <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">iPhones save photos as HEIC. Windows can't open them. Here is the fix.</p>
         </a>
-        <a href="/blog/best-free-pdf-tools-browser-2026" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
+        <a href="/blog/best-free-pdf-tools-browser-2026/" class="group block p-5 rounded-xl border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:-translate-y-0.5 hover:shadow-md hover:shadow-[rgba(45,80,22,0.08)] transition-all duration-200">
           <div class="text-xs text-[var(--color-ink-muted)] mb-2.5">PDF · Privacy · 8 min read</div>
           <h3 class="font-display text-lg text-[var(--color-ink)] group-hover:text-[var(--color-accent)] transition-colors leading-snug mb-2">Best Free PDF Tools in 2026 That Work in Your Browser</h3>
           <p class="text-sm text-[var(--color-ink-muted)] leading-relaxed">Honest comparison of browser-only tools vs iLovePDF, Smallpdf, and PDF24.</p>
         </a>
       </div>
       <div class="mt-5 sm:hidden">
-        <a href="/blog" class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4">All posts →</a>
+        <a href="/blog/" class="text-sm text-[var(--color-accent)] hover:underline underline-offset-4">All posts →</a>
       </div>
     </section>
   </main>

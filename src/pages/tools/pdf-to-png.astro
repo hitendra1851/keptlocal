@@ -17,11 +17,10 @@ const tool = tools.find((t) => t.slug === "pdf-to-png")!;
       <li>Click <strong>Convert to PNG</strong>. Pages render one by one — each gets its own Save link. For multi-page PDFs a <strong>Download ZIP</strong> button also appears so you can grab all pages in one click.</li>
     </ol>
     <p>
-      Everything runs in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the Canvas API.
-      No file is sent to a server — open DevTools (<code>F12</code>) → Network while converting to verify zero upload requests.
+      Everything runs in your browser using <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a> and the Canvas API — the file is rendered, not uploaded.
     </p>
 
-    <h2>When to convert PDF to PNG</h2>
+    <h2>Good candidates for PDF-to-PNG over PDF-to-JPG</h2>
     <ul>
       <li><strong>Embedding a PDF page in a document or slide deck</strong> — slide software like PowerPoint, Keynote, and Google Slides cannot import PDF pages directly. Export as PNG and insert the image instead.</li>
       <li><strong>Sharing a single-page document as an image</strong> — invoices, certificates, and flyers convert cleanly to PNG for sharing in messaging apps, email, or social media without requiring the recipient to have a PDF viewer.</li>
@@ -53,17 +52,13 @@ const tool = tools.find((t) => t.slug === "pdf-to-png")!;
     <ul>
       <li><strong>Memory:</strong> high-resolution canvases consume significant RAM. A large A3 page at 3× scale can require 200–400 MB of RAM. If the browser tab crashes on a large PDF, reduce the scale to Standard or High.</li>
       <li><strong>Fonts:</strong> pdf.js embeds and renders fonts from the PDF. PDFs that reference system fonts not embedded in the file may render with substituted fonts, which can change text layout slightly. This is a pdf.js limitation, not a keptlocal limitation.</li>
-      <li><strong>Password-protected PDFs:</strong> only PDFs openable without a password. Use the <a href="/tools/unlock-pdf">Unlock PDF</a> tool first.</li>
+      <li><strong>Password-protected PDFs:</strong> only PDFs openable without a password. Use the <a href="/tools/unlock-pdf/">Unlock PDF</a> tool first.</li>
       <li><strong>Very long documents:</strong> processing is sequential — each page renders before the next begins. A 100-page document at Best quality may take 30–60 seconds depending on your device's CPU speed.</li>
-      <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
-    <h2>Privacy: what happens to your file</h2>
+    <h2>Why PNG output stays lossless and local</h2>
     <p>
-      Your PDF is loaded into browser memory and rendered locally. Nothing is sent to a server. PNG files are generated from the canvas and downloaded directly to your device.
-    </p>
-    <p>
-      For sensitive PDFs — financial statements, medical records, legal documents — this architecture means there is no third-party server to trust. Open the Network tab in DevTools while converting to confirm zero file transfers.
+      Your PDF is loaded into browser memory and rendered locally; PNG files are generated straight from the canvas and downloaded to your device. For a document you're rasterizing specifically to preserve every pixel — a scanned signature page, a technical diagram, an architectural drawing — that lossless output would be undermined if the file also had to survive a round trip through a compression-happy upload server. Here it doesn't have to.
     </p>
   </Fragment>
 </ToolLayout>

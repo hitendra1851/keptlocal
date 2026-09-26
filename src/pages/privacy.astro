@@ -5,7 +5,7 @@ import Footer from "../components/Footer.astro";
 
 const title = "Privacy Policy — keptlocal";
 const description = "How keptlocal handles your data: we don't collect, store, or transmit your files. Detailed privacy policy.";
-const lastUpdated = "May 2026";
+const lastUpdated = "September 2026";
 ---
 
 <BaseLayout title={title} description={description}>
@@ -37,7 +37,7 @@ const lastUpdated = "May 2026";
       <h2>2. How file processing works</h2>
       <p>
         When you use a tool on keptlocal, the file you select is read by your browser into local
-        memory. JavaScript and WebAssembly code that we serve to your browser performs the requested
+        memory. JavaScript code that we serve to your browser performs the requested
         operation (merging, splitting, converting, etc.) on your device. The output is then offered
         as a download. The original file and the processed file remain on your computer the
         entire time.
@@ -50,20 +50,20 @@ const lastUpdated = "May 2026";
 
       <h2>3. What information we do collect</h2>
       <p>
-        <strong>Analytics.</strong> We use Cloudflare Web Analytics, a cookieless analytics service.
-        It collects anonymous, aggregated data such as page views, country (not city), referrer, and
-        browser type. No individual user is identifiable. We may also use Google Analytics 4 with
-        IP anonymization enabled.
+        <strong>Analytics.</strong> We use Google Analytics 4 with IP anonymization enabled. It
+        collects aggregated data such as pages viewed, approximate location (country), referrer,
+        and browser type, and it sets cookies in your browser. It never sees the contents of the
+        files you process, because those stay on your device.
       </p>
       <p>
-        <strong>Server logs.</strong> Like any website, our hosting provider (Cloudflare) keeps
-        short-term access logs containing your IP address, the URL you visited, and the time of
-        the visit. These are used for abuse prevention and standard operational purposes, and
-        are deleted on Cloudflare's standard retention schedule.
+        <strong>Server logs.</strong> Like any website, our hosting provider (Amazon Web Services,
+        via S3 and CloudFront) may keep short-term access logs containing your IP address, the
+        URL you visited, and the time of the visit. These are used for abuse prevention and
+        standard operational purposes.
       </p>
       <p>
         <strong>Contact form.</strong> If you email us through the address listed on the
-        <a href="/contact">contact page</a>, your message and email address are stored in our inbox
+        <a href="/contact/">contact page</a>, your message and email address are stored in our inbox
         for as long as needed to respond. We do not add you to any mailing list.
       </p>
 
@@ -102,15 +102,15 @@ const lastUpdated = "May 2026";
       <p>
         Because we collect almost no personal data, there is very little to access, correct, or
         delete. If you have questions about data we may hold relating to you (such as a contact
-        form email), reach us via the <a href="/contact">contact page</a> and we'll respond
+        form email), reach us via the <a href="/contact/">contact page</a> and we'll respond
         within 30 days.
       </p>
 
       <h2>8. International transfers</h2>
       <p>
-        keptlocal is hosted on Cloudflare's global CDN. When you visit, you are served from the
-        Cloudflare edge location closest to you. Aggregated analytics may be processed in the
-        United States.
+        keptlocal is hosted on Amazon Web Services and delivered through the CloudFront global
+        CDN. When you visit, you are served from the edge location closest to you. Analytics
+        data may be processed in the United States.
       </p>
 
       <h2>9. Changes to this policy</h2>
@@ -121,7 +121,7 @@ const lastUpdated = "May 2026";
 
       <h2>10. Contact</h2>
       <p>
-        Questions about privacy: use the <a href="/contact">contact page</a>.
+        Questions about privacy: use the <a href="/contact/">contact page</a>.
       </p>
     </div>
   </main>

@@ -18,10 +18,10 @@ const tool = tools.find((t) => t.slug === "png-to-jpg")!;
       <li>Download individual JPG files via the links that appear next to each file, or click <strong>Download ZIP</strong> to grab all results at once.</li>
     </ol>
     <p>
-      Conversion runs entirely in your browser using the Canvas API. Open DevTools → Network while converting to confirm zero outbound requests.
+      Conversion runs entirely in your browser using the Canvas API — nothing is uploaded, so there's no file size cap tied to a server plan.
     </p>
 
-    <h2>When to convert PNG to JPG</h2>
+    <h2>Reasons to switch a PNG to JPG</h2>
     <ul>
       <li><strong>Reducing file size for web and email.</strong> PNG uses lossless compression, which is great for quality but produces larger files than JPG for photographic content. A photo saved as PNG might be 3–5 MB; the same photo as a JPG at 85% quality might be 300–600 KB with no visible quality difference. Smaller files load faster, use less bandwidth, and stay under email attachment limits.</li>
       <li><strong>Uploading to platforms that prefer JPG.</strong> Some content management systems, social media platforms, and file upload forms either require JPG or handle JPG more reliably than PNG for photographic content.</li>
@@ -61,12 +61,11 @@ const tool = tools.find((t) => t.slug === "png-to-jpg")!;
       <li><strong>File size depends on content.</strong> A PNG containing a simple flat-colour logo may convert to a JPG that is actually larger at certain quality settings, because JPEG's compression is optimised for photographic content. For photos, the size reduction is significant. For flat graphics, the reduction is smaller.</li>
       <li><strong>Quality settings affect file size, not dimensions.</strong> The output JPG has the same pixel dimensions as the source PNG. Only the encoding quality — and therefore the file size — changes.</li>
       <li><strong>Very large images.</strong> High-resolution PNGs (50 MP+) may take a few seconds to process. The practical ceiling is your device's available RAM.</li>
-      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
-    <h2>Privacy: what happens to your files</h2>
+    <h2>Where your files go during conversion</h2>
     <p>
-      Your PNG files are read into browser memory using the File API and converted using the Canvas API. The JPG output is created in browser memory and downloaded directly to your device. Nothing is transmitted to a server — open DevTools → Network while converting to confirm zero outbound activity.
+      Nowhere but your device's memory. The PNG is read with the File API, drawn to a canvas, and re-encoded to JPEG — all inside the tab you're looking at. That matters more than it sounds for screenshots: people forget that a screenshot can contain an open inbox, a chat window, or an account dashboard in the background, which is exactly the kind of content you don't want sitting on a stranger's upload server.
     </p>
   </Fragment>
 </ToolLayout>

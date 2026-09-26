@@ -20,7 +20,7 @@ const tool = tools.find((t) => t.slug === "jpg-to-png")!;
       No quality setting is needed — PNG output is always lossless. Conversion runs entirely in your browser using the Canvas API.
     </p>
 
-    <h2>When to convert JPG to PNG</h2>
+    <h2>Good reasons to go from JPG to PNG</h2>
     <ul>
       <li><strong>Editing and re-saving images without quality loss.</strong> Every time you save a JPEG, it re-encodes and loses a small amount of detail. If you are going to edit an image multiple times — cropping, adjusting, annotating — convert to PNG first and keep the working file as PNG. Only convert back to JPG for the final output when file size matters.</li>
       <li><strong>Adding a transparent background.</strong> JPG does not support transparency. If you need to make parts of the image transparent — for a logo cutout, a product photo on a clear background, or any compositing work — you must work in PNG (or another format with alpha channel support). Converting from JPG to PNG is the first step.</li>
@@ -60,12 +60,11 @@ const tool = tools.find((t) => t.slug === "jpg-to-png")!;
       <li><strong>JPEG quality is already baked in.</strong> Any JPEG compression artefacts in the source file (blocking, ringing around edges, colour banding) will be visible in the PNG output. Converting to PNG does not fix or hide pre-existing JPEG artefacts.</li>
       <li><strong>No transparency.</strong> JPG files do not contain transparency information. The converted PNG will have a solid background (whatever colour the JPG background is). Creating transparency requires a separate masking step in an image editor.</li>
       <li><strong>Very large images.</strong> High-resolution JPGs may take a moment to process. The practical ceiling is your device's available RAM.</li>
-      <li><strong>Browser support.</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
     </ul>
 
-    <h2>Privacy: what happens to your files</h2>
+    <h2>Why do this locally instead of an upload-based converter</h2>
     <p>
-      Your JPG files are read into browser memory using the File API and converted using the Canvas API. The PNG output is created in memory and downloaded directly to your device. No files leave your device at any point — open DevTools → Network during conversion to confirm zero outbound activity.
+      JPGs you're turning into an editable working copy are often screenshots, ID scans, or photos of documents — the exact category of image people later regret having sent to a third-party server. Because the decode-and-re-encode happens with the browser's own Canvas API, the file is never packaged into a request and sent anywhere. It's read, converted, and handed back to you as a download, in that order, without a network hop in between.
     </p>
   </Fragment>
 </ToolLayout>

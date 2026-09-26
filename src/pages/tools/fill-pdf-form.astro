@@ -41,7 +41,7 @@ const tool = tools.find((t) => t.slug === "fill-pdf-form")!;
       <li><strong>Dropdowns.</strong> Select fields with a fixed list of options. The tool renders these as a standard dropdown with all available choices.</li>
     </ul>
     <p>
-      Signature fields and button fields are read-only in this tool — they are shown but cannot be filled. For signing documents, use the <a href="/tools/sign-pdf">Sign PDF tool</a>, which lets you draw or type a signature and place it on the page.
+      Signature fields and button fields are read-only in this tool — they are shown but cannot be filled. For signing documents, use the <a href="/tools/sign-pdf/">Sign PDF tool</a>, which lets you draw or type a signature and place it on the page.
     </p>
 
     <h2>What flattening does to a filled form</h2>
@@ -69,8 +69,8 @@ const tool = tools.find((t) => t.slug === "fill-pdf-form")!;
     <h2>Limits and what to expect</h2>
     <ul>
       <li><strong>The PDF must have actual form fields.</strong> Scanned forms, forms that look like fillable but are just images of printed forms, and flat PDFs with no AcroForm layer will not work — the tool will report "no fillable fields found".</li>
-      <li><strong>Password-protected PDFs.</strong> Encrypted PDFs that require a password to open cannot be read by this tool. Use the <a href="/tools/unlock-pdf">Unlock PDF tool</a> first to remove the password, then fill the form.</li>
-      <li><strong>Signature fields.</strong> Digital signature fields (PAdES/PKCS#7 cryptographic signatures) cannot be filled or applied with this tool. For a visual signature image, use the <a href="/tools/sign-pdf">Sign PDF tool</a> separately.</li>
+      <li><strong>Password-protected PDFs.</strong> Encrypted PDFs that require a password to open cannot be read by this tool. Use the <a href="/tools/unlock-pdf/">Unlock PDF tool</a> first to remove the password, then fill the form.</li>
+      <li><strong>Signature fields.</strong> Digital signature fields (PAdES/PKCS#7 cryptographic signatures) cannot be filled or applied with this tool. For a visual signature image, use the <a href="/tools/sign-pdf/">Sign PDF tool</a> separately.</li>
       <li><strong>Complex calculated fields.</strong> Some PDF forms use JavaScript to auto-populate fields based on other values (for example, calculating totals). Browser-based filling does not run embedded PDF JavaScript, so calculated fields may remain blank or show their previous value after filling. Fill them manually.</li>
       <li><strong>Appearance fidelity.</strong> pdf-lib generates standard appearance streams for filled fields. Most PDF viewers render these correctly. Highly customised field appearances (unusual fonts, non-standard widgets) may look slightly different from the original form's styling.</li>
     </ul>

@@ -57,7 +57,7 @@ const tool = tools.find((t) => t.slug === "fill-pdf-form")!;
 
     <h2>How pdf-lib reads and writes form fields</h2>
     <p>
-      pdf-lib is a JavaScript library for reading and manipulating PDFs, running entirely in the browser via WebAssembly-compatible JavaScript. When you upload a PDF, the tool calls <code>form.getFields()</code> to retrieve all AcroForm field objects from the document structure.
+      pdf-lib is a JavaScript library for reading and manipulating PDFs, running entirely in the browser. When you select a PDF, the tool calls <code>form.getFields()</code> to retrieve all AcroForm field objects from the document structure.
     </p>
     <p>
       Each field object exposes its type (<code>PDFTextField</code>, <code>PDFCheckBox</code>, <code>PDFRadioGroup</code>, <code>PDFDropdown</code>), its current value, and in the case of radio groups and dropdowns, the available options. The tool builds a dynamic form UI from this data.

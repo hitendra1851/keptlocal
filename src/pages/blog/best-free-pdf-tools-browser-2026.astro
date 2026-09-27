@@ -6,7 +6,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
   title="The Best Free PDF Tools in 2026 That Work Entirely in Your Browser"
   description="A practical guide to browser-based PDF tools that never upload your files — with honest comparisons against iLovePDF, Smallpdf, and PDF24."
   publishDate="2026-06-01"
-  modifiedDate="2026-09-26"
+  modifiedDate="2026-09-27"
   readTime={8}
   tags={["PDF", "Privacy"]}
   toolName="Browse all tools"
@@ -27,23 +27,82 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
     The assumption that serious PDF work requires a server was true in 2015. It is no longer true. Modern browsers expose a full set of APIs that make client-side PDF processing practical:
   </p>
   <ul>
-    <li><strong>pdf-lib</strong> — a pure JavaScript library that reads and writes PDF documents. Handles merging, splitting, rotating, reordering, watermarking, adding page numbers, deleting pages, and PDF compression. Runs entirely in the browser with no server needed.</li>
+    <li><strong>pdf-lib</strong> — a pure JavaScript library that reads and writes PDF documents. Handles merging, splitting, rotating, reordering, watermarking, adding page numbers, deleting pages, and PDF compression — including, as of a recent update, recompressing the embedded photos that usually make a PDF large, not just stripping metadata.</li>
     <li><strong>pdf.js</strong> — Mozilla's PDF rendering engine, the same one inside Firefox. Renders PDF pages to canvas at any resolution. Powers PDF-to-JPG and PDF-to-PNG conversion. Also extracts text content for PDF-to-text tools.</li>
-    <li><strong>WebAssembly</strong> — lets compiled C/C++ code run in the browser at near-native speed. This is how browser-side image compression, HEIC decoding, and future Ghostscript-level PDF work becomes possible.</li>
-    <li><strong>Canvas API + FileReader</strong> — handles all image processing: resize, crop, rotate, flip, grayscale, format conversion, Base64 encoding.</li>
+    <li><strong>Canvas API + FileReader</strong> — handles all image processing: resize, crop, rotate, flip, grayscale, format conversion, Base64 encoding, and (via the browser's own JPEG encoder) recompressing photos at a lower quality.</li>
+    <li><strong>WebAssembly</strong> — lets compiled C/C++ code run in the browser at near-native speed. Some browser-based tools use it for heavier decoding work (HEIC photo decoding is a common case); plenty of the operations above run in plain JavaScript instead.</li>
   </ul>
   <p>
-    The result: about 80% of what people need from a PDF tool can now run entirely client-side. The remaining 20% — aggressive PDF compression using Ghostscript, PDF-to-Word conversion, and OCR — genuinely requires server-side processing for quality results. I built keptlocal specifically around this split: local-first for everything that can be local, and honest about the boundary where it cannot.
+    The result: the large majority of everyday PDF work can now run entirely client-side, including the "make this smaller" job people usually assume needs a server. The parts that genuinely still don't: PDF-to-Word conversion, OCR, and true multi-pass Ghostscript-level compression for extreme cases. I built keptlocal around that split: local-first for everything that can be local, and honest about the boundary where it can't.
   </p>
 
   <h2>The best browser-based PDF tools in 2026</h2>
 
+  <div class="overflow-x-auto my-6 rounded-lg border border-[var(--color-rule)]">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="bg-[var(--color-paper-dark)] text-left">
+          <th class="px-3 py-2 font-medium">Tool</th>
+          <th class="px-3 py-2 font-medium">Processing</th>
+          <th class="px-3 py-2 font-medium">Free tier limits</th>
+          <th class="px-3 py-2 font-medium">Signup</th>
+          <th class="px-3 py-2 font-medium">Ads (free tier)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-t border-[var(--color-rule)]">
+          <td class="px-3 py-2 font-medium">keptlocal</td>
+          <td class="px-3 py-2">Your browser</td>
+          <td class="px-3 py-2">None — no file size or usage cap</td>
+          <td class="px-3 py-2">Not required</td>
+          <td class="px-3 py-2">None</td>
+        </tr>
+        <tr class="border-t border-[var(--color-rule)]">
+          <td class="px-3 py-2 font-medium">Smallpdf</td>
+          <td class="px-3 py-2">Their servers</td>
+          <td class="px-3 py-2">About 2 tasks/day on the free plan<sup>1</sup></td>
+          <td class="px-3 py-2">Not required for basic use</td>
+          <td class="px-3 py-2">—</td>
+        </tr>
+        <tr class="border-t border-[var(--color-rule)]">
+          <td class="px-3 py-2 font-medium">iLovePDF</td>
+          <td class="px-3 py-2">Their servers</td>
+          <td class="px-3 py-2">Per-tool file caps (15–400 MB) and monthly quotas, e.g. 25 merges, 2 compressions<sup>2</sup></td>
+          <td class="px-3 py-2">Not required for basic use</td>
+          <td class="px-3 py-2">Yes</td>
+        </tr>
+        <tr class="border-t border-[var(--color-rule)]">
+          <td class="px-3 py-2 font-medium">PDF24</td>
+          <td class="px-3 py-2">Their servers (a separate desktop app is local)</td>
+          <td class="px-3 py-2">No official cap stated<sup>3</sup>; independent reviews report a roughly 100 MB practical ceiling<sup>4</sup></td>
+          <td class="px-3 py-2">Not required</td>
+          <td class="px-3 py-2">Yes</td>
+        </tr>
+        <tr class="border-t border-[var(--color-rule)]">
+          <td class="px-3 py-2 font-medium">Squoosh <span class="text-[var(--color-ink-muted)]">(images only)</span></td>
+          <td class="px-3 py-2">Your browser</td>
+          <td class="px-3 py-2">None stated<sup>5</sup></td>
+          <td class="px-3 py-2">Not required</td>
+          <td class="px-3 py-2">None</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="text-xs text-[var(--color-ink-muted)]">
+    Checked 2026-09-27. Free-tier limits and terms change; verify current terms on each tool's own site before relying on them.
+    <sup>1</sup> reported by <a href="https://www.g2.com/products/smallpdf/pricing" target="_blank" rel="noopener">G2's Smallpdf pricing page</a>, not stated on Smallpdf's own site at the time of checking.
+    <sup>2</sup> per <a href="https://www.ilovepdf.com/pricing" target="_blank" rel="noopener">iLovePDF's own pricing page</a>.
+    <sup>3</sup> per <a href="https://tools.pdf24.org/en/" target="_blank" rel="noopener">PDF24's own site</a> ("no artificial limits").
+    <sup>4</sup> per <a href="https://filenaut.com/guides/pdf24-review-and-alternative" target="_blank" rel="noopener">an independent PDF24 review</a>.
+    <sup>5</sup> per <a href="https://squoosh.app" target="_blank" rel="noopener">Squoosh's own site</a>.
+  </p>
+
   <h3>keptlocal.com — built privacy-first from the ground up</h3>
   <p>
-    <a href="https://keptlocal.com">keptlocal.com</a> is a purpose-built collection of 22 browser-only tools for PDF and image work. Every tool in the collection runs client-side — no tool in the PDF or image category uploads your file to a server.
+    <a href="https://keptlocal.com">keptlocal.com</a> is a purpose-built collection of 37 browser-only tools for PDF and image work. Every tool in the collection runs client-side — no tool in the PDF or image category uploads your file to a server.
   </p>
   <p>
-    On the PDF side: Merge, Split, Rotate, Reorder Pages, Watermark, Delete Pages, Add Page Numbers, PDF to JPG, PDF to PNG, PDF to Text, Compress PDF, Unlock PDF, JPG to PDF, and PDF Info Viewer. On the image side: Compress Image, Resize Image, Crop Image, Convert Image (HEIC to JPG, PNG to WebP, and more), Rotate Image, Flip Image, Grayscale Image, and Image to Base64.
+    On the PDF side: Merge, Split, Rotate, Reorder Pages, Watermark, Delete Pages, Add Page Numbers, PDF to JPG, PDF to PNG, PDF to Text, Compress PDF, Unlock PDF, JPG to PDF, PDF Info Viewer, and more. On the image side: Compress Image, Resize Image, Crop Image, Convert Image (HEIC to JPG, PNG to WebP, and more), Rotate Image, Flip Image, Grayscale Image, Image to Base64, and more. See the <a href="/tools/">full tool list</a> for everything currently live.
   </p>
   <p>
     The site is free, requires no account, and has no watermark on any output. The design is straightforward — no upsell banners, no "upgrade to Pro" interruptions, no daily limits.
@@ -51,23 +110,23 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
 
   <h3>Smallpdf.com — strong tool depth, aggressive upsell</h3>
   <p>
-    Smallpdf has the broadest feature set of any PDF tool online, including PDF-to-Word and OCR. The catch: the free tier limits you to two tasks per hour, and many operations (including PDF-to-Word) require a paid account. Files are processed server-side. The privacy policy states files are held for 1 hour, but this is a policy claim, not a verifiable technical guarantee.
+    Smallpdf has a broad feature set, including PDF-to-Word and OCR. The catch: independent pricing trackers report the free tier limits you to around two tasks per day, and many operations (including PDF-to-Word) require a paid account. Files are processed server-side. The privacy policy states files are held for a limited time, but that is a policy claim, not a verifiable technical guarantee.
   </p>
   <p>
-    Good choice if you need PDF-to-Word or OCR and are comfortable with server-side processing. Poor choice for frequent use on the free tier — the two-task-per-hour limit is intentionally frustrating.
+    Good choice if you need PDF-to-Word or OCR and are comfortable with server-side processing. Poor choice for frequent use on the free tier — the daily task limit is intentionally restrictive.
   </p>
 
   <h3>iLovePDF.com — large-scale, upload-based</h3>
   <p>
-    iLovePDF is the market leader by traffic (roughly 300M visits/month). It covers almost everything. Files are uploaded to their servers. The free tier is generous but carries a file size limit of 15 MB on some operations and shows ads throughout the interface. The paid tier is cheap ($4–7/month).
+    iLovePDF is the market leader by traffic (over 250M monthly visits as of early 2026, per Similarweb — a figure that will drift over time). It covers almost everything. Files are uploaded to their servers. The free tier's limits vary by tool rather than following one blanket cap: per iLovePDF's own pricing page, file-size ceilings range from 15 MB to 400 MB depending on the operation, plus monthly quotas on some tools (for example 25 merges or 2 compressions). Ads appear throughout the free interface. The paid Premium tier starts at roughly €4–7/month.
   </p>
   <p>
-    Good choice if you need heavy-duty operations (true PDF compression, PDF → Office conversion) and you are comfortable with server-side processing. The 15 MB limit on free tier can be frustrating for large documents.
+    Good choice if you need heavy-duty operations (true PDF compression, PDF → Office conversion) and you are comfortable with server-side processing. The free tier's per-tool quotas can be frustrating for repeat use on a single operation.
   </p>
 
   <h3>PDF24.org — comprehensive, but cluttered</h3>
   <p>
-    PDF24 is entirely free with no file size limits, which is genuinely rare. It processes server-side. The interface is cluttered and the mobile experience is poor, but the tool coverage is deep. It is the best choice if you need server-side processing and want free-forever without a tier system.
+    PDF24 is free with no tier system, which is genuinely rare — PDF24 states there are no artificial limits, though independent reviews report a practical ceiling of around 100 MB per file for the web tools. Like Smallpdf and iLovePDF, the web version processes server-side and is ad-supported; unlike them, PDF24 also offers a free Windows desktop app that processes files locally. The web interface is cluttered and the mobile experience is poor, but the tool coverage is deep. It is the best choice if you want free-forever, server-side processing without a tier system.
   </p>
 
   <h3>Squoosh (images only) — Google's browser-based image compressor</h3>
@@ -95,7 +154,7 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
     There are operations that genuinely require server-side processing for quality results:
   </p>
   <ul>
-    <li><strong>Aggressive PDF compression:</strong> reducing a 50 MB scanned PDF to 2 MB requires re-encoding the embedded images at lower quality, and often Ghostscript-level PDF optimization. JavaScript libraries like pdf-lib can remove metadata and compress the cross-reference table, but they cannot re-encode embedded images. For truly small file sizes, server-side tools using Ghostscript are necessary.</li>
+    <li><strong>Extreme PDF compression, or unusual image types:</strong> browser-based tools (including keptlocal's Compress PDF, which now recompresses embedded JPEG and RGB/grayscale images alongside stripping metadata) handle the common case well. What they still hand off to a server or desktop tool: CMYK print-workflow images, transparent images with soft masks, and squeezing a 50 MB scan down to the absolute minimum via multi-pass Ghostscript-level optimization.</li>
     <li><strong>PDF to Word (.docx) conversion:</strong> this requires understanding the PDF's layout geometry and reconstructing a Word-compatible document structure — a hard problem that no current client-side library handles well. Tools that claim to do this in the browser typically produce poor results on anything other than simple text PDFs.</li>
     <li><strong>OCR (optical character recognition):</strong> recognizing text in a scanned PDF image requires a heavyweight model. Tesseract.js can run in the browser but is slow and less accurate than server-side alternatives for multi-page documents.</li>
     <li><strong>Sophisticated redaction:</strong> properly removing sensitive text from a PDF requires understanding the PDF content stream — not just drawing a black rectangle over it (a naive approach that leaves the underlying text selectable). This is a solved problem on the server with tools like pikepdf; it is not yet solved client-side.</li>
@@ -117,9 +176,9 @@ import BlogLayout from "../../layouts/BlogLayout.astro";
     For everyday PDF and image work — merging, splitting, rotating, converting, compressing, cropping — browser-based tools are the right choice in 2026. They are as fast as server-based tools for typical document sizes, free to use, and structurally safer for sensitive documents because there is no third-party server involved.
   </p>
   <p>
-    Keep a server-side tool bookmarked for the operations that genuinely need it: heavy PDF compression, PDF-to-Word conversion, OCR. For everything else, the browser is fast enough that you will not notice the difference. The file stays on your device.
+    Keep a server-side tool bookmarked for the operations that genuinely still need it: PDF-to-Word conversion, OCR, and the most extreme compression cases. For everything else — including compressing PDFs full of ordinary photos and scans — the browser is fast enough that you will not notice the difference, and the file stays on your device.
   </p>
   <p>
-    <a href="https://keptlocal.com">keptlocal.com</a> covers the browser-only operations. For heavy compression or PDF-to-Word conversions, PDF24 (free, server-side) or Smallpdf (paid, server-side) are the best complements.
+    <a href="https://keptlocal.com">keptlocal.com</a> covers the browser-only operations. For PDF-to-Word conversion or OCR, PDF24 (free, server-side) or Smallpdf (paid, server-side) are the best complements.
   </p>
 </BlogLayout>

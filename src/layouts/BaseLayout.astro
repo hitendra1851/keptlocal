@@ -93,6 +93,10 @@ const schemaArray = Array.isArray(schema)
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- PWA: lets keptlocal be installed and keeps already-opened tools working offline -->
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- Fonts are self-hosted via @fontsource-variable (no third-party render-blocking CSS) -->
     <link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin />
@@ -141,6 +145,17 @@ const schemaArray = Array.isArray(schema)
     {/* AdSense: add the adsbygoogle.js script here once approved, with the real
         ca-pub client ID. Do not leave a placeholder-ID script in this file: Astro
         emits <script> tags even when they are wrapped in an HTML comment. */}
+
+    <!-- Service worker: registered after load so it never delays first paint.
+         Lets a tool page keep working if the visitor loses their connection or
+         reopens the tab later, once they've opened it at least once online. -->
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
+    </script>
   </head>
   <body class="paper-grain">
     <slot />

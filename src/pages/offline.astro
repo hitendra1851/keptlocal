@@ -1,0 +1,35 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+const title = "You're offline — keptlocal";
+const description = "This page hasn't been saved for offline use yet. Tools you've already opened will keep working without a connection.";
+---
+
+<BaseLayout title={title} description={description} noindex={true}>
+  <Header />
+  <main class="max-w-3xl mx-auto px-6 pt-12 pb-16">
+    <p class="text-sm text-[var(--color-ink-muted)] mb-2">Offline</p>
+    <h1 class="font-display text-5xl tracking-tighter text-[var(--color-ink)] mb-4">
+      You're offline
+    </h1>
+    <p class="text-lg text-[var(--color-ink-soft)] mb-10 leading-relaxed">
+      This particular page hasn't been opened on this device before, so there's nothing saved
+      for it yet. Any tool you've already visited while online will keep working without a
+      connection — try going back, or reconnect and open the tool once to make it available
+      offline from then on.
+    </p>
+
+    <div class="prose-doc">
+      <h2>Why some pages work offline and others don't</h2>
+      <p>
+        keptlocal saves each page and tool the first time you open it, so it's still there the
+        next time — even mid-flight, or anywhere without a signal. A page it has never seen
+        can't be saved in advance, since every tool runs entirely from files kept on your
+        device, not fetched fresh from a server each time.
+      </p>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>

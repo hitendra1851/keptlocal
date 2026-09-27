@@ -606,6 +606,10 @@ export const tools: Tool[] = [
         a: "No. All processing runs in your browser using pdf-lib and the Canvas API. Your PDF never leaves your device.",
       },
       {
+        q: "Does this work offline?",
+        a: "Yes, once you've opened this page while online. keptlocal saves the tool on your device the first time you visit, so you can compress a PDF later with no signal at all — on a flight, in a basement archive room, anywhere. Open this page once with a connection, then it keeps working without one.",
+      },
+      {
         q: "How much will the file size be reduced?",
         a: "It depends on what the PDF contains. If most of the size comes from embedded photos or scanned pages, the Image compression setting re-encodes them at a lower quality and resolution, which is usually where the largest reductions come from. PDFs that are already well-compressed, or that are large mainly due to fonts or vector graphics, will see much smaller reductions.",
       },

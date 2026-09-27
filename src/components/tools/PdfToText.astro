@@ -56,10 +56,8 @@
   </div>
 </div>
 
-<script type="module">
-  const PDFJS_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
-  const WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
-
+<script>
+  let pdfjsLib = null;
   let pdfFile = null;
   let extractedText = "";
   let processing = false;
@@ -133,16 +131,11 @@
     setStatus("Loading pdf.js...");
 
     try {
-      if (!window.pdfjsLib) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement("script");
-          s.src = PDFJS_URL;
-          s.onload = resolve;
-          s.onerror = reject;
-          document.head.appendChild(s);
-        });
+      if (!pdfjsLib) {
+        pdfjsLib = await import("pdfjs-dist/build/pdf.min.mjs");
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
       }
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER_URL;
 
       const bytes = await pdfFile.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;

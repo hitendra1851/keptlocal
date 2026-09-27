@@ -28,7 +28,7 @@
   </div>
 </div>
 
-<script type="module">
+<script>
   let files = [];
   let resultBlobs = [];
   const $ = id => document.getElementById(id);
@@ -96,7 +96,7 @@
     }
 
     if (resultBlobs.length > 1) {
-      const { default: JSZip } = await import("https://esm.sh/jszip@3.10.1");
+      const { default: JSZip } = await import("jszip");
       const zip = new JSZip();
       resultBlobs.forEach(({ blob, name }) => zip.file(name, blob));
       const zipBlob = await zip.generateAsync({ type: "blob" });

@@ -51,7 +51,7 @@
   </div>
 </div>
 
-<script type="module">
+<script>
   const $ = id => document.getElementById(id);
   const fmtSize = b => b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
   const setStatus = (msg, err = false) => { $('status-msg').textContent = msg; $('status-msg').style.color = err ? 'var(--color-warn)' : ''; };
@@ -109,7 +109,7 @@
     setStatus('Encrypting PDF…');
 
     try {
-      const { PDFDocument } = await import('https://esm.sh/pdf-lib@1.17.1');
+      const { PDFDocument } = await import('pdf-lib');
       const bytes = await pdfFile.arrayBuffer();
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
       const outBytes = await doc.save({

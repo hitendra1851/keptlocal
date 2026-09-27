@@ -594,8 +594,8 @@ export const tools: Tool[] = [
     slug: "compress-pdf",
     name: "Compress PDF",
     shortName: "Compress PDF",
-    description: "Reduce PDF file size by removing unused objects and metadata — entirely in your browser.",
-    longDescription: "Compress a PDF without uploading — no signup, no account, no watermark. Strip metadata and unused objects to reduce file size. Runs entirely in your browser.",
+    description: "Reduce PDF file size by recompressing embedded photos and removing unused objects — entirely in your browser.",
+    longDescription: "Compress a PDF without uploading — no signup, no account, no watermark. Recompresses embedded images and strips metadata to reduce file size. Runs entirely in your browser.",
     category: "PDF",
     icon: "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4",
     status: "live",
@@ -603,27 +603,31 @@ export const tools: Tool[] = [
     faq: [
       {
         q: "Are my files uploaded to a server?",
-        a: "No. All processing runs in your browser using pdf-lib. Your PDF never leaves your device.",
+        a: "No. All processing runs in your browser using pdf-lib and the Canvas API. Your PDF never leaves your device.",
       },
       {
         q: "How much will the file size be reduced?",
-        a: "It depends on the PDF. Documents with heavy metadata, form field data, or unused embedded resources can reduce significantly. PDFs that are already well-optimised may see minimal change. For image-heavy PDFs, the biggest size reductions require re-encoding images at lower quality — this tool does not re-encode images to preserve visual quality.",
+        a: "It depends on what the PDF contains. If most of the size comes from embedded photos or scanned pages, the Image compression setting re-encodes them at a lower quality and resolution, which is usually where the largest reductions come from. PDFs that are already well-compressed, or that are large mainly due to fonts or vector graphics, will see much smaller reductions.",
+      },
+      {
+        q: "What does the image compression level do?",
+        a: "It re-encodes embedded photos as JPEG at a lower quality, and downsamples any image larger than a target pixel size. Basic is a light touch; Recommended (the default) balances size and quality for everyday sharing; Strong prioritises the smallest file. Choose Off to only strip metadata and leave every image untouched.",
+      },
+      {
+        q: "Which images does it skip?",
+        a: "Images with transparency (a soft mask or explicit mask), CMYK or indexed colour, and unusual bit depths are left unchanged rather than risk a wrong colour conversion. Vector graphics and text are never rasterised or touched. The result screen reports how many images were recompressed versus skipped.",
       },
       {
         q: "What does 'remove metadata' do?",
         a: "Metadata includes the document title, author, creation date, software that created it, and custom properties. Stripping this removes those fields from the file — useful for privacy and for slightly reducing file size.",
       },
       {
-        q: "Why is the size reduction smaller than I expected?",
-        a: "Browser-based PDF compression removes metadata and unused document objects. For more aggressive compression — particularly re-encoding embedded images at lower quality — server-side tools using Ghostscript achieve much higher reductions. We plan to add a cloud-processing option for this in a future update.",
-      },
-      {
         q: "Will content or quality change?",
-        a: "No visible content changes. Text, images, and formatting are preserved. Only invisible overhead (metadata, unused resources) is removed.",
+        a: "Text, vector graphics, and page layout are always preserved exactly. If image compression is on (the default), photos and scans are re-encoded at a lower quality and resolution — a real, visible trade-off in exchange for a smaller file, the same trade-off any PDF compressor makes. Set the level to Off to keep every image pixel-for-pixel identical.",
       },
       {
         q: "Is there a file size limit?",
-        a: "No hard limit. The practical ceiling is your device's available RAM.",
+        a: "No hard limit. The practical ceiling is your device's available RAM — very large, image-heavy PDFs take longer and use more memory to recompress.",
       },
     ],
   },

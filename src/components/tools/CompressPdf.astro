@@ -31,7 +31,33 @@
     </div>
 
     <div class="space-y-2">
-      <p class="text-sm font-medium text-[var(--color-ink)]">Optimisation options</p>
+      <p class="text-sm font-medium text-[var(--color-ink)]">Image compression</p>
+      <p class="text-xs text-[var(--color-ink-muted)]">
+        Re-encodes photos and scanned pages at a lower quality. Vector graphics and text are never touched.
+        Transparent and CMYK images are left unchanged (skipped) rather than risk breaking them.
+      </p>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Image compression level">
+        <label class="level-option">
+          <input type="radio" name="img-level" value="off" class="sr-only" />
+          <span>Off</span>
+        </label>
+        <label class="level-option">
+          <input type="radio" name="img-level" value="basic" class="sr-only" />
+          <span>Basic</span>
+        </label>
+        <label class="level-option">
+          <input type="radio" name="img-level" value="recommended" checked class="sr-only" />
+          <span>Recommended</span>
+        </label>
+        <label class="level-option">
+          <input type="radio" name="img-level" value="strong" class="sr-only" />
+          <span>Strong</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="space-y-2">
+      <p class="text-sm font-medium text-[var(--color-ink)]">Other optimisation</p>
       <label class="flex items-start gap-2.5 cursor-pointer">
         <input type="checkbox" id="remove-metadata" checked class="mt-0.5 accent-[var(--color-accent)]" />
         <span class="text-sm text-[var(--color-ink-soft)]">Remove document metadata <span class="text-xs text-[var(--color-ink-muted)]">(title, author, creation date)</span></span>
@@ -56,6 +82,7 @@
         <div id="size-saved" class="text-sm font-medium text-[var(--color-accent)]"></div>
       </div>
     </div>
+    <p id="image-report" class="hidden text-xs text-[var(--color-ink-muted)]"></p>
   </div>
 
   <!-- Action bar -->
@@ -72,23 +99,65 @@
   </div>
 </div>
 
+<style>
+  .level-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-rule);
+    font-size: 0.8125rem;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+  }
+  .level-option:has(input:checked) {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background: var(--color-accent-tint);
+    font-weight: 500;
+  }
+</style>
+
 <script>
-  import { PDFDocument } from "pdf-lib";
+  import {
+    PDFDocument,
+    PDFName,
+    PDFNumber,
+    PDFRawStream,
+    decodePDFRawStream,
+  } from "pdf-lib";
+
+  // Quality presets. quality: JPEG quality passed to canvas.toBlob.
+  // maxDim: an embedded image wider or taller than this (in pixels) is downsampled.
+  // Downsampling a raster image's pixel dimensions never changes its printed size:
+  // PDF places every image XObject onto a fixed rectangle via a `cm` transform in
+  // the page content stream, so a lower-resolution image just fills the same box.
+  const LEVELS = {
+    off: null,
+    basic: { quality: 0.85, maxDim: 3000 },
+    recommended: { quality: 0.7, maxDim: 2000 },
+    strong: { quality: 0.5, maxDim: 1400 },
+  };
 
   let pdfBytes = null;
   let origSize = 0;
   let processing = false;
 
   const $ = (id) => document.getElementById(id);
-  const fmtSize = (b) => b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(2)} MB`;
+  const fmtSize = (b) => (b < 1024 * 1024 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1024 / 1024).toFixed(2)} MB`);
   const setStatus = (msg, err = false) => {
     $("status-msg").textContent = msg;
     $("status-msg").style.color = err ? "var(--color-warn)" : "";
   };
+  const selectedLevel = () =>
+    document.querySelector('input[name="img-level"]:checked')?.value || "recommended";
 
   const loadFile = async (file) => {
     if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
-      setStatus("Only PDF files are accepted.", true); return;
+      setStatus("Only PDF files are accepted.", true);
+      return;
     }
     pdfBytes = await file.arrayBuffer();
     origSize = file.size;
@@ -97,13 +166,19 @@
     $("empty-state").classList.add("hidden");
     $("controls").classList.remove("hidden");
     $("result-stats").classList.add("hidden");
+    $("image-report").classList.add("hidden");
     $("process-btn").disabled = false;
     setStatus("Ready. Choose options and click Compress.");
   };
 
   $("browse-btn").addEventListener("click", () => $("file-input").click());
-  $("drop-zone").addEventListener("click", (e) => { if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click(); });
-  $("file-input").addEventListener("change", (e) => { if (e.target.files[0]) loadFile(e.target.files[0]); $("file-input").value = ""; });
+  $("drop-zone").addEventListener("click", (e) => {
+    if (e.target === $("drop-zone") || e.target === $("empty-state")) $("file-input").click();
+  });
+  $("file-input").addEventListener("change", (e) => {
+    if (e.target.files[0]) loadFile(e.target.files[0]);
+    e.target.value = "";
+  });
 
   const dz = $("drop-zone");
   ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
@@ -111,13 +186,165 @@
   dz.addEventListener("drop", (e) => { if (e.dataTransfer?.files[0]) loadFile(e.dataTransfer.files[0]); });
 
   $("clear-btn").addEventListener("click", () => {
-    pdfBytes = null; origSize = 0;
+    pdfBytes = null;
+    origSize = 0;
     $("empty-state").classList.remove("hidden");
     $("controls").classList.add("hidden");
     $("result-stats").classList.add("hidden");
+    $("image-report").classList.add("hidden");
     $("process-btn").disabled = true;
     setStatus("Drop a PDF to compress it.");
   });
+
+  /** Draw RGBA pixel data (already sized to outW x outH, nearest/no scale) as a JPEG blob. */
+  const rgbaToJpeg = (rgba, w, h, outW, outH, quality) => {
+    const canvas = document.createElement("canvas");
+    if (w === outW && h === outH) {
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext("2d").putImageData(new ImageData(rgba, w, h), 0, 0);
+    } else {
+      const tmp = document.createElement("canvas");
+      tmp.width = w;
+      tmp.height = h;
+      tmp.getContext("2d").putImageData(new ImageData(rgba, w, h), 0, 0);
+      canvas.width = outW;
+      canvas.height = outH;
+      canvas.getContext("2d").drawImage(tmp, 0, 0, outW, outH);
+    }
+    return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+  };
+
+  const bitmapToJpeg = async (bitmap, outW, outH, quality) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = outW;
+    canvas.height = outH;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, outW, outH);
+    return new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+  };
+
+  const fitDims = (w, h, maxDim) => {
+    if (Math.max(w, h) <= maxDim) return [w, h];
+    const scale = maxDim / Math.max(w, h);
+    return [Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale))];
+  };
+
+  /**
+   * Walk every indirect object in the PDF, find Image XObjects, and re-encode the
+   * safe, common cases (plain JPEG; uncompressed/Flate 8-bit RGB or grayscale with
+   * no transparency) as smaller JPEGs at the requested quality/resolution. Each
+   * image is handled independently and any failure just leaves that one image
+   * untouched — a bad image never aborts the whole file or corrupts other images.
+   */
+  const recompressImages = async (doc, level) => {
+    const context = doc.context;
+    const IMAGE = PDFName.of("Image");
+    const DCT = PDFName.of("DCTDecode");
+    const FLATE = PDFName.of("FlateDecode");
+    const RGB = PDFName.of("DeviceRGB");
+    const GRAY = PDFName.of("DeviceGray");
+    const SMASK = PDFName.of("SMask");
+    const MASK = PDFName.of("Mask");
+    const DECODE = PDFName.of("Decode");
+    const FILTER = PDFName.of("Filter");
+    const COLORSPACE = PDFName.of("ColorSpace");
+    const BPC = PDFName.of("BitsPerComponent");
+    const WIDTH = PDFName.of("Width");
+    const HEIGHT = PDFName.of("Height");
+
+    let recompressed = 0;
+    let skipped = 0;
+    let failed = 0;
+
+    const entries = context.enumerateIndirectObjects();
+    for (const [ref, obj] of entries) {
+      if (!(obj instanceof PDFRawStream)) continue;
+      const dict = obj.dict;
+      if (dict.lookup(PDFName.of("Subtype")) !== IMAGE) continue;
+
+      // Skip anything with transparency or a non-default Decode array: safe to
+      // leave alone, but risky to redraw through a canvas without special handling.
+      if (dict.has(SMASK) || dict.has(MASK) || dict.has(DECODE)) {
+        skipped++;
+        continue;
+      }
+
+      const widthObj = dict.lookup(WIDTH);
+      const heightObj = dict.lookup(HEIGHT);
+      const width = widthObj instanceof PDFNumber ? widthObj.asNumber() : undefined;
+      const height = heightObj instanceof PDFNumber ? heightObj.asNumber() : undefined;
+      if (!width || !height || width < 8 || height < 8) {
+        skipped++;
+        continue;
+      }
+
+      const filter = dict.lookup(FILTER);
+      const colorSpace = dict.lookup(COLORSPACE);
+      const bpcObj = dict.lookup(BPC);
+      const bpc = bpcObj instanceof PDFNumber ? bpcObj.asNumber() : 8;
+
+      try {
+        let jpegBlob = null;
+        const [outW, outH] = fitDims(width, height, level.maxDim);
+
+        if (filter === DCT) {
+          // Stream contents for a DCTDecode image XObject are literal JPEG file
+          // bytes (this is the same assumption pdf-lib's own embedJpg relies on).
+          const bitmap = await createImageBitmap(new Blob([obj.contents], { type: "image/jpeg" }));
+          jpegBlob = await bitmapToJpeg(bitmap, outW, outH, level.quality);
+          bitmap.close?.();
+        } else if (filter === FLATE && bpc === 8 && (colorSpace === RGB || colorSpace === GRAY)) {
+          const decoded = decodePDFRawStream(obj).decode();
+          const channels = colorSpace === RGB ? 3 : 1;
+          if (decoded.length < width * height * channels) {
+            skipped++;
+            continue;
+          }
+          const rgba = new Uint8ClampedArray(width * height * 4);
+          for (let i = 0, p = 0; i < width * height; i++, p += channels) {
+            if (channels === 3) {
+              rgba[i * 4] = decoded[p];
+              rgba[i * 4 + 1] = decoded[p + 1];
+              rgba[i * 4 + 2] = decoded[p + 2];
+            } else {
+              rgba[i * 4] = rgba[i * 4 + 1] = rgba[i * 4 + 2] = decoded[p];
+            }
+            rgba[i * 4 + 3] = 255;
+          }
+          jpegBlob = await rgbaToJpeg(rgba, width, height, outW, outH, level.quality);
+        } else {
+          // Anything else (CMYK, indexed palettes, 1-bit/16-bit, JPX/CCITT, etc.):
+          // leave untouched rather than risk a wrong colour conversion.
+          skipped++;
+          continue;
+        }
+
+        const newBytes = new Uint8Array(await jpegBlob.arrayBuffer());
+        if (newBytes.length >= obj.contents.length) {
+          // Re-encoding made it bigger (already-optimised image) — keep the original.
+          skipped++;
+          continue;
+        }
+
+        const newStream = context.stream(newBytes, {
+          Type: "XObject",
+          Subtype: "Image",
+          Width: outW,
+          Height: outH,
+          ColorSpace: "DeviceRGB",
+          BitsPerComponent: 8,
+          Filter: "DCTDecode",
+        });
+        context.assign(ref, newStream);
+        recompressed++;
+      } catch (err) {
+        console.error("Skipping one image after a recompression error:", err);
+        failed++;
+      }
+    }
+
+    return { recompressed, skipped, failed };
+  };
 
   $("process-btn").addEventListener("click", async () => {
     if (!pdfBytes || processing) return;
@@ -126,6 +353,7 @@
     $("spinner").classList.remove("hidden");
     $("btn-label").textContent = "Compressing...";
     setStatus("Optimising PDF in your browser...");
+    $("image-report").classList.add("hidden");
 
     try {
       const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
@@ -148,7 +376,45 @@
         });
       }
 
-      const out = await doc.save({ useObjectStreams: true });
+      let imgResult = null;
+      const levelKey = selectedLevel();
+      const level = LEVELS[levelKey];
+      if (level) {
+        setStatus("Recompressing images...");
+        imgResult = await recompressImages(doc, level);
+      }
+
+      let out = await doc.save({ useObjectStreams: true });
+
+      // Safety net: if the image surgery somehow produced a file pdf-lib itself
+      // can't re-parse, fall back to the metadata-only result rather than hand
+      // back something broken.
+      if (imgResult && imgResult.recompressed > 0) {
+        try {
+          await PDFDocument.load(out);
+        } catch (verifyErr) {
+          console.error("Recompressed PDF failed verification, falling back to metadata-only save:", verifyErr);
+          const fallbackDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+          if ($("remove-metadata").checked) {
+            fallbackDoc.setTitle("");
+            fallbackDoc.setAuthor("");
+            fallbackDoc.setSubject("");
+            fallbackDoc.setKeywords([]);
+            fallbackDoc.setProducer("");
+            fallbackDoc.setCreator("");
+            fallbackDoc.setCreationDate(new Date(0));
+            fallbackDoc.setModificationDate(new Date(0));
+          }
+          if ($("remove-annotations").checked) {
+            fallbackDoc.getPages().forEach((page) => {
+              if (page.node.has("Annots")) page.node.delete("Annots");
+            });
+          }
+          out = await fallbackDoc.save({ useObjectStreams: true });
+          imgResult = null;
+        }
+      }
+
       const outSize = out.byteLength;
       const saved = origSize - outSize;
       const savedPct = ((saved / origSize) * 100).toFixed(1);
@@ -157,6 +423,14 @@
       $("size-after").textContent = fmtSize(outSize);
       $("size-saved").textContent = saved > 0 ? `${fmtSize(Math.abs(saved))} (${savedPct}%)` : "Minimal";
       $("result-stats").classList.remove("hidden");
+
+      if (imgResult) {
+        const parts = [`${imgResult.recompressed} image${imgResult.recompressed === 1 ? "" : "s"} recompressed`];
+        if (imgResult.skipped) parts.push(`${imgResult.skipped} skipped (unsupported type or already small)`);
+        if (imgResult.failed) parts.push(`${imgResult.failed} left unchanged after an error`);
+        $("image-report").textContent = parts.join(" · ") + ".";
+        $("image-report").classList.remove("hidden");
+      }
 
       const blob = new Blob([out], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -168,9 +442,11 @@
       a.remove();
       URL.revokeObjectURL(url);
 
-      setStatus(saved > 0
-        ? `Done. Reduced by ${fmtSize(saved)} (${savedPct}%).`
-        : "Done. This PDF was already well-optimised — minimal size change.");
+      setStatus(
+        saved > 0
+          ? `Done. Reduced by ${fmtSize(saved)} (${savedPct}%).`
+          : "Done. This PDF was already well-optimised — minimal size change."
+      );
     } catch (err) {
       console.error(err);
       setStatus(`Error: ${err?.message || "could not process the PDF."}`, true);
@@ -182,5 +458,10 @@
     }
   });
 
-  window.addEventListener("beforeunload", (e) => { if (processing) { e.preventDefault(); e.returnValue = ""; } });
+  window.addEventListener("beforeunload", (e) => {
+    if (processing) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
+  });
 </script>

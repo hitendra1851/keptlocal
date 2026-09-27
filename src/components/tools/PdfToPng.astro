@@ -51,10 +51,8 @@
   </div>
 </div>
 
-<script type="module">
-  const PDFJS = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
-  const WORKER = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
-
+<script>
+  let pdfjsLib = null;
   let pdfFile = null;
   let blobs = [];
   let processing = false;
@@ -95,10 +93,11 @@
     $("spinner").classList.remove("hidden"); $("btn-label").textContent = "Converting...";
     blobs = [];
     try {
-      if (!window.pdfjsLib) {
-        await new Promise((res, rej) => { const s = document.createElement("script"); s.src = PDFJS; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+      if (!pdfjsLib) {
+        pdfjsLib = await import("pdfjs-dist/build/pdf.min.mjs");
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+          (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
       }
-      pdfjsLib.GlobalWorkerOptions.workerSrc = WORKER;
       const bytes = await pdfFile.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: bytes }).promise;
       const n = pdf.numPages;
@@ -123,7 +122,7 @@
       }
 
       if (n > 1) {
-        const JSZip = (await import("https://esm.sh/jszip@3.10.1")).default;
+        const JSZip = (await import("jszip")).default;
         const zip = new JSZip();
         blobs.forEach(({ blob, name }) => zip.file(name, blob));
         const zipBlob = await zip.generateAsync({ type: "blob" });

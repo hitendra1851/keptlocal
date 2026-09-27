@@ -56,8 +56,8 @@
 </div>
 
 <!-- pdf-lib loaded as ESM from CDN. Pinned version, integrity-checked at build time by browser. -->
-<script type="module">
-  import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
+<script>
+  import { PDFDocument } from "pdf-lib";
 
   /** @type {Array<{ id: string, name: string, size: number, bytes: ArrayBuffer }>} */
   let files = [];
@@ -283,3 +283,4 @@
     }
   });
 </script>
+

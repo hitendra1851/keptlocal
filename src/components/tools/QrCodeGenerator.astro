@@ -55,7 +55,7 @@
   </div>
 </div>
 
-<script type="module">
+<script>
   const $ = id => document.getElementById(id);
   let qrModule = null;
   let debounceTimer = null;
@@ -77,7 +77,7 @@
 
     if (!qrModule) {
       setStatus('Loading…');
-      qrModule = await import('https://esm.sh/qrcode@1.5.4');
+      qrModule = await import('qrcode');
     }
 
     const size = parseInt($('qr-size').value);

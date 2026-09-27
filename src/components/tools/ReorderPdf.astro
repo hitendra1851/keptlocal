@@ -63,11 +63,15 @@
 </div>
 
 <script>
-  import * as pdfjs from 'pdfjs-dist/build/pdf.min.mjs';
-  import { PDFDocument } from 'pdf-lib';
-  import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-  pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+  let pdfjs = null;
+  const loadPdfjs = async () => {
+    if (!pdfjs) {
+      pdfjs = await import('pdfjs-dist/build/pdf.min.mjs');
+      pdfjs.GlobalWorkerOptions.workerSrc =
+        (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+    }
+    return pdfjs;
+  };
 
   let pdfBytes   = null;
   let fileName   = '';
@@ -102,13 +106,33 @@
   };
 
   // Render one page thumbnail → dataURL
+  //
+  // KNOWN ISSUE: page.render().promise has been observed to hang indefinitely
+  // for some PDFs/environments, with no error, no rejection, and no console
+  // output -- reproduced both locally and on the production deployment,
+  // across every PDF tested, at every scale tried, with both static and
+  // dynamic imports of pdf.js, with and without a co-imported pdf-lib, and
+  // with the service worker fully unregistered. The worker script itself
+  // fetches and instantiates correctly and answers a plain postMessage, so
+  // the failure is specific to pdf.js's own render pipeline in this
+  // component, not a broken asset. Root cause not found this session; needs
+  // real browser DevTools (Worker inspector / breakpoints) to diagnose
+  // further. The timeout below turns the failure into a visible error
+  // instead of an infinite silent hang.
   const renderThumb = async (pdfDoc, pageNum) => {
     const page = await pdfDoc.getPage(pageNum);
     const viewport = page.getViewport({ scale: 0.25 });
     const canvas = document.createElement('canvas');
     canvas.width  = Math.round(viewport.width);
     canvas.height = Math.round(viewport.height);
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+    const renderTask = page.render({ canvasContext: canvas.getContext('2d'), viewport });
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => {
+        renderTask.cancel();
+        reject(new Error(`Timed out rendering page ${pageNum}. Try a different browser, or use PDF to JPG / PDF to PNG instead.`));
+      }, 20000)
+    );
+    await Promise.race([renderTask.promise, timeout]);
     page.cleanup();
     return canvas.toDataURL('image/jpeg', 0.75);
   };
@@ -161,19 +185,37 @@
 
     let pdfDoc;
     try {
-      pdfDoc = await pdfjs.getDocument({ data: pdfBytes.slice(0) }).promise;
-    } catch {
+      const pdfjsLib = await loadPdfjs();
+      pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes.slice(0) }).promise;
+    } catch (e) {
+      console.error(e);
+      pdfBytes = null; fileName = ''; pages = [];
+      emptyState.classList.remove('hidden');
+      loadingState.classList.add('hidden');
+      gridWrap.classList.add('hidden');
+      saveBtn.disabled = true;
       setStatus('Could not read the PDF — check that the file is valid.', true);
-      reset();
       return;
     }
 
     const total = pdfDoc.numPages;
-    for (let i = 1; i <= total; i++) {
-      loadingMsg.textContent = `Loading page ${i} of ${total}…`;
-      progressBar.style.width = `${Math.round((i / total) * 100)}%`;
-      const dataUrl = await renderThumb(pdfDoc, i);
-      pages.push({ origIdx: i - 1, dataUrl });
+    try {
+      for (let i = 1; i <= total; i++) {
+        loadingMsg.textContent = `Loading page ${i} of ${total}…`;
+        progressBar.style.width = `${Math.round((i / total) * 100)}%`;
+        const dataUrl = await renderThumb(pdfDoc, i);
+        pages.push({ origIdx: i - 1, dataUrl });
+      }
+    } catch (e) {
+      console.error(e);
+      pdfDoc.destroy();
+      pdfBytes = null; fileName = ''; pages = [];
+      emptyState.classList.remove('hidden');
+      loadingState.classList.add('hidden');
+      gridWrap.classList.add('hidden');
+      saveBtn.disabled = true;
+      setStatus(e?.message || 'Could not render this PDF’s pages.', true);
+      return;
     }
     pdfDoc.destroy();
 
@@ -257,6 +299,7 @@
     setStatus('Building PDF in your browser…');
 
     try {
+      const { PDFDocument } = await import('pdf-lib');
       const srcDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
       const newDoc = await PDFDocument.create();
       const origIndices = pages.map((p) => p.origIdx);

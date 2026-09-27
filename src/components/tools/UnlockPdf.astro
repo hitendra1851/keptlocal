@@ -44,7 +44,10 @@
 </div>
 
 <script>
-  import { PDFDocument } from "pdf-lib";
+  // Plain pdf-lib's load() has no `password` option at all -- it can only
+  // open PDFs that aren't really encrypted. @cantoo/pdf-lib is a maintained
+  // fork that adds real decryption (used here for this one tool).
+  import { PDFDocument } from "@cantoo/pdf-lib";
 
   let pdfBytes = null;
   let processing = false;

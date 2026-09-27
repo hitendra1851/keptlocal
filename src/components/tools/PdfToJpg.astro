@@ -137,7 +137,7 @@
     fileName = file.name.replace(/\.pdf$/i, '');
     try {
       const doc = await pdfjs.getDocument({ data: pdfBytes.slice(0) }).promise;
-      pageCount = doc.getPageCount();
+      pageCount = doc.numPages;
       doc.destroy();
     } catch {
       setStatus('Could not read the PDF — check that the file is valid.', true);

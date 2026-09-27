@@ -13,11 +13,12 @@ const tool = tools.find((t) => t.slug === "compress-pdf")!;
     <h2>How to compress a PDF</h2>
     <ol>
       <li>Drop your PDF into the zone above, or click to browse and select it.</li>
-      <li>Choose your optimisation options. <strong>Remove metadata</strong> strips the document title, author, creation date, and other invisible properties. <strong>Remove annotations</strong> removes comments and markup added to the document.</li>
-      <li>Click <strong>Compress &amp; download</strong>. The tool shows the before and after file sizes, and the optimised PDF downloads to your device.</li>
+      <li>Choose an <strong>image compression</strong> level. <strong>Recommended</strong> (the default) re-encodes embedded photos and scans as JPEG at a lower quality and resolution — this is usually where most of the size reduction comes from. <strong>Basic</strong> is a lighter touch, <strong>Strong</strong> prioritises the smallest file, and <strong>Off</strong> leaves every image pixel-for-pixel unchanged.</li>
+      <li>Choose your other options. <strong>Remove metadata</strong> strips the document title, author, creation date, and other invisible properties. <strong>Remove annotations</strong> removes comments and markup added to the document.</li>
+      <li>Click <strong>Compress &amp; download</strong>. The tool shows the before and after file sizes, how many images were recompressed, and the optimised PDF downloads to your device.</li>
     </ol>
     <p>
-      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a>.
+      Everything runs in your browser using <a href="https://github.com/Hopding/pdf-lib" target="_blank" rel="noopener">pdf-lib</a> and the browser's own Canvas API for image re-encoding.
       No file is sent to a server — open DevTools (<code>F12</code>) → Network while processing to verify zero upload requests.
     </p>
 
@@ -26,19 +27,19 @@ const tool = tools.find((t) => t.slug === "compress-pdf")!;
       Most people assume compression is a single operation with a predictable outcome. In practice, the amount of size reduction you can achieve depends entirely on what is making the file large. There are four main sources of PDF file size, each requiring a different approach.
     </p>
     <ul>
-      <li><strong>Embedded images:</strong> By far the most common cause of large PDFs. A document with scanned pages, product photography, or design graphics embeds each image at its original resolution. A single full-page photograph at 300 DPI can be 3–5 MB. A 30-page scanned document at 200 DPI can easily reach 50 MB. Reducing image-heavy PDFs requires re-encoding the images at lower resolution — something only server-side tools can do well.</li>
-      <li><strong>Embedded fonts:</strong> PDF can embed complete font files for every typeface used in the document. A single professional OpenType font can be 500 KB–2 MB. A PDF using three or four custom fonts carries several megabytes of font data that contributes nothing to the visual output for readers who never need to edit the document. Subsetting (embedding only the characters actually used) reduces this significantly, but few export tools do it aggressively.</li>
-      <li><strong>Metadata and document overhead:</strong> Author, title, keywords, revision history, comments, annotations, and internal cross-reference tables add overhead that has nothing to do with what readers see. For PDFs exported from design tools like Adobe Illustrator or InDesign, this overhead can be substantial — sometimes 30–40% of the total file size. This is the overhead this tool removes.</li>
-      <li><strong>Unused and duplicate objects:</strong> PDF is an append-only format. When you edit a PDF in most tools, the old version of each modified object stays in the file as a dead object — the file grows but nothing visible changes. Re-saving with object compression removes these dead objects.</li>
+      <li><strong>Embedded images:</strong> By far the most common cause of large PDFs. A document with scanned pages, product photography, or design graphics embeds each image at its original resolution. A single full-page photograph at 300 DPI can be 3–5 MB. A 30-page scanned document at 200 DPI can easily reach 50 MB. This is what the image compression option above addresses: it re-encodes the common cases — plain JPEG photos, and uncompressed or PNG-style RGB/grayscale images — at a lower quality and resolution, right in your browser.</li>
+      <li><strong>Embedded fonts:</strong> PDF can embed complete font files for every typeface used in the document. A single professional OpenType font can be 500 KB–2 MB. A PDF using three or four custom fonts carries several megabytes of font data that contributes nothing to the visual output for readers who never need to edit the document. Subsetting (embedding only the characters actually used) reduces this significantly, but few export tools do it aggressively. This tool does not touch fonts.</li>
+      <li><strong>Metadata and document overhead:</strong> Author, title, keywords, revision history, comments, annotations, and internal cross-reference tables add overhead that has nothing to do with what readers see. For PDFs exported from design tools like Adobe Illustrator or InDesign, this overhead can be substantial — sometimes 30–40% of the total file size. The metadata and annotation options above remove this.</li>
+      <li><strong>Unused and duplicate objects:</strong> PDF is an append-only format. When you edit a PDF in most tools, the old version of each modified object stays in the file as a dead object — the file grows but nothing visible changes. Re-saving with object compression removes these dead objects, which this tool always does.</li>
     </ul>
     <p>
-      This tool addresses the third and fourth categories. For image-heavy PDFs where the first category dominates, see the server-side options below.
+      This tool addresses the first, third, and fourth categories. It does not subset or remove embedded fonts, and it deliberately skips some image types for safety — see the limits below.
     </p>
 
     <h2>When to compress a PDF</h2>
     <ul>
-      <li><strong>Email attachments</strong> — many email providers cap attachments at 10–25 MB. Stripping metadata and unused resources can bring a bloated PDF under the limit.</li>
-      <li><strong>Document portals and upload limits</strong> — government portals, insurance sites, and HR systems often impose strict file size limits on uploads.</li>
+      <li><strong>Email attachments</strong> — many email providers cap attachments at 10–25 MB. Recompressing embedded photos and scans, plus stripping metadata and unused resources, can bring a bloated PDF well under the limit.</li>
+      <li><strong>Document portals and upload limits</strong> — government portals, insurance sites, and HR systems often impose strict file size limits on uploads, and scanned documents are usually what pushes a PDF over them.</li>
       <li><strong>Removing author metadata before sharing</strong> — a report created in Word carries author name, company, and revision history in the PDF metadata by default. Stripping it before sending removes that information.</li>
       <li><strong>Cleaning up PDFs exported from design tools</strong> — Illustrator and InDesign exports often include significant metadata overhead that contributes nothing to the document content.</li>
       <li><strong>Archiving</strong> — removing unused objects and annotations produces a cleaner, more compact file for long-term storage.</li>
@@ -46,27 +47,37 @@ const tool = tools.find((t) => t.slug === "compress-pdf")!;
 
     <h2>How it works under the hood</h2>
     <p>
-      pdf-lib loads the PDF and rewrites it with the <code>useObjectStreams: true</code> option, which compresses
-      the document's cross-reference table — an internal index of all objects in the file. This alone can reduce
-      file size by several percent for PDFs with many objects.
+      pdf-lib parses the PDF and walks every embedded image object directly. For a plain JPEG image (the most
+      common case — most photos and scans embedded in PDFs are already JPEG), the raw image bytes are decoded
+      with <code>createImageBitmap</code>, drawn to an off-screen canvas at the target resolution, and
+      re-encoded as a new, smaller JPEG with <code>canvas.toBlob</code>. For an uncompressed or PNG-style
+      RGB/grayscale image, the raw pixel samples are decoded, assembled into image data, and re-encoded the
+      same way. The new image replaces the old one at the same internal reference, so every page that used
+      it — including a logo or photo repeated across many pages — automatically picks up the smaller version.
+    </p>
+    <p>
+      Downsampling an image's pixel dimensions never changes how large it appears on the page: a PDF places
+      every image onto a fixed rectangle via a transform in the page's content stream, so a lower-resolution
+      image simply fills the same box at a lower effective DPI. Images with transparency, CMYK or indexed
+      colour, or unusual bit depths are left untouched rather than risk a wrong colour conversion or a broken
+      soft mask. After recompressing, the tool re-parses the entire result with pdf-lib as a safety check;
+      if anything about the rewritten file looks wrong, it silently falls back to the metadata-only result
+      instead of handing back something broken.
     </p>
     <p>
       Stripping metadata removes the document information dictionary, which stores title, author, subject,
       keywords, creator, and producer fields. These are invisible to readers but add bytes to every copy of
       the file. Removing annotations deletes the annotation arrays attached to each page — comments, highlights,
-      and markup left by reviewers.
-    </p>
-    <p>
-      What this tool does not do: re-encode embedded images at lower quality. Image data is the dominant source
-      of file size in most PDFs, and reducing it requires re-rendering images at a lower resolution — a process
-      that can only be done well with tools like Ghostscript. A server-based compression tool is more effective
-      for image-heavy PDFs; we plan to add this as an optional cloud processing feature.
+      and markup left by reviewers. Saving with <code>useObjectStreams: true</code> also compresses the
+      document's internal cross-reference table.
     </p>
 
     <h2>Limits and what to expect</h2>
     <ul>
-      <li><strong>Image-heavy PDFs:</strong> if most of the file size comes from embedded images, this tool will produce minimal reduction. The largest size wins require re-encoding images, which this tool does not do to preserve quality.</li>
-      <li><strong>Already-optimised PDFs:</strong> PDFs exported from modern tools with compression already applied may see little or no size reduction.</li>
+      <li><strong>Skipped image types:</strong> images with transparency, CMYK or indexed colour, or unusual bit depths are left unchanged rather than risk corrupting them. The result screen reports how many images were recompressed versus skipped so you can see which case you hit.</li>
+      <li><strong>Inline images:</strong> a small number of PDFs embed images directly inside the page content stream instead of as a separate object. Those are not recompressed.</li>
+      <li><strong>Already-optimised PDFs:</strong> PDFs exported from modern tools with compression already applied may see little or no size reduction — the tool only keeps a re-encoded image if it is actually smaller.</li>
+      <li><strong>Very large or many images:</strong> recompression happens one image at a time in your browser tab, so a PDF with dozens of large photos will take noticeably longer than a text-only document.</li>
       <li><strong>Password-protected PDFs:</strong> must be unlocked before use.</li>
       <li><strong>Annotation removal scope:</strong> removes standard annotations (comments, highlights, sticky notes). Interactive form fields are not removed by the annotations option.</li>
       <li><strong>Browser support:</strong> Chrome 90+, Firefox 90+, Safari 15+, Edge 90+.</li>
@@ -77,24 +88,26 @@ const tool = tools.find((t) => t.slug === "compress-pdf")!;
       Different destinations have different limits, and knowing the target helps you decide how much compression you actually need:
     </p>
     <ul>
-      <li><strong>Email attachments:</strong> Gmail caps at 25 MB, Outlook at 20 MB, many corporate mail servers at 10 MB or 5 MB. If your PDF is under 10 MB, it will get through most email systems. If it is over 20 MB, focus on image compression first — metadata removal alone will not bring a 50 MB PDF to below email limits.</li>
-      <li><strong>Web upload portals:</strong> Government forms, insurance portals, HR systems, and legal submission systems typically impose 5–10 MB limits. Some are stricter — 2 MB is common for passport and document scans.</li>
+      <li><strong>Email attachments:</strong> Gmail caps at 25 MB, Outlook at 20 MB, many corporate mail servers at 10 MB or 5 MB. If your PDF is over 20 MB from embedded photos or scans, try the <strong>Strong</strong> image compression level first — it's the setting most likely to bring a large PDF under an email limit.</li>
+      <li><strong>Web upload portals:</strong> Government forms, insurance portals, HR systems, and legal submission systems typically impose 5–10 MB limits. Some are stricter — 2 MB is common for passport and document scans. <strong>Strong</strong> downsamples images to 1400px on the longest side, which is enough resolution for on-screen review but well below print quality.</li>
       <li><strong>Cloud storage sharing:</strong> No size limits in practice, but very large PDFs take time to open in browser-based viewers. Under 5 MB is comfortable for most viewers.</li>
-      <li><strong>Print-ready PDFs:</strong> Print files should not be compressed aggressively — images need to stay at 300 DPI minimum. For print submissions, metadata removal is useful; image compression is not.</li>
+      <li><strong>Print-ready PDFs:</strong> Print files should not be compressed aggressively — images need to stay at 300 DPI minimum, which is usually well above the pixel dimensions this tool's presets target. For print submissions, use <strong>Off</strong> for image compression and only strip metadata.</li>
     </ul>
 
-    <h2>When browser-based compression is not enough</h2>
+    <h2>When this is not enough</h2>
     <p>
-      If your PDF is large because of embedded images — scanned pages, photographs, design graphics — this tool will make little difference. The PDF's size comes from pixel data, and reducing pixel data requires re-encoding the images at lower resolution. This is computationally intensive and best done with purpose-built tools:
+      This tool's image compression handles the common case well: plain JPEG photos and simple RGB or
+      grayscale scans. A few things it deliberately does not attempt, where a dedicated desktop tool remains
+      the better choice:
     </p>
     <ul>
-      <li><strong>Ghostscript (free, command line):</strong> The engine behind most server-side PDF compressors. Running it with <code>-dPDFSETTINGS=/ebook</code> typically reduces image-heavy PDFs to 20–30% of their original size at acceptable quality for screen use. Requires a technical setup but is the most powerful free option.</li>
-      <li><strong>Chrome print-to-PDF (free, any OS):</strong> Open the PDF in Chrome, press Ctrl+P, save as PDF. Chrome re-renders and recompresses images in the process. Quick, but may alter formatting subtly.</li>
-      <li><strong>macOS Preview Quartz filter (free, macOS):</strong> File → Export → Quartz Filter: "Reduce File Size." Aggressive image compression. Quality is visibly degraded but acceptable for documents where readability matters more than visual fidelity.</li>
-      <li><strong>Adobe Acrobat Pro (paid):</strong> The most controlled option. The PDF Optimizer lets you set target image resolution separately for colour, grayscale, and monochrome content, giving you the best balance of size and quality.</li>
+      <li><strong>CMYK images, from print-workflow PDFs:</strong> skipped here to avoid a wrong colour conversion. <strong>Adobe Acrobat Pro's</strong> PDF Optimizer or <strong>Ghostscript</strong> (<code>-dPDFSETTINGS=/ebook</code>) handle CMYK correctly.</li>
+      <li><strong>Transparent images and soft masks:</strong> skipped here for the same reason. A desktop tool with full image-compositing support will handle these correctly.</li>
+      <li><strong>Font subsetting:</strong> if a PDF is large mainly because of embedded font files rather than images, this tool won't help — that requires rewriting the font program itself, which <strong>Ghostscript</strong> and <strong>Adobe Acrobat Pro</strong> can do.</li>
+      <li><strong>Maximum possible compression regardless of quality loss:</strong> <strong>Ghostscript's</strong> <code>/screen</code> setting or repeated passes in <strong>Acrobat Pro</strong> can go further than this tool's Strong preset, at a visibly lower quality.</li>
     </ul>
     <p>
-      For metadata-heavy PDFs from office or design tools — where the images are already compressed but overhead is adding unnecessary size — the browser-based approach here is genuinely the right tool, and the results are fast and lossless.
+      For everything else — metadata-heavy exports from office or design tools, and PDFs whose size mostly comes from ordinary embedded photos or scans — the browser-based approach here is genuinely a real fix, not just a stopgap, and nothing ever leaves your device.
     </p>
 
     <h2>Privacy compared to other PDF compressors</h2>

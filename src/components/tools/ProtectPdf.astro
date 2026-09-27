@@ -109,10 +109,14 @@
     setStatus('Encrypting PDF…');
 
     try {
-      const { PDFDocument } = await import('pdf-lib');
+      // Plain pdf-lib has no encryption support: save() silently ignores
+      // password options, so a PDF "protected" that way opens with no
+      // password at all. @cantoo/pdf-lib is a maintained fork that adds a
+      // real encrypt() (AES-256 by default) -- used here for this one tool.
+      const { PDFDocument } = await import('@cantoo/pdf-lib');
       const bytes = await pdfFile.arrayBuffer();
       const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
-      const outBytes = await doc.save({
+      doc.encrypt({
         userPassword: pw,
         ownerPassword: pw + '_owner',
         permissions: {
@@ -125,6 +129,7 @@
           documentAssembly: false,
         },
       });
+      const outBytes = await doc.save();
       const blob = new Blob([outBytes], { type: 'application/pdf' });
       const base = pdfFile.name.replace(/\.pdf$/i, '');
       const outName = `${base}-protected.pdf`;

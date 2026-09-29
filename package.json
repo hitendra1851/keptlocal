@@ -4,6 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "description": "Private, browser-only PDF and image tools. Your files. Kept local.",
+  "license": "MIT",
+  "author": "Hitendra Patel",
+  "homepage": "https://keptlocal.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hitendra1851/keptlocal.git"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

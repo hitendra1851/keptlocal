@@ -1252,6 +1252,25 @@ export const tools: Tool[] = [
       { q: "Can I get multiple platform sizes from one upload?", a: "Not in a single click currently — select a preset, download, then select another preset and download again for each platform you need." },
     ],
   },
+  {
+    slug: "passport-photo-maker",
+    name: "Passport Photo Maker",
+    shortName: "Passport Photo",
+    pageTitle: "Passport Photo Maker — Correct Size, Free",
+    description: "Crop a photo to the exact passport, visa, or ID size for your country, with a face-alignment guide — instantly in your browser.",
+    longDescription: "Make a passport or visa photo free in your browser — no signup, nothing uploaded. Pick your country's exact size, align your face to the guide, and download a print-ready photo — including a 4×6 sheet with multiple copies.",
+    category: "Image",
+    icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm0 0c-4 0-7 2-7 5v1h14v-1c0-3-3-5-7-5z",
+    status: "live",
+    keywords: ["passport photo maker", "passport photo size free", "visa photo online", "id photo maker no signup", "passport photo print sheet"],
+    faq: [
+      { q: "Is my photo uploaded anywhere?", a: "No. Cropping, resizing, and building the print sheet all happen on the Canvas API in your browser. Nothing is sent to a server — worth noting specifically for a tool handling a photo of your face intended for an identity document." },
+      { q: "Does this guarantee my photo will be accepted?", a: "No. This tool gets the size and framing right, but official acceptance also depends on things it can't control — background color, lighting, neutral expression, no glasses glare, recent photo. Check your specific passport office's full photo requirements before submitting." },
+      { q: "What does the face-alignment guide actually do?", a: "It overlays a reference oval and eye-line on the preview so you can see whether your face is centered and appropriately sized before cropping — a visual aid only. It doesn't detect your face automatically or enforce the alignment; you position the photo to match the guide yourself." },
+      { q: "What's the 4×6 print sheet for?", a: "Many photo print shops and pharmacies only print standard photo sizes (like 4×6 inches), not custom passport dimensions. The print sheet tiles multiple copies of your passport photo onto a single 4×6 sheet, the same layout walk-in print services typically offer, so you can print it affordably without a specialty passport-photo service." },
+      { q: "Which countries' sizes are included?", a: "US/India passport and visa (2×2 in), UK/Schengen/Australia visa and passport (35×45mm), Canada passport (50×70mm), and China visa (33×48mm). If your country isn't listed, check its exact required millimeter or inch dimensions and use keptlocal's Crop Image tool with a custom size instead." },
+    ],
+  },
 ];
 
 export const liveTools = tools.filter((t) => t.status === "live");

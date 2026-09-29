@@ -1,0 +1,79 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Passport Photo Size Requirements by Country"
+  description="Reference dimensions for US, India, UK, Schengen, Canada, and China passport and visa photos, plus why getting the size exactly right matters more than it seems."
+  publishDate="2026-12-08"
+  readTime={4}
+  tags={["Image"]}
+  toolSlug="passport-photo-maker"
+  toolName="Passport Photo Maker"
+  toolTagline="Crop to the exact size for your country, with a face-alignment guide — free, in your browser."
+  faqs={[
+    { q: "Why do passport photo sizes differ by country at all?", a: "Each country's passport office sets its own specification independently, generally based on print and scanning standards that predate any international coordination on the topic. There's no single global standard, though many countries converge on similar (not identical) dimensions." },
+    { q: "Is getting the exact size really important, or just roughly close?", a: "Exact matters. Passport and visa photo specs are checked against precise measurements — head size as a percentage of photo height, exact photo dimensions — and a photo outside tolerance is a common reason for rejection, requiring a resubmission that can delay processing." },
+    { q: "Does the photo need to be printed, or can I submit it digitally?", a: "Depends entirely on the application method. Many passport renewals now accept digital photo uploads with pixel-dimension and file-size requirements instead of (or alongside) a printed physical photo — check your specific application's current process." },
+    { q: "What else besides size do passport offices check?", a: "Background color (usually plain white or light gray), even lighting with no harsh shadows, a neutral expression with mouth closed, eyes open and visible (no tinted glasses, minimal glare on clear glasses), and photo recency — most offices require a photo taken within the last 6 months." },
+    { q: "Can I use a photo taken at a photo booth or self-taken at home?", a: "Yes, as long as it meets the size, background, and quality requirements — official passport photo booths aren't mandatory in most countries, though some countries' application processes specifically require a professional photographer's certification stamp on the print." },
+  ]}
+>
+
+<p class="lead">
+  Every country's passport office specifies photo dimensions down to the millimeter, and a photo that's even slightly off can mean a rejected application and a delay. Here's a reference for the most commonly needed sizes.
+</p>
+
+<h2>Get the exact crop in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/passport-photo-maker/">Passport Photo Maker</a> on keptlocal crops to the correct size for your country, with a face-alignment guide, entirely on your device — including a 4×6 print sheet with multiple copies.
+</p>
+
+<h2>Reference sizes</h2>
+<table>
+  <thead>
+    <tr><th>Country / Region</th><th>Size</th><th>Pixels at 300 DPI</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>United States (passport &amp; visa)</td><td>2 × 2 in</td><td>600 × 600 px</td></tr>
+    <tr><td>India (passport)</td><td>2 × 2 in</td><td>600 × 600 px</td></tr>
+    <tr><td>United Kingdom</td><td>35 × 45 mm</td><td>413 × 531 px</td></tr>
+    <tr><td>Schengen area visa</td><td>35 × 45 mm</td><td>413 × 531 px</td></tr>
+    <tr><td>Australia</td><td>35 × 45 mm</td><td>413 × 531 px</td></tr>
+    <tr><td>Canada (passport)</td><td>50 × 70 mm</td><td>591 × 827 px</td></tr>
+    <tr><td>China (visa)</td><td>33 × 48 mm</td><td>390 × 567 px</td></tr>
+  </tbody>
+</table>
+<p>
+  These reflect commonly published requirements as of 2026 — always cross-check against your specific passport office's current published specification before a real application, since requirements are occasionally revised.
+</p>
+
+<h2>Why exact dimensions matter more than they seem</h2>
+<p>
+  Passport photo requirements aren't just about overall photo size — they specify head size as a proportion of the frame (commonly a range like 50–69% of the photo's height, depending on the country), eye position within a defined vertical band, and centering tolerances. A photo cropped to the wrong overall dimensions almost always also gets the head-size proportion wrong, since that proportion is calculated against the specific frame size the office expects. This is why "close enough" so often isn't — a photo processed for the wrong country's dimensions, then just resized to the right pixel count, typically has an incorrect head-to-frame ratio even though the file dimensions now look correct.
+</p>
+
+<h2>Beyond size: what else gets checked</h2>
+<p>
+  Size is necessary but not sufficient for acceptance. Passport offices also evaluate:
+</p>
+<ul>
+  <li><strong>Background</strong> — almost universally required to be plain white or light gray, with no shadows, patterns, or other people visible.</li>
+  <li><strong>Lighting</strong> — even, front-facing light with no harsh shadows across the face or cast onto the background.</li>
+  <li><strong>Expression</strong> — neutral expression, mouth closed, both eyes open and clearly visible (most countries prohibit smiling for passport photos specifically, unlike casual portraits).</li>
+  <li><strong>Recency</strong> — most passport offices require a photo taken within the last 6 months, to ensure it reflects current appearance.</li>
+</ul>
+<p>
+  Getting the size and framing right handles the geometric part of the requirement; the rest depends on the actual photo shoot conditions.
+</p>
+
+<h2>Privacy: what happens to your photo</h2>
+<p>
+  Cropping, the alignment guide, and the print sheet all run on the Canvas API in your browser — your photo is never uploaded, which matters specifically for a photo intended for an identity document.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Make a passport photo now with <a href="/tools/passport-photo-maker/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Passport Photo Maker</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,52 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import PassportPhotoMaker from "../../components/tools/PassportPhotoMaker.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "passport-photo-maker")!;
+---
+
+<ToolLayout tool={tool}>
+  <PassportPhotoMaker slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to make a passport photo</h2>
+    <ol>
+      <li>Upload a clear, front-facing photo — good lighting, plain background, neutral expression.</li>
+      <li>Pick your country's size: US/India (2×2 in), UK/Schengen/Australia (35×45mm), Canada (50×70mm), or China (33×48mm).</li>
+      <li>Use the face-alignment guide (the oval and eye-line) to check your face is centered and correctly sized — adjust zoom and pan until it lines up.</li>
+      <li>Click <strong>Download photo</strong> for a single print-ready file, or <strong>Download 4×6 print sheet</strong> for multiple copies laid out on one standard photo-print sheet.</li>
+    </ol>
+    <p>
+      Every output is generated at 300 DPI — the standard resolution photo printers and print shops expect for sharp results at passport-photo scale.
+    </p>
+
+    <h2>What this tool does and doesn't guarantee</h2>
+    <p>
+      This tool handles the geometry — exact dimensions, correct aspect ratio, a visual guide for face position and size. It does not verify your photo against the full list of official requirements passport and visa offices actually check: background color (usually plain white or off-white), lighting (no shadows on the face or background), expression (neutral, mouth closed, eyes open), no glasses glare or tinted lenses, and photo recency (most offices require a photo taken within the last 6 months). Getting the size right is necessary but not sufficient — check your destination country's full photo requirements before submitting, especially for a passport application where a rejected photo means a delay.
+    </p>
+
+    <h2>Why the guide is a guide, not an automatic check</h2>
+    <p>
+      The oval and eye-line overlay is a visual reference, not a face-detection system — it doesn't scan your photo or verify anything automatically. You position and zoom the photo until your face roughly matches the guide's proportions: eyes near the horizontal line, face filling most of the oval without touching its edges. Most official passport photo specs describe head size as a percentage of the photo height (commonly 50-70% depending on the country) — the guide is sized to approximate a reasonable middle of that range, which covers most country requirements without being tuned to one specific country's exact numbers.
+    </p>
+
+    <h2>The 4×6 print sheet</h2>
+    <p>
+      Passport-sized prints are a niche request most consumer photo printers and pharmacy print kiosks don't offer directly — they're built around standard sizes like 4×6 inches. The print sheet option tiles as many copies of your passport photo as fit onto a single 4×6 sheet (the exact count depends on your chosen size — the US 2×2in preset fits 6 copies per sheet), so you can print through any ordinary photo printing service instead of a specialty passport-photo counter, and get multiple usable copies from one print.
+    </p>
+
+    <h2>Understanding the sizes</h2>
+    <ul>
+      <li><strong>US / India — 2×2 inches</strong> (600×600px at 300 DPI): both countries specify the same physical photo size, with head-size and background requirements that differ slightly between them.</li>
+      <li><strong>UK / Schengen area / Australia — 35×45mm</strong>: this size is shared across a wide range of European and Commonwealth passport and visa applications.</li>
+      <li><strong>Canada — 50×70mm</strong>: notably larger than the UK/Schengen size, with its own specific head-size proportions.</li>
+      <li><strong>China visa — 33×48mm</strong>: a size specific to Chinese visa applications, distinct from the other presets here.</li>
+    </ul>
+
+    <h2>Privacy: what happens to your photo</h2>
+    <p>
+      Every step — cropping, the alignment guide, building the print sheet — runs on the Canvas API in your browser. Your photo is never uploaded. This matters more than usual for a tool handling a photo meant for an identity document: open DevTools → Network while using the tool and you'll see no outbound requests at any point.
+    </p>
+  </Fragment>
+</ToolLayout>

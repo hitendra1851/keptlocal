@@ -1,0 +1,260 @@
+---
+---
+
+<div id="passport-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 0c-4 0-7 2-7 5v1h14v-1c0-3-3-5-7-5z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop a photo here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">A clear, front-facing photo works best. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div id="preset-grid" class="grid grid-cols-2 gap-2"></div>
+
+    <div class="rounded-lg border border-[var(--color-rule)] overflow-hidden bg-[var(--color-paper-dark)] flex items-center justify-center p-2 relative" style="min-height:280px">
+      <canvas id="preview-canvas" class="max-w-full" style="max-height:340px"></canvas>
+    </div>
+    <p id="dims-label" class="text-xs text-[var(--color-ink-muted)] text-center"></p>
+
+    <div class="flex items-center gap-3">
+      <label class="text-xs text-[var(--color-ink-muted)] w-16 shrink-0">Zoom</label>
+      <input type="range" id="zoom-slider" min="100" max="250" value="100" step="1" class="w-full accent-[var(--color-accent)]" />
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div class="flex items-center gap-3">
+        <label class="text-xs text-[var(--color-ink-muted)] w-16 shrink-0">Pan X</label>
+        <input type="range" id="pan-x-slider" min="-100" max="100" value="0" step="1" class="w-full accent-[var(--color-accent)]" />
+      </div>
+      <div class="flex items-center gap-3">
+        <label class="text-xs text-[var(--color-ink-muted)] w-16 shrink-0">Pan Y</label>
+        <input type="range" id="pan-y-slider" min="-100" max="100" value="0" step="1" class="w-full accent-[var(--color-accent)]" />
+      </div>
+    </div>
+    <label class="flex items-center gap-2 cursor-pointer text-sm text-[var(--color-ink-soft)]">
+      <input type="checkbox" id="guide-toggle" checked class="accent-[var(--color-accent)] w-3.5 h-3.5 cursor-pointer" />
+      Show face-alignment guide
+    </label>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload a photo to get started.</div>
+    <div class="flex gap-2 flex-wrap justify-end">
+      <button type="button" id="sheet-btn" class="btn-secondary" disabled>Download 4×6 print sheet</button>
+      <button type="button" id="download-btn" class="btn-primary" disabled>Download photo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const MM_PER_IN = 25.4;
+  const DPI = 300;
+  const mm = (v: number) => Math.round((v / MM_PER_IN) * DPI);
+  const inch = (v: number) => Math.round(v * DPI);
+
+  const PRESETS = [
+    { label: "US / India Passport", sub: "2×2 in", w: inch(2), h: inch(2) },
+    { label: "UK / Schengen / AU", sub: "35×45mm", w: mm(35), h: mm(45) },
+    { label: "Canada Passport", sub: "50×70mm", w: mm(50), h: mm(70) },
+    { label: "China Visa", sub: "33×48mm", w: mm(33), h: mm(48) },
+  ];
+
+  let img: HTMLImageElement | null = null;
+  let fileName = "photo";
+  let activePreset = PRESETS[0];
+  const canvas = document.getElementById("preview-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  const setStatus = (msg: string, err = false) => {
+    $("status-msg").textContent = msg;
+    ($("status-msg") as HTMLElement).style.color = err ? "var(--color-warn)" : "";
+  };
+
+  const renderPresets = () => {
+    const grid = $("preset-grid");
+    grid.innerHTML = "";
+    PRESETS.forEach((p) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "preset-btn text-left px-3 py-2 rounded-lg border text-xs transition-colors";
+      btn.innerHTML = `<div class="font-medium text-[var(--color-ink)]">${p.label}</div><div class="text-[var(--color-ink-muted)]">${p.sub}</div>`;
+      btn.addEventListener("click", () => { activePreset = p; stylePresets(); resetPanZoom(); draw(); });
+      grid.appendChild(btn);
+    });
+    stylePresets();
+  };
+  const stylePresets = () => {
+    Array.from($("preset-grid").children).forEach((el, i) => {
+      const active = PRESETS[i] === activePreset;
+      el.classList.toggle("border-[var(--color-accent)]", active);
+      el.classList.toggle("bg-[var(--color-accent-tint)]", active);
+      el.classList.toggle("border-[var(--color-rule)]", !active);
+    });
+  };
+
+  const resetPanZoom = () => {
+    (($("zoom-slider") as HTMLInputElement).value = "100");
+    (($("pan-x-slider") as HTMLInputElement).value = "0");
+    (($("pan-y-slider") as HTMLInputElement).value = "0");
+  };
+
+  // Renders the crop: base "cover" fit to the target ratio, then user zoom/pan on top.
+  const draw = () => {
+    if (!img) return;
+    const { w: tw, h: th } = activePreset;
+    canvas.width = tw;
+    canvas.height = th;
+
+    const targetRatio = tw / th;
+    const srcRatio = img.naturalWidth / img.naturalHeight;
+    let baseW, baseH;
+    if (srcRatio > targetRatio) { baseH = img.naturalHeight; baseW = baseH * targetRatio; }
+    else { baseW = img.naturalWidth; baseH = baseW / targetRatio; }
+
+    const zoom = parseInt(($("zoom-slider") as HTMLInputElement).value) / 100;
+    const panX = parseInt(($("pan-x-slider") as HTMLInputElement).value) / 100;
+    const panY = parseInt(($("pan-y-slider") as HTMLInputElement).value) / 100;
+
+    const cropW = baseW / zoom;
+    const cropH = baseH / zoom;
+    const maxOffX = (img.naturalWidth - cropW) / 2;
+    const maxOffY = (img.naturalHeight - cropH) / 2;
+    const centerX = img.naturalWidth / 2 + panX * maxOffX;
+    const centerY = img.naturalHeight / 2 + panY * maxOffY;
+    const sx = Math.max(0, Math.min(img.naturalWidth - cropW, centerX - cropW / 2));
+    const sy = Math.max(0, Math.min(img.naturalHeight - cropH, centerY - cropH / 2));
+
+    ctx.clearRect(0, 0, tw, th);
+    ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, tw, th);
+
+    if ((document.getElementById("guide-toggle") as HTMLInputElement).checked) {
+      ctx.save();
+      ctx.strokeStyle = "rgba(220,60,60,0.85)";
+      ctx.lineWidth = Math.max(1, tw * 0.006);
+      ctx.beginPath();
+      ctx.ellipse(tw / 2, th * 0.46, tw * 0.28, th * 0.36, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([tw * 0.02, tw * 0.02]);
+      ctx.beginPath();
+      ctx.moveTo(0, th * 0.4);
+      ctx.lineTo(tw, th * 0.4);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    $("dims-label").textContent = `${activePreset.label} (${activePreset.sub}) — ${tw}×${th}px @ 300 DPI`;
+  };
+
+  const loadFile = (file: File) => {
+    if (!file.type.startsWith("image/")) { setStatus("Please choose an image file.", true); return; }
+    fileName = file.name.replace(/\.[^.]+$/, "");
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      img = image;
+      $("empty-state").classList.add("hidden");
+      $("controls").classList.remove("hidden");
+      (document.getElementById("download-btn") as HTMLButtonElement).disabled = false;
+      (document.getElementById("sheet-btn") as HTMLButtonElement).disabled = false;
+      setStatus("Align your face to the guide, then download.");
+      renderPresets();
+      resetPanZoom();
+      draw();
+    };
+    image.onerror = () => setStatus("Could not read that image file.", true);
+    image.src = url;
+  };
+
+  $("browse-btn").addEventListener("click", () => ($("file-input") as HTMLInputElement).click());
+  $("file-input").addEventListener("change", (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f) loadFile(f);
+    (e.target as HTMLInputElement).value = "";
+  });
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e: DragEvent) => { const f = e.dataTransfer?.files[0]; if (f) loadFile(f); });
+  dz.addEventListener("click", (e) => { if (e.target === dz || e.target === $("empty-state")) ($("file-input") as HTMLInputElement).click(); });
+
+  ["zoom-slider", "pan-x-slider", "pan-y-slider", "guide-toggle"].forEach((id) => $(id).addEventListener("input", draw));
+
+  $("download-btn").addEventListener("click", () => {
+    // Redraw once without the guide overlay for the actual output.
+    const guideEl = document.getElementById("guide-toggle") as HTMLInputElement;
+    const wasChecked = guideEl.checked;
+    guideEl.checked = false;
+    draw();
+    canvas.toBlob((blob) => {
+      guideEl.checked = wasChecked;
+      draw();
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${fileName}-passport-photo.jpg`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Downloaded.");
+    }, "image/jpeg", 0.95);
+  });
+
+  $("sheet-btn").addEventListener("click", () => {
+    if (!img) return;
+    const guideEl = document.getElementById("guide-toggle") as HTMLInputElement;
+    const wasChecked = guideEl.checked;
+    guideEl.checked = false;
+    draw();
+
+    const photoW = canvas.width, photoH = canvas.height;
+    const sheetW = inch(4), sheetH = inch(6); // 4x6in portrait sheet, standard photo-print size
+
+    // Pack photos edge-to-edge (matches real passport-photo print templates,
+    // which tile borderless so e.g. 2x2in photos fill a 4x6 sheet exactly
+    // 2x3 = 6-up with no wasted space), then center any leftover as margin.
+    const cols = Math.max(1, Math.floor(sheetW / photoW));
+    const rows = Math.max(1, Math.floor(sheetH / photoH));
+
+    const sheet = document.createElement("canvas");
+    sheet.width = sheetW; sheet.height = sheetH;
+    const sctx = sheet.getContext("2d")!;
+    sctx.fillStyle = "#ffffff";
+    sctx.fillRect(0, 0, sheetW, sheetH);
+
+    const totalW = cols * photoW;
+    const totalH = rows * photoH;
+    const startX = (sheetW - totalW) / 2;
+    const startY = (sheetH - totalH) / 2;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = startX + c * photoW;
+        const y = startY + r * photoH;
+        sctx.drawImage(canvas, x, y, photoW, photoH);
+        sctx.strokeStyle = "#cccccc";
+        sctx.lineWidth = 1;
+        sctx.strokeRect(x, y, photoW, photoH); // thin cut-guide, drawn on the shared boundary
+      }
+    }
+
+    guideEl.checked = wasChecked;
+    draw();
+
+    sheet.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${fileName}-print-sheet.jpg`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      setStatus(`Downloaded a 4×6 sheet with ${cols * rows} copies.`);
+    }, "image/jpeg", 0.95);
+  });
+</script>

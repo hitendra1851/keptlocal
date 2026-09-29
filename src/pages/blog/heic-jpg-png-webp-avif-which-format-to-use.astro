@@ -1,0 +1,64 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="HEIC, JPG, PNG, WebP, AVIF: Which Image Format to Use"
+  description="A practical comparison of five common image formats — compression, transparency support, browser compatibility, and when each one is actually the right choice."
+  publishDate="2026-11-23"
+  readTime={5}
+  tags={["Image"]}
+  toolSlug="convert-image"
+  toolName="Convert Image"
+  toolTagline="Convert between HEIC, JPG, PNG, and WebP — free, in your browser."
+  faqs={[
+    { q: "Why can't I open HEIC photos on some devices?", a: "HEIC is Apple's default photo format on iPhone since 2017, but support outside Apple's ecosystem is inconsistent — many Windows apps, older Android devices, and some web upload forms don't accept it. Converting to JPG solves compatibility instantly, at a modest quality/size cost." },
+    { q: "Should I use WebP or JPG for my website?", a: "WebP, in most cases — it produces smaller files than JPG at equivalent visual quality, and browser support is now near-universal. The main reason to stick with JPG is compatibility with older tools in your workflow (some image editors and older CMS platforms still handle JPG more reliably) or specific requirements from a platform that expects it." },
+    { q: "Does PNG always look better than JPG?", a: "Not necessarily — PNG's advantage is lossless compression and transparency support, not inherently higher quality for every image type. For photos with complex color and gradients, a high-quality JPG often looks visually identical to PNG at a fraction of the file size. PNG's real advantages show up specifically for images with transparency, sharp edges, flat colors, or text (screenshots, logos, diagrams)." },
+    { q: "Is AVIF worth switching to?", a: "For file size, yes — AVIF typically beats both JPG and WebP at equivalent quality, sometimes substantially. The tradeoff is compatibility: AVIF support is newer and less universal than WebP's, and encoding is slower. For a website's primary images where every byte of load time matters, it's increasingly worth adopting (often with a fallback format for older browsers)." },
+    { q: "Can converting between formats reduce image quality?", a: "Converting to a lossless format (PNG) from another lossless source doesn't lose quality. Converting to or between lossy formats (JPG, most WebP/AVIF settings) does involve some quality loss, though modern lossy formats at reasonable quality settings are very close to visually lossless for most photos." },
+  ]}
+>
+
+<p class="lead">
+  Every image format is a different tradeoff between file size, quality, and compatibility — there's no single "best" one. Here's what each of the five formats you'll actually encounter is good at.
+</p>
+
+<h2>Convert between formats in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/convert-image/">Convert Image tool</a> on keptlocal converts between HEIC, JPG, PNG, WebP, and AVIF, entirely on your device — including batch conversion for multiple files at once.
+</p>
+
+<h2>The five formats, compared</h2>
+<ul>
+  <li><strong>HEIC</strong> — Apple's default photo format since iOS 11 (2017). Genuinely efficient (roughly half the file size of an equivalent-quality JPG), but compatibility outside Apple's ecosystem is inconsistent — many Windows programs, older Android phones, and web forms reject or mishandle it. The most common reason to convert away from it is simply getting a photo to open somewhere that doesn't support it.</li>
+  <li><strong>JPG (JPEG)</strong> — the oldest and most universally compatible lossy format. Every device, browser, and image tool built in the last three decades handles JPG. No transparency support. The safe default when compatibility matters more than squeezing out the smallest possible file size.</li>
+  <li><strong>PNG</strong> — lossless compression, meaning no quality is lost from encoding, plus full transparency (alpha channel) support. Excellent for screenshots, logos, diagrams, and anything with sharp edges or flat color areas, where JPG's compression artifacts show up as visible fuzziness around edges. Poor choice for complex photos, where lossless compression produces much larger files than a visually similar JPG.</li>
+  <li><strong>WebP</strong> — Google's modern successor to both JPG and PNG, supporting both lossy and lossless compression plus transparency in one format. At equivalent visual quality, WebP files are typically 25–35% smaller than JPG. Browser support is now near-universal across modern browsers, making it a solid default for web images today.</li>
+  <li><strong>AVIF</strong> — the newest of the five, based on the AV1 video codec's compression technology. Generally the smallest files of any format here at equivalent quality — often beating even WebP by a meaningful margin. The tradeoff is newer, slightly less universal support and slower encoding time, which matters for very large batch-processing workflows but rarely for a single image.</li>
+</ul>
+
+<h2>Quick recommendations by use case</h2>
+<ul>
+  <li><strong>Sharing an iPhone photo with someone who can't open it</strong> → convert HEIC to JPG.</li>
+  <li><strong>A website's primary photography</strong> → WebP (or AVIF if your platform and audience's browsers support it well).</li>
+  <li><strong>A screenshot, logo, or diagram</strong> → PNG, for the lossless edges and optional transparency.</li>
+  <li><strong>Email attachment or maximum compatibility with old software</strong> → JPG.</li>
+  <li><strong>Smallest possible file size, modern audience</strong> → AVIF.</li>
+</ul>
+
+<h2>Lossy vs. lossless, briefly</h2>
+<p>
+  JPG, and most typical WebP/AVIF settings, are lossy — they discard some image detail permanently in exchange for smaller files, calibrated so the loss is minimally visible at reasonable quality settings. PNG, and WebP/AVIF used in their lossless modes, preserve every original pixel exactly, at the cost of larger files for anything but simple, flat-color images. Converting from a lossy format to another lossy format compounds quality loss slightly with each conversion — for the best result, always convert from the original or highest-quality source available, not from an already-compressed copy.
+</p>
+
+<h2>Privacy: what happens to your images</h2>
+<p>
+  Every conversion runs locally using the Canvas API (and heic2any specifically for HEIC input) — images are never uploaded.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert an image now with <a href="/tools/convert-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Convert Image tool</a> — no upload, no signup. Need to shrink the file size too? Try <a href="/tools/compress-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Compress Image</a>.
+</p>
+
+</BlogLayout>

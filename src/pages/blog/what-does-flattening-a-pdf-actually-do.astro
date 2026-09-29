@@ -1,0 +1,67 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="What Does Flattening a PDF Actually Do?"
+  description="Flattening converts editable form fields and annotations into fixed page content. Here's what changes, what's lost, and when you actually need it."
+  publishDate="2026-11-27"
+  readTime={3}
+  tags={["PDF"]}
+  toolSlug="flatten-pdf"
+  toolName="Flatten PDF"
+  toolTagline="Lock form fields and annotations into permanent page content — free, in your browser."
+  faqs={[
+    { q: "Can I un-flatten a PDF afterward?", a: "No — flattening isn't reversible. Once form fields and annotations are baked into fixed page content, there's no way to recover them as separate editable elements. Always keep the original, unflattened file if you might need to edit it again later." },
+    { q: "Does flattening reduce a PDF's file size?", a: "Sometimes modestly, since form field definitions and interactive annotation objects carry some overhead that fixed page content doesn't — but size reduction isn't the primary purpose, and the difference is usually small." },
+    { q: "Will a flattened PDF still look the same when opened?", a: "Yes — visually, a flattened PDF looks identical to the filled-in original. The difference is entirely about what's editable, not what's displayed." },
+    { q: "What's the difference between flattening and just saving a filled form normally?", a: "A normally saved filled form still contains live, editable form fields — anyone opening it in a PDF editor can change the values. Flattening specifically converts those live fields into fixed content, removing that editability." },
+    { q: "Should I flatten every PDF I fill out?", a: "Not necessarily — only when you want to lock in the values as final. If you or someone else might legitimately need to go back and change an answer later, keep an unflattened copy." },
+  ]}
+>
+
+<p class="lead">
+  "Flatten this PDF" is common instruction in form-filling and document workflows, and it's not always obvious what it actually changes. The short version: it converts something editable into something fixed.
+</p>
+
+<h2>Flatten a PDF in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/flatten-pdf/">Flatten PDF tool</a> on keptlocal locks form fields — and optionally annotations — into permanent page content, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Form fields are always flattened; choose whether to also flatten annotations (comments, highlights, drawn markup).</li>
+  <li>Download the result.</li>
+</ol>
+
+<h2>What "flattening" means</h2>
+<p>
+  A PDF form field — a text box, checkbox, dropdown — is a distinct object layered on top of the page, separate from the page's underlying content. That's what makes it editable: a PDF viewer renders the field, but the value you typed lives in the field object, not baked into the page itself. Flattening takes whatever value is currently in each field and permanently merges it into the page's fixed content — the same way any other text or graphic on the page is rendered. After flattening, there's no field object anymore, just content that looks the same but can't be edited through the form interface, because the form interface no longer exists.
+</p>
+<p>
+  The same idea applies to annotations — comments, highlights, sticky notes, drawn markup added in a PDF viewer. These also exist as separate, editable layers by default; flattening merges them into the page too.
+</p>
+
+<h2>Why this matters</h2>
+<p>
+  An unflattened, filled-in form is still technically a blank form with values sitting in its fields. Anyone who opens it in a PDF editor can change those values without any visible indication that they've been altered — which is fine for an internal draft, but a real problem for anything meant to be a fixed record of what was submitted: a signed application, a declaration, a form with legal or contractual weight. Flattening converts the filled values into the same kind of fixed content as any other text on the page, so what was submitted is what stays submitted.
+</p>
+<p>
+  It's also useful more narrowly: some systems and printers handle flattened PDFs more predictably than ones with live interactive elements, since there's no interactive layer for the rendering software to reconcile.
+</p>
+
+<h2>The tradeoff: it's not reversible</h2>
+<p>
+  Once flattened, the form fields are gone — you can't go back and edit a single answer without starting over from an unflattened copy. If there's any chance you or someone else will need to revise an answer later, keep the original unflattened file alongside the flattened one you actually submit or distribute.
+</p>
+
+<h2>Privacy: what happens to your file</h2>
+<p>
+  Flattening runs entirely in your browser using pdf-lib — your document is never uploaded.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Flatten a PDF now with <a href="/tools/flatten-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Flatten PDF tool</a> — no upload, no signup. Filling out a form first? Try <a href="/tools/fill-pdf-form/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Fill PDF Form</a>.
+</p>
+
+</BlogLayout>

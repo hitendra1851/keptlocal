@@ -1,0 +1,61 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Remove Margins from a PDF"
+  description="Trim excess white space from every page of a PDF, free and without uploading the file — useful for scans, slide exports, and printing without waste."
+  publishDate="2026-12-01"
+  readTime={3}
+  tags={["PDF"]}
+  toolSlug="crop-pdf"
+  toolName="Crop PDF"
+  toolTagline="Remove margins from every page — free, in your browser."
+  faqs={[
+    { q: "Does cropping delete content, or just hide it?", a: "Cropping in this tool changes the page's visible boundary (its crop box) — content outside that boundary is no longer displayed or printed, functionally equivalent to removing it for any practical purpose, though the underlying data may still exist in the file structure depending on the PDF viewer's handling." },
+    { q: "Can I crop different amounts from different sides?", a: "Yes — margins can typically be set independently for top, bottom, left, and right, rather than a single uniform crop applied to all four sides." },
+    { q: "Will cropping affect text selection or searchability?", a: "No — cropping only changes what's visible within the page boundary. Any text that remains within the cropped area stays selectable and searchable exactly as before." },
+    { q: "Is this the same as trimming a PDF's page size?", a: "Effectively yes for display and printing purposes — cropping adjusts the visible page boundary, which changes the effective page dimensions without needing to resize or re-render the underlying content." },
+    { q: "Can I undo a crop if I get it wrong?", a: "Not within the tool itself — re-upload your original (uncropped) file and crop again with different settings. Keep your original file until you're satisfied with the result." },
+  ]}
+>
+
+<p class="lead">
+  Wide margins around scanned pages, exported slides with excess white space, or a PDF designed for a paper size larger than needed — all waste screen space and printer ink for content that isn't actually there. Removing the margins fixes it without touching the actual content.
+</p>
+
+<h2>Crop margins in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/crop-pdf/">Crop PDF tool</a> on keptlocal removes margins from every page of a document, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Set the margin amount to remove — uniformly or per side.</li>
+  <li>Download the cropped result.</li>
+</ol>
+<p>
+  The crop applies to the entire document in one pass, so a multi-page PDF with consistent margins throughout gets cleaned up without needing to process each page individually.
+</p>
+
+<h2>Common reasons a PDF has excess margins</h2>
+<ul>
+  <li><strong>Scans</strong> — a physical document scanned on a flatbed scanner often includes extra white space around the actual page content, from imprecise placement on the scanner bed.</li>
+  <li><strong>Slide or presentation exports</strong> — exporting slides to PDF sometimes adds letterboxing or margin space to fit a fixed page size that doesn't match the slide's actual aspect ratio.</li>
+  <li><strong>Print-oriented page sizes</strong> — a document formatted for a specific paper size (Letter or A4) but with content that only fills a portion of it, common in documents originally designed for print with generous margins that don't serve any purpose on screen.</li>
+</ul>
+
+<h2>What actually changes when you crop</h2>
+<p>
+  Cropping adjusts a PDF page's crop box — the boundary that determines what's actually visible and printed — without touching the underlying content stream. Anything within the new, smaller boundary displays and prints exactly as before, fully selectable and searchable if it was before; anything outside the new boundary is no longer shown. This is different from re-rendering or resizing the page's content, which is why cropping is fast and doesn't introduce any quality loss — no pixels are recompressed, no text is reflowed, only the visible window onto the page changes.
+</p>
+
+<h2>Privacy: what happens to your file</h2>
+<p>
+  Cropping runs entirely in your browser using pdf-lib — your document is never uploaded.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Crop a PDF now with <a href="/tools/crop-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Crop PDF tool</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,71 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Watermark a PDF for Free"
+  description="Stamp a diagonal text watermark — CONFIDENTIAL, DRAFT, your company name — across every page of a PDF, free and without uploading the file."
+  publishDate="2026-10-02"
+  readTime={4}
+  tags={["PDF"]}
+  toolSlug="watermark-pdf"
+  toolName="Watermark PDF"
+  toolTagline="Stamp text across every page — free, in your browser."
+  faqs={[
+    { q: "Can I use my own logo as an image watermark instead of text?", a: "Not with this tool — it applies a text watermark only, in a choice of gray, red, blue, or black. If you need an image or logo placed onto a PDF (not necessarily as a translucent watermark), keptlocal's Add Image to PDF tool handles that." },
+    { q: "Does the watermark apply to every page automatically?", a: "Yes. The current tool applies the watermark to all pages of the document in one pass; there isn't a page-range selector for watermarking specific pages only." },
+    { q: "Can I remove the watermark later?", a: "The watermark is drawn as permanent page content, the same way any other text on the page is rendered — it isn't a removable annotation layer. To produce both a watermarked and clean copy, keep the original file and only watermark a copy." },
+    { q: "Will the watermark show up when the PDF is printed?", a: "Yes — it's part of the page content, so it prints exactly as it displays on screen, at whatever opacity you chose." },
+    { q: "What opacity should I use?", a: "25% (the default) is legible as a mark without seriously interfering with reading the underlying text. Go lower (10–15%) for a subtle background mark on documents meant to be read normally; go higher (35–50%) when the point is to make the watermark hard to miss, such as marking a document clearly as a draft or sample." },
+  ]}
+>
+
+<p class="lead">
+  Marking a document DRAFT, CONFIDENTIAL, or with your company name before sharing it is one of the fastest ways to prevent a document from being mistaken for something it isn't — a work-in-progress treated as final, or an internal document treated as approved for external use.
+</p>
+
+<h2>Watermark it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/watermark-pdf/">Watermark PDF tool</a> on keptlocal stamps text diagonally across every page, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Type the watermark text — up to 40 characters. "CONFIDENTIAL" is the default.</li>
+  <li>Pick a colour: gray, red, blue, or black.</li>
+  <li>Pick a size: small, medium, or large.</li>
+  <li>Adjust opacity with the slider — 10% (subtle) to 50% (bold).</li>
+  <li>Click <strong>Apply &amp; download</strong>.</li>
+</ol>
+<p>
+  The text is drawn at a 45° angle across the center of every page, scaled proportionally to the page size so it looks consistent whether the document is A4, Letter, or a custom size.
+</p>
+
+<h2>When a watermark is (and isn't) the right tool</h2>
+<p>
+  A visible text watermark is a communication device, not a security control — it makes a document's status obvious to anyone reading it, but it doesn't prevent someone from cropping, editing, or redistributing the file. Common, well-suited uses:
+</p>
+<ul>
+  <li><strong>Marking drafts</strong> so a work-in-progress document is never mistaken for the final version if it's shared before review is complete.</li>
+  <li><strong>Confidentiality notices</strong> on internal documents being shared with a limited audience — a visible reminder not to forward or publish.</li>
+  <li><strong>Sample or preview marking</strong> — publishers and stock content providers watermark previews so the full, clean version stays valuable.</li>
+  <li><strong>Attribution</strong> — stamping a company name or source across pages of a report being distributed publicly.</li>
+</ul>
+<p>
+  If you actually need to prevent unauthorized copying or opening, that's a different problem — see keptlocal's <a href="/tools/protect-pdf/">Protect PDF</a> tool, which adds real AES-256 password encryption rather than a visible mark.
+</p>
+
+<h2>Choosing color and opacity</h2>
+<p>
+  Gray at 20–25% opacity is the most common choice for a professional document — visible without competing with the body text for attention. Red at higher opacity (35%+) reads as more urgent, which suits "DRAFT" or "DO NOT DISTRIBUTE" marks where the goal is to be impossible to miss. Blue and black sit between the two, useful when a document's existing color scheme makes gray or red clash visually.
+</p>
+
+<h2>Privacy: what happens to your file</h2>
+<p>
+  The watermark is applied entirely in your browser using pdf-lib, a JavaScript PDF library — your file is never uploaded. Open DevTools → Network while watermarking and you'll see no outbound requests. This matters for anything marked "CONFIDENTIAL" in particular: sending a confidential document to a third-party server just to add a confidentiality stamp is a bit self-defeating.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Watermark a PDF now with <a href="/tools/watermark-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Watermark PDF tool</a> — no upload, no signup. Need real encryption instead? Try <a href="/tools/protect-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Protect PDF</a>.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,64 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="MD5 vs. SHA-256: Which Hash Should You Use?"
+  description="A practical comparison of MD5, SHA-1, and SHA-256 — what each is still good for, what broke, and which one to reach for by default in 2026."
+  publishDate="2026-10-11"
+  readTime={4}
+  tags={["Utility", "Developer"]}
+  toolSlug="hash-generator"
+  toolName="Hash Generator"
+  toolTagline="Generate MD5, SHA-1, SHA-256, SHA-384, and SHA-512 hashes — free, in your browser."
+  faqs={[
+    { q: "Is MD5 completely useless now?", a: "No — it's useless against a deliberate adversary trying to forge a matching file, but it's still fine for accidental-corruption checks, deduplication, and matching against legacy systems that only support MD5. The distinction is adversarial vs. non-adversarial use." },
+    { q: "What actually broke in MD5 and SHA-1?", a: "Researchers found practical methods to construct two different inputs that hash to the same output (a \"collision\") — for MD5 in 2004, for SHA-1 in a 2017 demonstration by Google and CWI Amsterdam. That means someone can deliberately craft a malicious file with the same hash as a legitimate one, undermining any use case where the hash is meant to prove authenticity against an attacker." },
+    { q: "Is SHA-256 itself guaranteed safe forever?", a: "No hash function is proven unbreakable — only unbroken so far, given current cryptanalysis. SHA-256 has no known practical collision attack as of 2026 and is part of the well-studied SHA-2 family, which is why it's the current safe default. Cryptographic best practice is to plan for eventual migration, not assume permanence." },
+    { q: "Should I use SHA-256 for hashing passwords?", a: "No — use bcrypt, scrypt, or Argon2 instead. SHA-256 is fast by design, which is good for checksums and bad for password storage, since speed is exactly what makes brute-forcing a stolen password database cheap." },
+    { q: "What about SHA-3?", a: "SHA-3, standardized in 2015, uses a different internal structure (Keccak) than SHA-1/SHA-2 as a hedge against any future attack that might affect the whole SHA-2 family. It's not in widespread default use yet, and SHA-256 remains the practical default for most applications in 2026." },
+  ]}
+>
+
+<p class="lead">
+  "Just use a hash" is common advice that skips the actual question: which one, and why. The answer depends entirely on whether you're defending against an adversary or just checking for accidental corruption — and conflating the two is how outdated hash choices end up in places they shouldn't be.
+</p>
+
+<h2>Generate any of them in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/hash-generator/">Hash Generator</a> on keptlocal computes MD5, SHA-1, SHA-256, SHA-384, and SHA-512 simultaneously as you type, entirely in your browser.
+</p>
+
+<h2>The short answer</h2>
+<p>
+  Default to <strong>SHA-256</strong> unless you have a specific reason not to. It's fast, universally supported, has no known practical collision weakness, and is what most modern systems (Git's newer object format, TLS certificates, package manager checksums) have standardized on. The rest of this comes down to when the older algorithms are still legitimately fine to use.
+</p>
+
+<h2>What "broken" actually means here</h2>
+<p>
+  Both MD5 and SHA-1 are broken in a specific, technical sense: researchers demonstrated practical methods to construct two different files that produce the identical hash — a "collision." That capability matters enormously if a hash is being used to prove a file hasn't been tampered with by someone who might want to trick you (a malicious download disguised as a legitimate one, a forged digital signature). It matters far less if you're just checking whether a file got corrupted during an ordinary transfer, or deduplicating files in your own storage — nobody is trying to deliberately engineer a matching hash in that scenario.
+</p>
+
+<h2>When each one still makes sense</h2>
+<ul>
+  <li><strong>MD5</strong> — legacy checksum verification (older software mirrors still publish MD5 sums), quick internal deduplication, matching against systems that only accept MD5. Never for anything where a malicious actor might try to forge a match.</li>
+  <li><strong>SHA-1</strong> — largely superseded, though still present internally in older Git repositories. New projects should not choose it deliberately.</li>
+  <li><strong>SHA-256</strong> — the default choice for almost everything in 2026: file integrity checks, package manager lockfiles, TLS certificate fingerprints, Bitcoin's proof-of-work, general application use.</li>
+  <li><strong>SHA-384 / SHA-512</strong> — used where a system specifically calls for a larger digest, often for marginal extra cryptographic headroom; functionally similar to SHA-256 for most practical purposes.</li>
+</ul>
+
+<h2>The one thing none of these should be used for</h2>
+<p>
+  Password storage. This is worth repeating because it's a common and serious mistake: general-purpose hash functions (MD5, SHA-1, SHA-256, and friends) are deliberately fast — designed to hash gigabytes of data quickly. That speed is a liability for password storage specifically, because it makes brute-forcing a stolen password database computationally cheap. Password storage needs a function designed to be slow and resource-intensive on purpose, with built-in per-password salting: bcrypt, scrypt, or Argon2 (the current recommended default). If you're building anything that stores user credentials, this is the one place where "just use SHA-256" is actively bad advice.
+</p>
+
+<h2>Privacy: what happens to your input</h2>
+<p>
+  Every algorithm runs locally — SHA-family hashes through the browser's native Web Crypto API, MD5 through a small local JavaScript implementation. Nothing you type is transmitted anywhere.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Generate any of these hashes now with <a href="/tools/hash-generator/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Hash Generator</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,59 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import FaviconGenerator from "../../components/tools/FaviconGenerator.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "favicon-generator")!;
+---
+
+<ToolLayout tool={tool}>
+  <FaviconGenerator slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to generate a favicon set</h2>
+    <ol>
+      <li>Upload a square (or square-ish) image — a logo mark, an icon, or a simple illustration.</li>
+      <li>Check the size previews to confirm the crop and detail hold up at small sizes.</li>
+      <li>Click <strong>Generate &amp; download .zip</strong>.</li>
+      <li>Unzip and drop the files into your site's root (or wherever your framework serves static assets), then add the provided <code>&lt;link&gt;</code> tags to your <code>&lt;head&gt;</code>.</li>
+    </ol>
+    <p>
+      Every resize happens on an HTML5 canvas in your browser — the image is never uploaded.
+    </p>
+
+    <h2>What's in the download</h2>
+    <ul>
+      <li><strong>favicon.ico</strong> — a single file containing 16×16, 32×32, and 48×48 versions, the classic format browsers have looked for since the 1990s and still fall back to.</li>
+      <li><strong>favicon-16x16.png, favicon-32x32.png, favicon-48x48.png, favicon-64x64.png</strong> — standalone PNGs for browsers and tools that prefer PNG over ICO.</li>
+      <li><strong>apple-touch-icon.png (180×180)</strong> — what iOS looks for specifically when a user adds your site to their home screen.</li>
+      <li><strong>icon-192.png and icon-512.png</strong> — the sizes the Web App Manifest spec expects for Android home-screen icons and PWA install prompts.</li>
+      <li><strong>how-to-use.html</strong> — a plain-text snippet with the exact <code>&lt;link&gt;</code> tags to paste into your site.</li>
+    </ul>
+
+    <h2>Why one image isn't enough</h2>
+    <p>
+      A favicon isn't rendered once and reused — it's requested fresh, at a specific pixel size, by whatever surface is displaying it. A browser tab wants 16×16 or 32×32. A pinned Windows taskbar icon might request something larger. An iPhone home-screen bookmark specifically requests a 180×180 <code>apple-touch-icon</code>, and if it isn't present, iOS falls back to taking a screenshot of your page — which looks worse than almost any icon would. Serving one image and letting the browser scale it produces soft, blurry results at small sizes; generating each size independently, with its own resize pass, keeps edges crisper.
+    </p>
+
+    <h2>Designing an icon that survives being shrunk</h2>
+    <p>
+      Most favicon disappointment comes from the source image, not the resizing. A detailed logo with fine text or subtle gradients looks great at 512px and becomes a gray smudge at 16px. A few things that hold up:
+    </p>
+    <ul>
+      <li><strong>Simple shapes over detailed illustrations.</strong> A single bold letterform, a geometric mark, or a simple icon reads clearly at 16px; a multi-element logo usually doesn't.</li>
+      <li><strong>High contrast.</strong> Favicons sit against light and dark browser chrome depending on the user's theme — strong contrast between the icon and transparent/white background keeps it visible in both.</li>
+      <li><strong>No small text.</strong> Text below roughly 100px in the source image becomes illegible once scaled to 16–32px. If your logo relies on a wordmark, use just the symbol or initial for the favicon instead.</li>
+      <li><strong>Centered, with a little breathing room.</strong> The tool crops to a centered square — if your subject sits off-center or too close to the edge in a non-square source image, it may be clipped.</li>
+    </ul>
+
+    <h2>The ICO format, briefly</h2>
+    <p>
+      A <code>.ico</code> file isn't one image — it's a small container holding several images at different sizes, each tagged with its dimensions, so the requesting browser or OS can pick the closest match rather than scaling a single image up or down. Modern ICO files (and this tool's output) embed standard PNG data for each size, which every current browser and OS supports; older BMP-based encoding is no longer necessary.
+    </p>
+
+    <h2>Privacy: what happens to your image</h2>
+    <p>
+      Your source image never leaves your device — every resize is drawn with the Canvas API, and the final ZIP is assembled locally using JSZip running in your browser tab. Open DevTools → Network while generating and you'll see no upload requests.
+    </p>
+  </Fragment>
+</ToolLayout>

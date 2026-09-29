@@ -1,0 +1,217 @@
+---
+---
+
+<div id="favicon-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/*" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">Square images work best. Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="preview-section" class="hidden px-4 pb-4 space-y-4">
+    <div class="flex items-center gap-3 px-3 py-2.5 bg-[var(--color-paper-dark)] rounded-md">
+      <img id="src-thumb" class="w-10 h-10 rounded object-cover border border-[var(--color-rule)]" alt="Source" />
+      <div class="flex-1 min-w-0">
+        <div id="file-name" class="text-sm text-[var(--color-ink)] truncate"></div>
+        <div id="file-meta" class="text-xs text-[var(--color-ink-muted)]"></div>
+      </div>
+      <button type="button" id="change-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] shrink-0">Change</button>
+    </div>
+
+    <div>
+      <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Preview at size</p>
+      <div id="thumb-row" class="flex items-end gap-4 flex-wrap"></div>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload an image to get started.</div>
+    <button type="button" id="gen-btn" class="btn-primary" disabled>
+      <span id="gen-label">Generate & download .zip</span>
+      <svg id="spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56" /></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  import JSZip from "jszip";
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const SIZES = [16, 32, 48, 64, 180, 192, 512];
+  const ICO_SIZES = [16, 32, 48];
+
+  let srcImage: HTMLImageElement | null = null;
+  let srcFileName = "icon";
+
+  const setStatus = (msg: string, err = false) => {
+    $("status-msg").textContent = msg;
+    ($("status-msg") as HTMLElement).style.color = err ? "var(--color-warn)" : "";
+  };
+
+  // Draws the source image into a centered-square canvas at the target size.
+  const squareCanvasAt = (size: number): HTMLCanvasElement => {
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+    const img = srcImage!;
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx = (img.naturalWidth - side) / 2;
+    const sy = (img.naturalHeight - side) / 2;
+    ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+    return canvas;
+  };
+
+  const canvasToPngBytes = (canvas: HTMLCanvasElement): Promise<Uint8Array> =>
+    new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        blob!.arrayBuffer().then((buf) => resolve(new Uint8Array(buf)));
+      }, "image/png");
+    });
+
+  // Builds a .ico containing PNG-compressed images (supported by every modern OS/browser).
+  const buildIco = (pngs: { size: number; bytes: Uint8Array }[]): Uint8Array => {
+    const headerSize = 6;
+    const dirEntrySize = 16;
+    const dataOffset0 = headerSize + dirEntrySize * pngs.length;
+
+    let totalLen = dataOffset0;
+    for (const p of pngs) totalLen += p.bytes.length;
+
+    const out = new Uint8Array(totalLen);
+    const view = new DataView(out.buffer);
+
+    view.setUint16(0, 0, true);       // reserved
+    view.setUint16(2, 1, true);       // type: icon
+    view.setUint16(4, pngs.length, true);
+
+    let offset = dataOffset0;
+    pngs.forEach((p, i) => {
+      const entryOff = headerSize + i * dirEntrySize;
+      out[entryOff + 0] = p.size >= 256 ? 0 : p.size; // width
+      out[entryOff + 1] = p.size >= 256 ? 0 : p.size; // height
+      out[entryOff + 2] = 0; // color count
+      out[entryOff + 3] = 0; // reserved
+      view.setUint16(entryOff + 4, 1, true);  // color planes
+      view.setUint16(entryOff + 6, 32, true); // bits per pixel
+      view.setUint32(entryOff + 8, p.bytes.length, true);
+      view.setUint32(entryOff + 12, offset, true);
+      out.set(p.bytes, offset);
+      offset += p.bytes.length;
+    });
+
+    return out;
+  };
+
+  const renderThumbs = () => {
+    const row = $("thumb-row");
+    row.innerHTML = "";
+    for (const size of [16, 32, 48, 180]) {
+      const canvas = squareCanvasAt(Math.min(size, 96)); // cap render size for the preview
+      canvas.style.width = `${Math.min(size, 64)}px`;
+      canvas.style.height = `${Math.min(size, 64)}px`;
+      canvas.className = "rounded border border-[var(--color-rule)] bg-white";
+      const wrap = document.createElement("div");
+      wrap.className = "flex flex-col items-center gap-1";
+      wrap.appendChild(canvas);
+      const label = document.createElement("span");
+      label.className = "text-[10px] text-[var(--color-ink-muted)]";
+      label.textContent = `${size}px`;
+      wrap.appendChild(label);
+      row.appendChild(wrap);
+    }
+  };
+
+  const loadFile = (file: File) => {
+    if (!file.type.startsWith("image/")) { setStatus("Please choose an image file.", true); return; }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      srcImage = img;
+      srcFileName = file.name.replace(/\.[^.]+$/, "") || "icon";
+      ($("src-thumb") as HTMLImageElement).src = url;
+      $("file-name").textContent = file.name;
+      $("file-meta").textContent = `${img.naturalWidth}×${img.naturalHeight}px`;
+      $("empty-state").classList.add("hidden");
+      $("preview-section").classList.remove("hidden");
+      (document.getElementById("gen-btn") as HTMLButtonElement).disabled = false;
+      setStatus("Ready — click Generate to build the icon set.");
+      renderThumbs();
+    };
+    img.onerror = () => setStatus("Could not read that image file.", true);
+    img.src = url;
+  };
+
+  $("browse-btn").addEventListener("click", () => ($("file-input") as HTMLInputElement).click());
+  $("change-btn").addEventListener("click", () => ($("file-input") as HTMLInputElement).click());
+  $("file-input").addEventListener("change", (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f) loadFile(f);
+    (e.target as HTMLInputElement).value = "";
+  });
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e: DragEvent) => { const f = e.dataTransfer?.files[0]; if (f) loadFile(f); });
+  dz.addEventListener("click", (e) => { if (e.target === dz || e.target === $("empty-state")) ($("file-input") as HTMLInputElement).click(); });
+
+  $("gen-btn").addEventListener("click", async () => {
+    if (!srcImage) return;
+    const btn = $("gen-btn") as HTMLButtonElement;
+    btn.disabled = true;
+    $("spinner").classList.remove("hidden");
+    $("gen-label").textContent = "Generating…";
+    setStatus("Rendering icon set in your browser…");
+
+    try {
+      const zip = new JSZip();
+      const pngsForIco: { size: number; bytes: Uint8Array }[] = [];
+
+      for (const size of SIZES) {
+        const canvas = squareCanvasAt(size);
+        const bytes = await canvasToPngBytes(canvas);
+        if (ICO_SIZES.includes(size)) pngsForIco.push({ size, bytes });
+
+        const label = size === 180 ? "apple-touch-icon" : size === 192 ? "icon-192" : size === 512 ? "icon-512" : `favicon-${size}x${size}`;
+        zip.file(`${label}.png`, bytes);
+      }
+
+      const icoBytes = buildIco(pngsForIco);
+      zip.file("favicon.ico", icoBytes);
+
+      zip.file(
+        "how-to-use.html",
+        `<!-- Add these to your site's <head> -->\n` +
+        `<link rel="icon" href="/favicon.ico" sizes="any">\n` +
+        `<link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32">\n` +
+        `<link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16">\n` +
+        `<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">\n` +
+        `<link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192">\n`
+      );
+
+      setStatus("Zipping…");
+      const blob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${srcFileName}-favicons.zip`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+
+      setStatus(`Done — favicon.ico plus ${SIZES.length} PNG sizes downloaded.`);
+    } catch (err: any) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not generate the icon set."}`, true);
+    } finally {
+      btn.disabled = false;
+      $("spinner").classList.add("hidden");
+      $("gen-label").textContent = "Generate & download .zip";
+    }
+  });
+</script>

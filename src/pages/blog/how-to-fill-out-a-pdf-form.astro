@@ -1,0 +1,61 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Fill Out a PDF Form Without Printing It"
+  description="Fill in a fillable PDF form's real fields in your browser, then flatten and download — no printing, scanning, or uploading required."
+  publishDate="2026-10-05"
+  readTime={4}
+  tags={["PDF"]}
+  toolSlug="fill-pdf-form"
+  toolName="Fill PDF Form"
+  toolTagline="Fill in real form fields and download — free, in your browser."
+  faqs={[
+    { q: "Does this work on any PDF, or only forms?", a: "Only PDFs that already contain fillable AcroForm fields — text boxes, checkboxes, dropdowns, radio buttons built into the file. If a PDF has no such fields (a scanned paper form, for instance), the tool will say so; it can't detect where blank lines \"should\" go on a non-interactive PDF." },
+    { q: "What does \"flatten after filling\" do, and should I leave it checked?", a: "Flattening converts your filled-in values from editable form fields into permanent page content — the same way text becomes part of the page in any other PDF edit. It's checked by default and recommended for anything you're submitting or sharing, since it prevents the recipient's PDF viewer from letting someone silently change your answers." },
+    { q: "Can I save my progress and finish the form later?", a: "Not directly — the tool doesn't persist state between visits, matching its no-server, nothing-stored design. Download an unflattened copy (uncheck the flatten option) if you need to reopen and continue editing the actual form fields later in another PDF editor." },
+    { q: "What if a field's checkbox or dropdown doesn't match what I expect?", a: "The tool renders each field using the type embedded in the PDF by whoever created the form. If a dropdown's listed options seem wrong or a checkbox behaves oddly, that usually reflects how the original form was built, not a bug in reading it." },
+    { q: "Will my answers be visible if I share the unflattened file?", a: "Yes, and they'll also remain editable by anyone who opens it in a PDF editor. Flatten before sharing if you want the values to be a fixed, visible part of the document rather than a still-editable form." },
+  ]}
+>
+
+<p class="lead">
+  Printing a PDF form, filling it out by hand, scanning it back in, and emailing the scan is still how a surprising number of people complete digital paperwork — largely because they assume that's the only option. If the PDF has real fillable fields (most government, HR, and application forms do), you can fill it out directly and skip printing entirely.
+</p>
+
+<h2>Fill it out in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/fill-pdf-form/">Fill PDF Form tool</a> on keptlocal reads a PDF's actual form fields and lets you fill them in, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF form onto the tool.</li>
+  <li>The tool reads every fillable field — text boxes, checkboxes, dropdowns — and shows them as a clean list.</li>
+  <li>Fill in each field.</li>
+  <li>Leave <strong>Flatten after filling</strong> checked (the default) to lock in your answers, or uncheck it to keep the fields editable.</li>
+  <li>Click <strong>Fill &amp; download PDF</strong>.</li>
+</ol>
+
+<h2>How to tell if a PDF actually has fillable fields</h2>
+<p>
+  Not every PDF that looks like a form has real form fields behind it. A quick way to check before uploading anywhere: open the PDF in a standard viewer and click where you'd expect to type — if a text cursor appears and you can type directly into a bordered box, it has real AcroForm fields. If nothing happens when you click, the "form" is just an image or flat layout with blank lines drawn on it, and there's no field data for any tool (this one included) to read. In that case, the practical options are printing and filling by hand, or using a PDF editor that lets you place free-floating text boxes manually.
+</p>
+
+<h2>Why flattening matters</h2>
+<p>
+  An unflattened, filled-in PDF form is still, technically, a blank form with values sitting in its fields — anyone who opens it in a PDF editor can change those values without any indication that they've been altered. For casual internal use that's rarely a problem. For anything you're submitting as a record of what you attested to — a signed application, a declaration, a form with legal weight — flattening converts your answers into fixed page content, the same as any other text on the page, so what you submitted is what stays submitted.
+</p>
+<p>
+  The tradeoff: once flattened, the fields are gone — you (or anyone else) can't go back and edit just one answer without starting over from an unflattened copy. Keep the original blank form if you might need to fill it out differently later.
+</p>
+
+<h2>Privacy: what happens to your form data</h2>
+<p>
+  Everything — reading the fields, rendering the inputs, writing your answers back into the PDF — happens locally using pdf-lib in your browser tab. Nothing is uploaded. This matters more than usual for forms specifically, since they routinely ask for information you'd rather not send through an unnecessary third-party server: a Social Security number, a medical history question, a salary figure.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Fill out a PDF form now with <a href="/tools/fill-pdf-form/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Fill PDF Form tool</a> — no upload, no signup. Need a signature on it too? Try <a href="/tools/sign-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Sign PDF</a>.
+</p>
+
+</BlogLayout>

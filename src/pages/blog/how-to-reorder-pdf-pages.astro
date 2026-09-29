@@ -1,0 +1,61 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Reorder Pages in a PDF Without Retyping Anything"
+  description="Drag and drop to reorder PDF pages visually, free and without uploading the file — no need to split, rearrange, and re-merge separately."
+  publishDate="2026-10-17"
+  readTime={4}
+  tags={["PDF"]}
+  toolSlug="reorder-pdf"
+  toolName="Reorder PDF Pages"
+  toolTagline="Drag thumbnails to reorder pages — free, in your browser."
+  faqs={[
+    { q: "Do I need to know the page numbers in advance?", a: "No — the tool renders a visual thumbnail of every page, so you're dragging what you can see rather than tracking numbers." },
+    { q: "Can I reorder a very long PDF?", a: "Yes, though rendering thumbnails for a large page count takes a moment longer, since each page has to be drawn individually. For documents over a few hundred pages, expect the initial thumbnail load to take a few seconds." },
+    { q: "Does reordering affect the content of individual pages?", a: "No — each page's content is copied as-is; only the sequence changes. Text stays selectable, images stay at original resolution, nothing is re-rendered or recompressed." },
+    { q: "Can I remove a page while reordering, or only reorder?", a: "This tool is focused on reordering. To remove pages, use keptlocal's Remove Pages from PDF tool — for extracting a specific set of pages into a new file, use Split PDF." },
+    { q: "What if a page thumbnail fails to render?", a: "Rendering happens locally in your browser using pdf.js; on rare complex PDFs or in some browser/device combinations, a specific page's preview may take longer or occasionally fail to render. If that happens, try a different browser (Chrome and Firefox both have solid pdf.js support) — the underlying reorder-and-save step doesn't depend on the thumbnail rendering succeeding." },
+  ]}
+>
+
+<p class="lead">
+  A scanned document that came out of order, a report where the appendix should move before the conclusion, a PDF built from files added in the wrong sequence — reordering pages by hand usually means splitting the file apart and merging it back together in the right order. There's a more direct way.
+</p>
+
+<h2>Reorder pages in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/reorder-pdf/">Reorder PDF Pages tool</a> on keptlocal renders a thumbnail of every page and lets you drag them into the order you want, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool. Thumbnails of every page load into a grid.</li>
+  <li>Drag pages into the order you want.</li>
+  <li>Click <strong>Download</strong> — the reordered PDF saves immediately.</li>
+</ol>
+<p>
+  Because you're dragging visual thumbnails rather than typing page numbers, it's much harder to make an off-by-one mistake than with a numeric "new order" field.
+</p>
+
+<h2>Why this beats split-and-remerge</h2>
+<p>
+  Before a visual reorder tool, fixing page order meant three separate steps: split the PDF into individual pages, note which file corresponds to which position, then merge them back together in the corrected sequence — a process with several opportunities to mislabel a file or merge in the wrong order, especially past a handful of pages. Dragging thumbnails directly into place removes the indirection: what you see is the order you get.
+</p>
+
+<h2>Common reasons pages end up out of order</h2>
+<ul>
+  <li><strong>Scanning</strong> — a double-sided document scanned single-sided produces odd and even pages as two separate passes, which then need interleaving; a stack fed into an auto-feeder slightly out of order comes out slightly out of order.</li>
+  <li><strong>Document assembly</strong> — combining sections from different sources (an appendix added after the fact, a revised chapter inserted) often lands pages at the end rather than where they belong.</li>
+  <li><strong>Export order</strong> — some software exports pages in the order they were created or edited rather than a logical reading order.</li>
+</ul>
+
+<h2>Privacy: what happens to your file</h2>
+<p>
+  Thumbnail rendering uses pdf.js and the actual reordering uses pdf-lib — both running locally in your browser tab. Your PDF is never uploaded. Open DevTools → Network while using the tool and you'll see no outbound requests, even while the thumbnails are being generated.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Reorder a PDF now with <a href="/tools/reorder-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Reorder PDF Pages tool</a> — no upload, no signup. Need to remove a page instead? Try <a href="/tools/delete-pages-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Remove Pages from PDF</a>.
+</p>
+
+</BlogLayout>

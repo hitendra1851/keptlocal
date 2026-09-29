@@ -1,0 +1,216 @@
+---
+---
+
+<div id="unit-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5 space-y-5">
+    <div>
+      <label class="block text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Category</label>
+      <div id="cat-row" class="flex gap-2 flex-wrap"></div>
+    </div>
+
+    <div class="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+      <div>
+        <label class="block text-xs text-[var(--color-ink-muted)] mb-1">From</label>
+        <input type="number" id="input-a" value="1"
+          class="w-full px-3 py-2.5 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-lg focus:outline-none focus:border-[var(--color-accent)]" />
+        <select id="unit-a" class="w-full mt-2 px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)]"></select>
+      </div>
+      <button type="button" id="swap-btn" title="Swap" class="mb-9 p-2 rounded-full border border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] hover:border-[var(--color-accent)] transition-colors">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div>
+        <label class="block text-xs text-[var(--color-ink-muted)] mb-1">To</label>
+        <input type="number" id="input-b" value=""
+          class="w-full px-3 py-2.5 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-lg focus:outline-none focus:border-[var(--color-accent)]" />
+        <select id="unit-b" class="w-full mt-2 px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)]"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)]">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Type a value in either field.</div>
+  </div>
+</div>
+
+<script>
+  type UnitDef = { label: string; toBase: number }; // multiply by this to get the base unit
+
+  const CATEGORIES: Record<string, { units: Record<string, UnitDef>; base: string }> = {
+    Length: {
+      base: "m",
+      units: {
+        mm: { label: "Millimeters (mm)", toBase: 0.001 },
+        cm: { label: "Centimeters (cm)", toBase: 0.01 },
+        m: { label: "Meters (m)", toBase: 1 },
+        km: { label: "Kilometers (km)", toBase: 1000 },
+        in: { label: "Inches (in)", toBase: 0.0254 },
+        ft: { label: "Feet (ft)", toBase: 0.3048 },
+        yd: { label: "Yards (yd)", toBase: 0.9144 },
+        mi: { label: "Miles (mi)", toBase: 1609.344 },
+      },
+    },
+    Weight: {
+      base: "kg",
+      units: {
+        mg: { label: "Milligrams (mg)", toBase: 0.000001 },
+        g: { label: "Grams (g)", toBase: 0.001 },
+        kg: { label: "Kilograms (kg)", toBase: 1 },
+        oz: { label: "Ounces (oz)", toBase: 0.028349523125 },
+        lb: { label: "Pounds (lb)", toBase: 0.45359237 },
+        st: { label: "Stone (st)", toBase: 6.35029318 },
+        t: { label: "Metric tons (t)", toBase: 1000 },
+      },
+    },
+    Volume: {
+      base: "l",
+      units: {
+        ml: { label: "Milliliters (ml)", toBase: 0.001 },
+        l: { label: "Liters (l)", toBase: 1 },
+        "fl-oz": { label: "US fluid ounces", toBase: 0.0295735295625 },
+        cup: { label: "US cups", toBase: 0.2365882365 },
+        pt: { label: "US pints", toBase: 0.473176473 },
+        qt: { label: "US quarts", toBase: 0.946352946 },
+        gal: { label: "US gallons", toBase: 3.785411784 },
+      },
+    },
+    Area: {
+      base: "m2",
+      units: {
+        mm2: { label: "Sq. millimeters", toBase: 0.000001 },
+        cm2: { label: "Sq. centimeters", toBase: 0.0001 },
+        m2: { label: "Sq. meters", toBase: 1 },
+        ha: { label: "Hectares", toBase: 10000 },
+        km2: { label: "Sq. kilometers", toBase: 1000000 },
+        ft2: { label: "Sq. feet", toBase: 0.09290304 },
+        yd2: { label: "Sq. yards", toBase: 0.83612736 },
+        acre: { label: "Acres", toBase: 4046.8564224 },
+        mi2: { label: "Sq. miles", toBase: 2589988.110336 },
+      },
+    },
+    Speed: {
+      base: "mps",
+      units: {
+        mps: { label: "Meters/second", toBase: 1 },
+        kph: { label: "Kilometers/hour", toBase: 0.277777778 },
+        mph: { label: "Miles/hour", toBase: 0.44704 },
+        knot: { label: "Knots", toBase: 0.514444444 },
+        fps: { label: "Feet/second", toBase: 0.3048 },
+      },
+    },
+  };
+  // Temperature handled separately — offsets, not pure ratios.
+  const TEMP_UNITS = { C: "Celsius (°C)", F: "Fahrenheit (°F)", K: "Kelvin (K)" };
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  let category = "Length";
+  let syncing = false;
+
+  const renderCategories = () => {
+    const row = $("cat-row");
+    row.innerHTML = "";
+    [...Object.keys(CATEGORIES), "Temperature"].forEach((cat) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = cat;
+      btn.className = "cat-btn px-3 py-1.5 rounded-full border text-sm font-medium transition-colors";
+      btn.addEventListener("click", () => setCategory(cat));
+      row.appendChild(btn);
+    });
+  };
+
+  const styleCatButtons = () => {
+    Array.from($("cat-row").children).forEach((btn) => {
+      const active = (btn as HTMLElement).textContent === category;
+      btn.classList.toggle("border-[var(--color-accent)]", active);
+      btn.classList.toggle("bg-[var(--color-accent-tint)]", active);
+      btn.classList.toggle("text-[var(--color-accent)]", active);
+      btn.classList.toggle("border-[var(--color-rule)]", !active);
+      btn.classList.toggle("text-[var(--color-ink-soft)]", !active);
+    });
+  };
+
+  const populateSelects = () => {
+    const selA = $("unit-a") as HTMLSelectElement;
+    const selB = $("unit-b") as HTMLSelectElement;
+    selA.innerHTML = "";
+    selB.innerHTML = "";
+
+    if (category === "Temperature") {
+      Object.entries(TEMP_UNITS).forEach(([key, label]) => {
+        selA.add(new Option(label, key));
+        selB.add(new Option(label, key));
+      });
+      selA.value = "C";
+      selB.value = "F";
+    } else {
+      const units = CATEGORIES[category].units;
+      const keys = Object.keys(units);
+      keys.forEach((key) => {
+        selA.add(new Option(units[key].label, key));
+        selB.add(new Option(units[key].label, key));
+      });
+      selA.value = keys[0];
+      selB.value = keys[1] ?? keys[0];
+    }
+  };
+
+  const setCategory = (cat: string) => {
+    category = cat;
+    styleCatButtons();
+    populateSelects();
+    (($("input-a") as HTMLInputElement).value = "1");
+    convert("a");
+  };
+
+  const toFahrenheit = (c: number) => (c * 9) / 5 + 32;
+  const toCelsius = (from: string, v: number) =>
+    from === "C" ? v : from === "F" ? ((v - 32) * 5) / 9 : v - 273.15;
+  const fromCelsius = (to: string, c: number) =>
+    to === "C" ? c : to === "F" ? toFahrenheit(c) : c + 273.15;
+
+  const convert = (source: "a" | "b") => {
+    if (syncing) return;
+    syncing = true;
+
+    const inA = $("input-a") as HTMLInputElement;
+    const inB = $("input-b") as HTMLInputElement;
+    const selA = ($("unit-a") as HTMLSelectElement).value;
+    const selB = ($("unit-b") as HTMLSelectElement).value;
+
+    const srcInput = source === "a" ? inA : inB;
+    const dstInput = source === "a" ? inB : inA;
+    const srcUnit = source === "a" ? selA : selB;
+    const dstUnit = source === "a" ? selB : selA;
+
+    const raw = parseFloat(srcInput.value);
+    if (isNaN(raw)) { dstInput.value = ""; syncing = false; return; }
+
+    let result: number;
+    if (category === "Temperature") {
+      result = fromCelsius(dstUnit, toCelsius(srcUnit, raw));
+    } else {
+      const units = CATEGORIES[category].units;
+      const base = raw * units[srcUnit].toBase;
+      result = base / units[dstUnit].toBase;
+    }
+
+    const rounded = Math.abs(result) >= 1000 ? Math.round(result * 100) / 100 : Math.round(result * 1e6) / 1e6;
+    dstInput.value = String(rounded);
+    $("status-msg").textContent = `${raw} ${srcUnit} = ${rounded} ${dstUnit}`;
+    syncing = false;
+  };
+
+  $("input-a").addEventListener("input", () => convert("a"));
+  $("input-b").addEventListener("input", () => convert("b"));
+  $("unit-a").addEventListener("change", () => convert("a"));
+  $("unit-b").addEventListener("change", () => convert("b"));
+  $("swap-btn").addEventListener("click", () => {
+    const selA = $("unit-a") as HTMLSelectElement;
+    const selB = $("unit-b") as HTMLSelectElement;
+    [selA.value, selB.value] = [selB.value, selA.value];
+    convert("a");
+  });
+
+  renderCategories();
+  setCategory("Length");
+</script>

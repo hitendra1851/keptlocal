@@ -1,0 +1,111 @@
+---
+---
+
+<div id="case-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5 space-y-4">
+    <div>
+      <label for="case-input" class="block text-sm font-medium text-[var(--color-ink)] mb-2">Text</label>
+      <textarea
+        id="case-input"
+        rows="4"
+        spellcheck="false"
+        class="w-full text-sm text-[var(--color-ink)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-lg px-4 py-3 leading-relaxed resize-y focus:outline-none focus:border-[var(--color-accent)]"
+        placeholder="Type or paste text here"
+      ></textarea>
+    </div>
+
+    <div id="results" class="space-y-2"></div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)]">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Every case updates as you type.</div>
+  </div>
+</div>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const toWords = (s: string) =>
+    s
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/[_-]+/g, " ")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean);
+
+  const CASES: { label: string; fn: (s: string) => string }[] = [
+    { label: "UPPERCASE", fn: (s) => s.toUpperCase() },
+    { label: "lowercase", fn: (s) => s.toLowerCase() },
+    {
+      label: "Title Case",
+      fn: (s) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()),
+    },
+    {
+      label: "Sentence case",
+      fn: (s) => {
+        const lower = s.toLowerCase();
+        return lower.replace(/(^\s*\w|[.!?]\s+\w)/g, (c) => c.toUpperCase());
+      },
+    },
+    {
+      label: "camelCase",
+      fn: (s) => {
+        const words = toWords(s).map((w) => w.toLowerCase());
+        return words.map((w, i) => (i === 0 ? w : w[0].toUpperCase() + w.slice(1))).join("");
+      },
+    },
+    {
+      label: "PascalCase",
+      fn: (s) => toWords(s).map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(""),
+    },
+    {
+      label: "snake_case",
+      fn: (s) => toWords(s).map((w) => w.toLowerCase()).join("_"),
+    },
+    {
+      label: "kebab-case",
+      fn: (s) => toWords(s).map((w) => w.toLowerCase()).join("-"),
+    },
+  ];
+
+  const renderRows = () => {
+    const container = $("results");
+    container.innerHTML = "";
+    CASES.forEach(({ label }) => {
+      const row = document.createElement("div");
+      row.className = "flex items-center gap-2";
+      row.innerHTML = `
+        <span class="text-xs font-mono font-semibold text-[var(--color-accent)] w-28 shrink-0">${label}</span>
+        <input type="text" readonly data-case="${label}" class="case-output flex-1 min-w-0 font-mono text-xs text-[var(--color-ink-soft)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-md px-2.5 py-2 select-all focus:outline-none" value="" />
+        <button type="button" data-copy="${label}" class="copy-one-btn shrink-0 px-2 py-2 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors" title="Copy">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round"/></svg>
+        </button>`;
+      container.appendChild(row);
+    });
+
+    container.querySelectorAll(".copy-one-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const label = (btn as HTMLElement).dataset.copy!;
+        const input = container.querySelector(`.case-output[data-case="${label}"]`) as HTMLInputElement;
+        if (!input.value) return;
+        navigator.clipboard.writeText(input.value).then(() => {
+          const original = (btn as HTMLElement).innerHTML;
+          (btn as HTMLElement).innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+          setTimeout(() => { (btn as HTMLElement).innerHTML = original; }, 1400);
+        });
+      });
+    });
+  };
+
+  const compute = () => {
+    const text = ($("case-input") as HTMLTextAreaElement).value;
+    CASES.forEach(({ label, fn }) => {
+      const input = document.querySelector(`.case-output[data-case="${label}"]`) as HTMLInputElement;
+      input.value = text ? fn(text) : "";
+    });
+    $("status-msg").textContent = text ? `${text.length.toLocaleString()} character${text.length === 1 ? "" : "s"} converted.` : "Every case updates as you type.";
+  };
+
+  $("case-input").addEventListener("input", compute);
+  renderRows();
+</script>

@@ -1,0 +1,153 @@
+---
+---
+
+<div id="social-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div id="preset-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+
+    <div class="rounded-lg border border-[var(--color-rule)] overflow-hidden bg-[var(--color-paper-dark)] flex items-center justify-center p-2" style="min-height:200px">
+      <canvas id="preview-canvas" class="max-w-full" style="max-height:280px"></canvas>
+    </div>
+    <p id="dims-label" class="text-xs text-[var(--color-ink-muted)] text-center"></p>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload an image to get started.</div>
+    <button type="button" id="download-btn" class="btn-primary" disabled>Download</button>
+  </div>
+</div>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const PRESETS = [
+    { label: "Instagram Post", w: 1080, h: 1080 },
+    { label: "Instagram Story", w: 1080, h: 1920 },
+    { label: "X / Twitter Post", w: 1600, h: 900 },
+    { label: "Facebook Post", w: 1200, h: 630 },
+    { label: "LinkedIn Post", w: 1200, h: 627 },
+    { label: "YouTube Thumbnail", w: 1280, h: 720 },
+  ];
+
+  let img: HTMLImageElement | null = null;
+  let fileName = "image";
+  let mimeType = "image/jpeg";
+  let activePreset = PRESETS[0];
+  const canvas = document.getElementById("preview-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  const setStatus = (msg: string, err = false) => {
+    $("status-msg").textContent = msg;
+    ($("status-msg") as HTMLElement).style.color = err ? "var(--color-warn)" : "";
+  };
+
+  const renderPresets = () => {
+    const grid = $("preset-grid");
+    grid.innerHTML = "";
+    PRESETS.forEach((p) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "preset-btn text-left px-3 py-2 rounded-lg border text-xs transition-colors";
+      btn.innerHTML = `<div class="font-medium text-[var(--color-ink)]">${p.label}</div><div class="text-[var(--color-ink-muted)]">${p.w}×${p.h}</div>`;
+      btn.addEventListener("click", () => { activePreset = p; stylePresets(); draw(); });
+      grid.appendChild(btn);
+    });
+    stylePresets();
+  };
+
+  const stylePresets = () => {
+    Array.from($("preset-grid").children).forEach((el, i) => {
+      const active = PRESETS[i] === activePreset;
+      el.classList.toggle("border-[var(--color-accent)]", active);
+      el.classList.toggle("bg-[var(--color-accent-tint)]", active);
+      el.classList.toggle("border-[var(--color-rule)]", !active);
+    });
+  };
+
+  // Center-crop the source to the target aspect ratio, then scale to exact target size.
+  const draw = () => {
+    if (!img) return;
+    const { w: tw, h: th } = activePreset;
+    canvas.width = tw;
+    canvas.height = th;
+
+    const targetRatio = tw / th;
+    const srcRatio = img.naturalWidth / img.naturalHeight;
+
+    let sx, sy, sw, sh;
+    if (srcRatio > targetRatio) {
+      // source wider than target — crop left/right
+      sh = img.naturalHeight;
+      sw = sh * targetRatio;
+      sx = (img.naturalWidth - sw) / 2;
+      sy = 0;
+    } else {
+      // source taller than target — crop top/bottom
+      sw = img.naturalWidth;
+      sh = sw / targetRatio;
+      sx = 0;
+      sy = (img.naturalHeight - sh) / 2;
+    }
+
+    ctx.clearRect(0, 0, tw, th);
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+    $("dims-label").textContent = `${activePreset.label} — ${tw}×${th}px`;
+  };
+
+  const loadFile = (file: File) => {
+    if (!file.type.startsWith("image/")) { setStatus("Please choose an image file.", true); return; }
+    mimeType = file.type === "image/png" ? "image/png" : "image/jpeg";
+    fileName = file.name.replace(/\.[^.]+$/, "");
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      img = image;
+      $("empty-state").classList.add("hidden");
+      $("controls").classList.remove("hidden");
+      (document.getElementById("download-btn") as HTMLButtonElement).disabled = false;
+      setStatus("Pick a platform, then download.");
+      renderPresets();
+      draw();
+    };
+    image.onerror = () => setStatus("Could not read that image file.", true);
+    image.src = url;
+  };
+
+  $("browse-btn").addEventListener("click", () => ($("file-input") as HTMLInputElement).click());
+  $("file-input").addEventListener("change", (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f) loadFile(f);
+    (e.target as HTMLInputElement).value = "";
+  });
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e: DragEvent) => { const f = e.dataTransfer?.files[0]; if (f) loadFile(f); });
+  dz.addEventListener("click", (e) => { if (e.target === dz || e.target === $("empty-state")) ($("file-input") as HTMLInputElement).click(); });
+
+  $("download-btn").addEventListener("click", () => {
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const slug = activePreset.label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+      a.download = `${fileName}-${slug}.${mimeType === "image/png" ? "png" : "jpg"}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Downloaded.");
+    }, mimeType, 0.92);
+  });
+</script>

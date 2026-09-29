@@ -1,0 +1,61 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Rotate a Photo Without Losing Quality"
+  description="Fix a sideways or upside-down photo in seconds, with preset 90/180-degree rotation and a custom angle for straightening a tilted horizon."
+  publishDate="2026-11-02"
+  readTime={3}
+  tags={["Image"]}
+  toolSlug="rotate-image"
+  toolName="Rotate Image"
+  toolTagline="Rotate by preset angle or a custom degree — free, in your browser."
+  faqs={[
+    { q: "Does rotating an image reduce its quality?", a: "For 90°, 180°, and 270° rotations, no — every pixel simply moves to a new position with no interpolation needed, since the pixel grid aligns exactly. For a custom angle (straightening a tilted horizon, for instance), some quality loss is unavoidable, because pixels no longer align to a clean grid and have to be interpolated — but at small correction angles (a few degrees) it's not visible in practice." },
+    { q: "Why does my photo appear sideways in the first place?", a: "Almost always a camera orientation issue — many cameras and phones save the image data in landscape orientation regardless of how you actually held the device, and store the correct display orientation separately as EXIF metadata. Software that reads that metadata displays it correctly; software that doesn't shows it sideways." },
+    { q: "What's the difference between rotating and flipping?", a: "Rotation turns the image around a center point (clockwise or counterclockwise) — up becomes sideways or upside-down. Flipping mirrors the image across an axis — left and right (or top and bottom) swap places, but nothing turns. They solve different problems: rotation fixes orientation, flipping creates a mirror image." },
+    { q: "Can I straighten a slightly tilted horizon?", a: "Yes — use the custom angle field instead of a preset. A few degrees is usually enough to correct a handheld shot's slight tilt." },
+    { q: "Does the output keep the same file format?", a: "Yes — a JPG stays a JPG, a PNG stays a PNG. To change format as well, use keptlocal's Convert Image tool." },
+  ]}
+>
+
+<p class="lead">
+  A sideways photo is almost always a metadata problem, not a content problem — the pixels are fine, the orientation flag just wasn't read correctly somewhere along the way. Fixing it takes a few seconds.
+</p>
+
+<h2>Rotate it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/rotate-image/">Rotate Image tool</a> on keptlocal rotates a photo by a preset angle or a custom degree, entirely on your device.
+</p>
+<ol>
+  <li>Drop your image onto the tool.</li>
+  <li>Click a preset — 90° left, 180°, or 90° right — or enter a custom angle.</li>
+  <li>Download the result.</li>
+</ol>
+
+<h2>Why 90° rotations are lossless and custom angles aren't</h2>
+<p>
+  A digital image is a grid of pixels. Rotating exactly 90°, 180°, or 270° maps every pixel onto another exact grid position — the top-left pixel becomes the top-right pixel (for a 90° turn), and so on, with no ambiguity about where each pixel lands. Nothing needs to be invented or blended, so there's no quality loss.
+</p>
+<p>
+  A custom angle — say, straightening a photo shot 3° off level — doesn't have this property. Rotating by 3° means most pixels no longer land on a clean grid position; the new image has to interpolate colors between the original pixels to fill in the rotated grid. This introduces a small amount of softening, more noticeable at larger custom angles and essentially invisible at the small corrections (a few degrees) most straightening actually requires.
+</p>
+
+<h2>When each preset applies</h2>
+<ul>
+  <li><strong>90° left / 90° right</strong> — the most common fix, for a photo that displays fully sideways (a portrait-oriented shot showing as landscape, or vice versa).</li>
+  <li><strong>180°</strong> — for a photo that's completely upside down, which happens occasionally with certain scanning workflows or camera orientation bugs.</li>
+  <li><strong>Custom angle</strong> — for straightening, not fixing gross orientation. A handheld shot with a slightly tilted horizon typically needs somewhere between 1° and 5° of correction.</li>
+</ul>
+
+<h2>Privacy: what happens to your photo</h2>
+<p>
+  Rotation happens on an HTML5 canvas in your browser — your photo is never uploaded. Open DevTools → Network while rotating and you'll see no outbound requests.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Rotate a photo now with <a href="/tools/rotate-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Rotate Image tool</a> — no upload, no signup. Need a mirror image instead? Try <a href="/tools/flip-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Flip Image</a>.
+</p>
+
+</BlogLayout>

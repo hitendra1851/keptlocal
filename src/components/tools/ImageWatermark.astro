@@ -1,0 +1,176 @@
+---
+---
+
+<div id="watermark-img-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div id="drop-zone" class="drop-zone m-4">
+    <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="hidden" />
+    <div id="empty-state">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <p class="text-[var(--color-ink-soft)] mb-1">Drop an image here, or</p>
+      <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">choose a file from your device</button>
+      <p class="text-xs text-[var(--color-ink-muted)] mt-4">JPG, PNG, WebP · Files never leave your browser.</p>
+    </div>
+  </div>
+
+  <div id="controls" class="hidden px-4 pb-4 space-y-4">
+    <div class="rounded-lg border border-[var(--color-rule)] overflow-hidden bg-[var(--color-paper-dark)] flex items-center justify-center" style="max-height:340px">
+      <canvas id="preview-canvas" class="max-w-full" style="max-height:340px"></canvas>
+    </div>
+
+    <div>
+      <label for="wm-text" class="block text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium mb-2">Watermark text</label>
+      <input type="text" id="wm-text" value="SAMPLE" maxlength="40"
+        class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)]" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="wm-color" class="block text-xs text-[var(--color-ink-muted)] mb-1">Color</label>
+        <input type="color" id="wm-color" value="#ffffff" class="w-full h-9 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] cursor-pointer" />
+      </div>
+      <div>
+        <label for="wm-position" class="block text-xs text-[var(--color-ink-muted)] mb-1">Position</label>
+        <select id="wm-position" class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper)] text-[var(--color-ink)] text-sm focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="center">Center (diagonal)</option>
+          <option value="bottom-right">Bottom right</option>
+          <option value="bottom-left">Bottom left</option>
+          <option value="bottom-center">Bottom center</option>
+          <option value="top-right">Top right</option>
+          <option value="top-left">Top left</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">Size</p>
+        <span id="size-value" class="text-xs text-[var(--color-ink-muted)] tabular-nums">6%</span>
+      </div>
+      <input type="range" id="size-slider" min="2" max="15" value="6" step="1" class="w-full accent-[var(--color-accent)]" />
+    </div>
+
+    <div>
+      <div class="flex justify-between mb-2">
+        <p class="text-xs uppercase tracking-wider text-[var(--color-ink-muted)] font-medium">Opacity</p>
+        <span id="opacity-value" class="text-xs text-[var(--color-ink-muted)] tabular-nums">30%</span>
+      </div>
+      <input type="range" id="opacity-slider" min="10" max="80" value="30" step="5" class="w-full accent-[var(--color-accent)]" />
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Upload an image to get started.</div>
+    <button type="button" id="download-btn" class="btn-primary" disabled>Download</button>
+  </div>
+</div>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  let img: HTMLImageElement | null = null;
+  let fileName = "image";
+  let mimeType = "image/png";
+  const canvas = document.getElementById("preview-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  const setStatus = (msg: string, err = false) => {
+    $("status-msg").textContent = msg;
+    ($("status-msg") as HTMLElement).style.color = err ? "var(--color-warn)" : "";
+  };
+
+  const draw = () => {
+    if (!img) return;
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+
+    const text = ($("wm-text") as HTMLInputElement).value.trim();
+    if (!text) return;
+
+    const color = ($("wm-color") as HTMLInputElement).value;
+    const opacity = parseInt(($("opacity-slider") as HTMLInputElement).value) / 100;
+    const sizePct = parseInt(($("size-slider") as HTMLInputElement).value) / 100;
+    const position = ($("wm-position") as HTMLSelectElement).value;
+    const fontSize = Math.round(Math.min(canvas.width, canvas.height) * sizePct);
+    const margin = Math.round(fontSize * 0.6);
+
+    ctx.save();
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.fillStyle = color;
+    ctx.globalAlpha = opacity;
+    const metrics = ctx.measureText(text);
+    const textW = metrics.width;
+
+    let x = 0, y = 0;
+    if (position === "center") {
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((-30 * Math.PI) / 180);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, 0, 0);
+    } else {
+      ctx.textBaseline = "alphabetic";
+      if (position.includes("right")) { ctx.textAlign = "right"; x = canvas.width - margin; }
+      else if (position.includes("left")) { ctx.textAlign = "left"; x = margin; }
+      else { ctx.textAlign = "center"; x = canvas.width / 2; }
+      if (position.includes("top")) y = margin + fontSize * 0.8;
+      else y = canvas.height - margin;
+      ctx.fillText(text, x, y);
+    }
+    ctx.restore();
+  };
+
+  const loadFile = (file: File) => {
+    if (!file.type.startsWith("image/")) { setStatus("Please choose an image file.", true); return; }
+    mimeType = file.type === "image/jpeg" ? "image/jpeg" : "image/png";
+    fileName = file.name.replace(/\.[^.]+$/, "");
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      img = image;
+      $("empty-state").classList.add("hidden");
+      $("controls").classList.remove("hidden");
+      (document.getElementById("download-btn") as HTMLButtonElement).disabled = false;
+      setStatus("Adjust the watermark, then download.");
+      draw();
+    };
+    image.onerror = () => setStatus("Could not read that image file.", true);
+    image.src = url;
+  };
+
+  $("browse-btn").addEventListener("click", () => ($("file-input") as HTMLInputElement).click());
+  $("file-input").addEventListener("change", (e) => {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f) loadFile(f);
+    (e.target as HTMLInputElement).value = "";
+  });
+  const dz = $("drop-zone");
+  ["dragenter", "dragover"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add("dragging"); }));
+  ["dragleave", "drop"].forEach((ev) => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove("dragging"); }));
+  dz.addEventListener("drop", (e: DragEvent) => { const f = e.dataTransfer?.files[0]; if (f) loadFile(f); });
+  dz.addEventListener("click", (e) => { if (e.target === dz || e.target === $("empty-state")) ($("file-input") as HTMLInputElement).click(); });
+
+  ["wm-text", "wm-color", "wm-position", "size-slider", "opacity-slider"].forEach((id) => {
+    $(id).addEventListener("input", () => {
+      if (id === "size-slider") $("size-value").textContent = `${($("size-slider") as HTMLInputElement).value}%`;
+      if (id === "opacity-slider") $("opacity-value").textContent = `${($("opacity-slider") as HTMLInputElement).value}%`;
+      draw();
+    });
+  });
+
+  $("download-btn").addEventListener("click", () => {
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${fileName}-watermarked.${mimeType === "image/jpeg" ? "jpg" : "png"}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      setStatus("Downloaded.");
+    }, mimeType, 0.95);
+  });
+</script>

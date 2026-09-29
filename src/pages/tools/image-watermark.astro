@@ -1,0 +1,49 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ImageWatermark from "../../components/tools/ImageWatermark.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "image-watermark")!;
+---
+
+<ToolLayout tool={tool}>
+  <ImageWatermark slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to watermark an image</h2>
+    <ol>
+      <li>Drop your photo or image onto the tool — a live preview appears immediately.</li>
+      <li>Type your watermark text.</li>
+      <li>Pick a color and a position: a diagonal center mark, or a corner/edge placement.</li>
+      <li>Adjust size and opacity until it looks right in the preview.</li>
+      <li>Click <strong>Download</strong>.</li>
+    </ol>
+    <p>
+      Everything renders live on an HTML5 canvas as you adjust settings, so you see the exact result before downloading.
+    </p>
+
+    <h2>When to watermark a photo</h2>
+    <ul>
+      <li><strong>Portfolio previews</strong> — photographers and designers watermark proofs so a client can review the work without the full-resolution, mark-free version circulating before payment.</li>
+      <li><strong>Attribution</strong> — a website or social handle stamped on images meant to be shared, so credit travels with the image even if it's reposted elsewhere.</li>
+      <li><strong>Draft or sample marking</strong> — indicating an image isn't the final deliverable.</li>
+      <li><strong>Discouraging casual reuse</strong> — a visible mark doesn't prevent copying, but it does discourage casual reuse of an image found via search or social media.</li>
+    </ul>
+    <p>
+      A watermark is a deterrent and an attribution device, not a security measure — someone determined enough can crop or edit around it. It's most effective as a visible signal of ownership on images meant to be seen widely, not as a barrier against a determined bad actor.
+        </p>
+
+    <h2>Choosing position and style</h2>
+    <p>
+      A diagonal center watermark (the default here) is the hardest to crop out without losing important parts of the image, since it spans the middle of the frame — the standard choice for stock photo previews and portfolio proofs, precisely because it can't be trimmed off without also cutting the photo's subject. A corner placement is less intrusive and better suited to attribution — a website URL or handle in the bottom corner that doesn't interfere with viewing the image, at the cost of being easy to crop out.
+    </p>
+    <p>
+      Lower opacity (15–25%) keeps the underlying image easy to view — appropriate when the goal is attribution rather than deterrence. Higher opacity (40%+) makes the mark harder to ignore or edit around, more appropriate for a sample image not meant to be used as-is.
+    </p>
+
+    <h2>Privacy: what happens to your image</h2>
+    <p>
+      The watermark is drawn directly onto the image using the Canvas API, entirely in your browser — the photo is never uploaded. Open DevTools → Network while using the tool and you'll see no outbound requests.
+    </p>
+  </Fragment>
+</ToolLayout>

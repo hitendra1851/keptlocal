@@ -1,0 +1,49 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import SocialImageResizer from "../../components/tools/SocialImageResizer.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "social-image-resizer")!;
+---
+
+<ToolLayout tool={tool}>
+  <SocialImageResizer slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to resize an image for social media</h2>
+    <ol>
+      <li>Drop your image onto the tool.</li>
+      <li>Pick a platform preset — Instagram Post, Instagram Story, X/Twitter Post, Facebook Post, LinkedIn Post, or YouTube Thumbnail.</li>
+      <li>Check the preview — the tool center-crops your image to the platform's exact aspect ratio automatically.</li>
+      <li>Click <strong>Download</strong>. Repeat with a different preset for other platforms.</li>
+    </ol>
+
+    <h2>Why exact dimensions matter</h2>
+    <p>
+      Upload an image with the "wrong" aspect ratio to most platforms, and the platform crops or letterboxes it automatically — often in ways you didn't intend. A wide photo uploaded as an Instagram post gets cropped to a square by Instagram's own algorithm, which has no idea your subject is on the left edge of the frame; a portrait photo uploaded as a Facebook link preview gets letterboxed with bars, or cropped to a wide format that cuts off the top and bottom. Preparing the image at the platform's actual expected dimensions means you control exactly what gets kept and what gets cut, instead of leaving it to an automated crop.
+    </p>
+
+    <h2>The current preset dimensions</h2>
+    <ul>
+      <li><strong>Instagram Post — 1080×1080</strong> (square, 1:1). Instagram supports non-square posts too, but square remains the most universally safe choice across the grid view and feed.</li>
+      <li><strong>Instagram Story — 1080×1920</strong> (9:16, vertical). Matches the full-screen vertical format Stories and Reels display in.</li>
+      <li><strong>X/Twitter Post — 1600×900</strong> (16:9). Twitter's in-feed image preview crops to this ratio by default.</li>
+      <li><strong>Facebook Post — 1200×630</strong>. Matches Facebook's link-preview and shared-image display dimensions.</li>
+      <li><strong>LinkedIn Post — 1200×627</strong>. Nearly identical to Facebook's ratio, reflecting LinkedIn's similar link-preview card format.</li>
+      <li><strong>YouTube Thumbnail — 1280×720</strong> (16:9). YouTube's official recommended thumbnail size.</li>
+    </ul>
+    <p>
+      Platforms do adjust their specs occasionally — treat these as reliable defaults for everyday posting, and double-check a platform's current published requirements before a campaign where exact compliance really matters.
+    </p>
+
+    <h2>How the crop works</h2>
+    <p>
+      The tool center-crops your source image to match the target aspect ratio — trimming equally from the sides (if your image is relatively wider than the target) or from top and bottom (if relatively taller) — then scales the result to the exact target pixel dimensions. This is the same "cover" behavior most platforms use for their own automatic crops, except you can see and control it directly instead of leaving it to an algorithm you don't control. If your subject isn't centered in the original photo, crop it yourself first with keptlocal's <a href="/tools/crop-image/">Crop Image</a> tool for precise control over what's kept, then resize here.
+    </p>
+
+    <h2>Privacy: what happens to your image</h2>
+    <p>
+      Cropping and resizing both run on an HTML5 canvas in your browser — the image is never uploaded. Open DevTools → Network while using the tool and you'll see no outbound requests.
+    </p>
+  </Fragment>
+</ToolLayout>

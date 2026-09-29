@@ -1,0 +1,128 @@
+---
+---
+
+<div id="json-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5 space-y-4">
+    <div>
+      <label for="json-input" class="block text-sm font-medium text-[var(--color-ink)] mb-2">Paste JSON</label>
+      <textarea
+        id="json-input"
+        rows="10"
+        spellcheck="false"
+        class="w-full font-mono text-sm text-[var(--color-ink)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-lg px-4 py-3 leading-relaxed resize-y focus:outline-none focus:border-[var(--color-accent)]"
+        placeholder={'{"example": [1, 2, 3], "nested": {"ok": true}}'}
+      ></textarea>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <label class="flex items-center gap-2 cursor-pointer text-sm text-[var(--color-ink-soft)]">
+        <span>Indent</span>
+        <select id="indent-select" class="text-sm bg-[var(--color-paper)] border border-[var(--color-rule)] rounded-md px-2 py-1 focus:outline-none focus:border-[var(--color-accent)]">
+          <option value="2" selected>2 spaces</option>
+          <option value="4">4 spaces</option>
+          <option value="tab">Tab</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="error-box" class="hidden text-sm text-[var(--color-warn)] bg-[color-mix(in_srgb,var(--color-warn)_10%,transparent)] border border-[var(--color-warn)] rounded-lg px-3 py-2"></div>
+
+    <div>
+      <label for="json-output" class="block text-sm font-medium text-[var(--color-ink)] mb-2">Result</label>
+      <textarea
+        id="json-output"
+        readonly
+        rows="10"
+        class="w-full font-mono text-sm text-[var(--color-ink)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-lg px-4 py-3 leading-relaxed resize-y select-all focus:outline-none"
+        placeholder="Formatted JSON will appear here"
+      ></textarea>
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Paste JSON above and click Format.</div>
+    <div class="flex gap-2">
+      <button type="button" id="minify-btn" class="px-3 py-2 rounded-md text-xs font-medium border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors text-[var(--color-ink-muted)]">Minify</button>
+      <button type="button" id="copy-btn" class="px-3 py-2 rounded-md text-xs font-medium border border-[var(--color-rule)] bg-[var(--color-paper)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors text-[var(--color-ink-muted)]">
+        <span id="copy-label">Copy result</span>
+      </button>
+      <button type="button" id="format-btn" class="btn-primary">Format & validate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const getIndent = (): string | number => {
+    const v = ($("indent-select") as HTMLSelectElement).value;
+    return v === "tab" ? "\t" : parseInt(v);
+  };
+
+  const showError = (msg: string) => {
+    const box = $("error-box");
+    box.textContent = msg;
+    box.classList.remove("hidden");
+    ($("json-output") as HTMLTextAreaElement).value = "";
+    $("status-msg").textContent = "Invalid JSON — see error above.";
+    $("status-msg").style.color = "var(--color-warn)";
+  };
+
+  const clearError = () => {
+    $("error-box").classList.add("hidden");
+    $("status-msg").style.color = "";
+  };
+
+  const parseWithLocation = (text: string) => {
+    try {
+      return { value: JSON.parse(text), error: null };
+    } catch (e: any) {
+      // Try to extract a position from the native error message.
+      const match = /position (\d+)/.exec(e.message);
+      let detail = e.message;
+      if (match) {
+        const pos = parseInt(match[1]);
+        const upToPos = text.slice(0, pos);
+        const line = upToPos.split("\n").length;
+        const col = pos - upToPos.lastIndexOf("\n");
+        detail = `${e.message} (line ${line}, column ${col})`;
+      }
+      return { value: null, error: detail };
+    }
+  };
+
+  const format = () => {
+    const input = ($("json-input") as HTMLTextAreaElement).value.trim();
+    if (!input) { showError("Paste some JSON first."); return; }
+    const { value, error } = parseWithLocation(input);
+    if (error) { showError(error); return; }
+    clearError();
+    const out = JSON.stringify(value, null, getIndent());
+    ($("json-output") as HTMLTextAreaElement).value = out;
+    const keys = JSON.stringify(value).length;
+    $("status-msg").textContent = `Valid JSON · ${out.split("\n").length} lines · ${keys.toLocaleString()} characters minified`;
+  };
+
+  const minify = () => {
+    const input = ($("json-input") as HTMLTextAreaElement).value.trim();
+    if (!input) { showError("Paste some JSON first."); return; }
+    const { value, error } = parseWithLocation(input);
+    if (error) { showError(error); return; }
+    clearError();
+    const out = JSON.stringify(value);
+    ($("json-output") as HTMLTextAreaElement).value = out;
+    $("status-msg").textContent = `Valid JSON · minified to ${out.length.toLocaleString()} characters`;
+  };
+
+  $("format-btn").addEventListener("click", format);
+  $("minify-btn").addEventListener("click", minify);
+
+  $("copy-btn").addEventListener("click", () => {
+    const text = ($("json-output") as HTMLTextAreaElement).value;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      $("copy-label").textContent = "Copied!";
+      setTimeout(() => { $("copy-label").textContent = "Copy result"; }, 1800);
+    });
+  });
+</script>

@@ -1,0 +1,72 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Format and Validate JSON Online for Free"
+  description="Find and fix JSON syntax errors fast, understand format vs. minify, and see why trailing commas and single quotes are the most common breakages."
+  publishDate="2026-09-29"
+  readTime={4}
+  tags={["Utility", "Developer"]}
+  toolSlug="json-formatter"
+  toolName="JSON Formatter"
+  toolTagline="Format, validate, and minify JSON — free, in your browser."
+  faqs={[
+    { q: "Why does my JSON fail to parse even though it looks correct?", a: "The most common invisible causes are a trailing comma after the last item, a smart/curly quote character pasted in from a word processor instead of a straight double quote, or a single stray backslash inside a string that isn't a valid escape sequence. All three look fine at a glance." },
+    { q: "What's the difference between this and JSON5 or JSONC?", a: "JSON5 and JSONC are relaxed supersets that allow comments, trailing commas, and unquoted keys — useful for hand-written config files, but not valid JSON. This tool validates strict JSON (RFC 8259), which is what virtually every API and JSON.parse() call actually requires." },
+    { q: "Can I use this on very large JSON files?", a: "Yes, into the tens of megabytes — the limit is your browser tab's available memory, not the tool. Extremely large files (100MB+) may briefly pause the tab while parsing." },
+    { q: "Does formatting change the data, only the whitespace?", a: "Only whitespace and key/array ordering as originally parsed (object key order is preserved as written; JSON doesn't guarantee key order matters, but this tool doesn't reorder anything). No values are altered." },
+    { q: "Is my JSON uploaded anywhere to be checked?", a: "No. Validation runs through the browser's native JSON.parse, entirely locally. This matters because JSON payloads often contain API keys or customer data that shouldn't be pasted into a third-party server." },
+  ]}
+>
+
+<p class="lead">
+  JSON is unforgiving. A single trailing comma or stray quote mark makes the entire document fail to parse, and the error message points to where the parser gave up — which is often several lines away from where the actual mistake is. Here's how to find and fix it quickly.
+</p>
+
+<h2>Validate and format in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/json-formatter/">JSON Formatter</a> on keptlocal validates and reformats JSON using the browser's native parser.
+</p>
+<ol>
+  <li>Paste your JSON into the input box.</li>
+  <li>Choose an indent width — 2 spaces, 4 spaces, or tabs.</li>
+  <li>Click <strong>Format &amp; validate</strong>. Valid JSON prints back out cleanly indented; invalid JSON shows the specific error and its line/column position.</li>
+  <li>Need the compact version instead? Click <strong>Minify</strong>.</li>
+</ol>
+
+<h2>The five most common JSON errors</h2>
+<p>
+  In rough order of how often they actually happen:
+</p>
+<ul>
+  <li><strong>Trailing commas.</strong> <code>{'{"a": 1, "b": 2,}'}</code> — valid in JavaScript object literals, invalid in strict JSON. This is the single most common breakage, especially when JSON is hand-edited from JavaScript code.</li>
+  <li><strong>Single quotes.</strong> JSON strings and keys require double quotes. <code>{"{'key': 'value'}"}</code> is valid JavaScript but not valid JSON.</li>
+  <li><strong>Unquoted keys.</strong> <code>{'{key: "value"}'}</code> is JavaScript shorthand; JSON requires every key to be a quoted string.</li>
+  <li><strong>Smart quotes from a word processor.</strong> Pasting JSON out of Word, Google Docs, or a rich-text email client can silently convert straight quotes (<code>"</code>) into curly ones (<code>"</code> <code>"</code>), which look nearly identical but break parsing.</li>
+  <li><strong>Unescaped characters inside strings.</strong> A literal double quote, backslash, or newline inside a string value needs to be escaped (<code>\"</code>, <code>\\</code>, <code>\n</code>) — an easy thing to miss when hand-constructing JSON from a template.</li>
+</ul>
+
+<h2>Format vs. minify</h2>
+<p>
+  Use <strong>format</strong> when a human needs to read the JSON — debugging an API response, reviewing a config change in a pull request, writing documentation. The indentation costs nothing when someone's going to read it once.
+</p>
+<p>
+  Use <strong>minify</strong> when the JSON is headed over a network or into a size-constrained field — an environment variable, a URL query parameter, a database column with a length limit. Stripping whitespace directly reduces payload size, which is why production APIs serve minified JSON by default; formatting is a development-time convenience, not something you'd ship.
+</p>
+
+<h2>Strict JSON vs. relaxed variants</h2>
+<p>
+  Strict JSON (RFC 8259) is deliberately minimal — no comments, no trailing commas, no unquoted keys — and that minimalism is why it became the universal interchange format: it parses identically, with near-zero ambiguity, in every language. Some tools accept relaxed variants for convenience: JSON5 allows comments and trailing commas for hand-written config; JSONC (JSON with Comments) is what VS Code uses for its own settings files. If your input uses either of those and this tool flags it as invalid, that's correct behavior — it genuinely isn't standard JSON, even though a specific editor or library might tolerate it.
+</p>
+
+<h2>Privacy: what happens to your data</h2>
+<p>
+  JSON payloads routinely contain API keys, tokens, or customer records. This tool never transmits what you paste — parsing and formatting run through the browser's built-in <code>JSON.parse</code> and <code>JSON.stringify</code>, locally, in the tab. Open DevTools → Network while using it and nothing fires.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Validate JSON now with <a href="/tools/json-formatter/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free JSON Formatter</a> — no upload, no signup. Generating test data? Try <a href="/tools/uuid-generator/" class="text-[var(--color-accent)] hover:underline underline-offset-4">UUID Generator</a>.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,66 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="The Best Free Tools for Nonprofits and Volunteer Organizations"
+  description="Grant applications, donor records, volunteer forms, and event flyers — the recurring document work of nonprofits, handled free on a budget of zero."
+  publishDate="2026-10-08"
+  readTime={6}
+  tags={["PDF", "Image"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  Nonprofits run on volunteer time and donated budgets, which means software costs get scrutinized in a way they rarely are elsewhere — and the document work doesn't stop just because the budget for tools did. A handful of free browser tools cover most of what comes up.
+</p>
+
+<h2>Grant applications and reporting</h2>
+<ul>
+  <li><a href="/tools/merge-pdf/">Merge PDF</a> — combine a grant narrative, budget, and supporting letters into one submission document.</li>
+  <li><a href="/tools/compress-pdf/">Compress PDF</a> — shrink a report with photos or charts before a funder's online portal rejects an oversized upload.</li>
+  <li><a href="/tools/fill-pdf-form/">Fill PDF Form</a> — complete a funder's standard application form directly, without printing and scanning.</li>
+  <li><a href="/tools/add-page-numbers-pdf/">Add Page Numbers to PDF</a> — number a multi-section grant report for easier reviewer reference.</li>
+</ul>
+
+<h2>Donor and volunteer records</h2>
+<p>
+  These often contain exactly the kind of information that shouldn't casually pass through a third-party server — donor contact details, volunteer background-check paperwork, sometimes minors' information for youth programs.
+</p>
+<ul>
+  <li><a href="/tools/protect-pdf/">Protect PDF</a> — add real password encryption to a donor list or volunteer roster before emailing it internally.</li>
+  <li><a href="/tools/flatten-pdf/">Flatten PDF</a> — lock a filled-out volunteer intake form's values before filing it.</li>
+  <li><a href="/tools/remove-image-exif/">Remove Image Metadata</a> — strip GPS and device data from photos taken at events before sharing them, especially any including volunteers or program participants who are minors.</li>
+</ul>
+
+<h2>Event and outreach materials</h2>
+<ul>
+  <li><a href="/tools/compress-image/">Compress Image</a> — shrink event photos for a newsletter or website without a paid image CDN.</li>
+  <li><a href="/tools/social-image-resizer/">Social Image Resizer</a> — resize a flyer or event photo to the exact size for each social platform used for outreach.</li>
+  <li><a href="/tools/qr-code-generator/">QR Code Generator</a> — create a QR code linking to a donation page, printed directly on a flyer or event signage.</li>
+  <li><a href="/tools/image-watermark/">Image Watermark</a> — mark event photos with the organization's name before sharing them publicly.</li>
+</ul>
+
+<h2>Everyday administration</h2>
+<ul>
+  <li><a href="/tools/password-generator/">Password Generator</a> — generate strong passwords for shared organizational accounts (a genuine risk area for small nonprofits sharing logins across volunteers).</li>
+  <li><a href="/tools/jpg-to-pdf/">JPG to PDF</a> — combine photographed receipts into a single PDF for expense reporting to a board or funder.</li>
+  <li><a href="/tools/rotate-pdf/">Rotate PDF</a> — fix a scanned incorporation document or tax-exemption letter that came out sideways.</li>
+</ul>
+
+<h2>Why this matters specifically for nonprofits</h2>
+<p>
+  Nonprofits often handle donor financial information, volunteer background checks, and sometimes program participant data (including minors in youth-serving organizations) — exactly the categories of information that carry real obligations under data protection frameworks, regardless of the organization's size or budget. A free tool that uploads files to a server to process them is a reasonable trade for a public flyer; a much less reasonable one for a donor list or a minor's volunteer paperwork. Running these operations in the browser instead keeps the file on the device processing it the entire time, at no cost — which matters specifically for organizations that can't budget for paid, contracted document-processing services.
+</p>
+
+<h2>Privacy: verifying it yourself</h2>
+<p>
+  Open DevTools (F12) → Network tab, run any keptlocal tool, and confirm nothing uploads. It takes under a minute, and it's a reasonable thing to verify before recommending a tool to volunteers handling sensitive records.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

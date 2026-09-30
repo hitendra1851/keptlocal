@@ -1,146 +1,66 @@
-# keptlocal.com
+# keptlocal
 
-> Privacy-first PDF and image tools that run entirely in your browser.
+**[keptlocal.com](https://keptlocal.com)** — 37 free PDF and image tools that run entirely in your browser. No uploads, no accounts, no signup. Files never leave your device.
 
 [![Astro](https://img.shields.io/badge/Astro-5-orange)](https://astro.build)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-## What this is
+## Why this exists
 
-A free utility tools website. All file processing happens client-side in the browser
-via WebAssembly — files never touch a server. Monetized via Google AdSense.
+Most free "online PDF tools" upload your file to a server, process it there, and send the result back. That's fine for a public flyer. It's a real risk for a contract, a medical record, or a tax return — you're trusting a company you've never audited with a document you can't take back once it's uploaded.
 
-**Tech stack:** Astro 5 · Tailwind v4 · pdf-lib · Cloudflare Pages · Python FastAPI (later, for heavy server tools)
+keptlocal does the same jobs — merge, split, compress, convert, watermark, sign, and more — entirely on your own device, using [pdf-lib](https://github.com/Hopding/pdf-lib) and [pdf.js](https://github.com/mozilla/pdf.js) running in your browser tab. No file data is ever sent anywhere. This isn't a marketing claim: open DevTools → Network tab, run any tool, and watch it stay empty.
 
-## Quick start
+The site also works **offline** once you've opened a tool page while online — a service worker caches it, so it keeps working with no connection at all.
+
+## What's here
+
+**PDF (20 tools):** Merge, Split, Reorder Pages, Rotate, Watermark, Add Page Numbers, Remove Pages, Crop, Sign, Fill Form, Flatten, Add Image, Protect (AES‑256), Unlock, Compress (recompresses embedded photos, not just metadata), PDF to JPG/PNG/Text, JPG to PDF, PDF Info Viewer
+
+**Image (14 tools):** Compress, Resize, Crop, Rotate, Flip, Grayscale, Convert (HEIC/JPG/PNG/WebP/SVG in any direction), Remove EXIF metadata, Image to Base64
+
+**Utility (3 tools):** QR Code Generator, Password Generator, Word Counter
+
+Every tool is a standalone Astro page plus a vanilla-JS component — see [`src/data/tools.ts`](src/data/tools.ts) for the registry and [`src/components/tools/`](src/components/tools) for the implementations.
+
+## Tech stack
+
+- **[Astro 5](https://astro.build)** — static site generation, no client-side framework overhead
+- **[pdf-lib](https://github.com/Hopding/pdf-lib)** — pure-JS PDF read/write ([@cantoo/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) fork for the two tools that need real AES‑256 encryption, which upstream pdf-lib doesn't support)
+- **[pdf.js](https://github.com/mozilla/pdf.js)** — Mozilla's PDF renderer, for PDF→image conversion and text extraction
+- **Canvas API**, **[heic2any](https://github.com/alexcorvi/heic2any)**, **[browser-image-compression](https://github.com/Donaldcwl/browser-image-compression)**, **[jszip](https://github.com/Stuk/jszip)**, **[qrcode](https://github.com/soldair/node-qrcode)**, **[exifr](https://github.com/MikeKovarik/exifr)** — image processing and utilities
+- **Tailwind CSS v4**
+- Every library above is bundled at build time from npm — nothing is fetched from a third-party CDN at runtime, so there's no external host to trust (or go down) while a tool is actually processing a file
+- A hand-written service worker (`public/sw.js`) provides offline support with no third-party runtime dependency
+
+Hosted on AWS Amplify + CloudFront + S3. Monetized via Google AdSense (no paid tier, no signup, no free-tier limits).
+
+## Running locally
 
 ```bash
-# Install dependencies
 npm install
-
-# Run dev server (http://localhost:4321)
-npm run dev
-
-# Build for production (outputs to dist/)
-npm run build
-
-# Preview the production build
-npm run preview
+npm run dev       # http://localhost:4321
+npm run build     # → dist/
+npm run preview   # serve the production build locally
 ```
 
-## Project structure
+## Adding a new tool
 
-```
-keptlocal/
-├── astro.config.mjs        # Site URL + integrations
-├── tsconfig.json
-├── tailwind.config.mjs     # (Tailwind v4 — config lives in src/styles/global.css)
-├── public/
-│   ├── favicon.svg
-│   └── robots.txt
-└── src/
-    ├── data/
-    │   └── tools.ts        # ← Central tool registry. Add new tools here.
-    ├── layouts/
-    │   ├── BaseLayout.astro    # SEO meta, schema, font loading, theme
-    │   └── ToolLayout.astro    # Tool-page template with sidebar + FAQ
-    ├── components/
-    │   ├── Header.astro
-    │   ├── Footer.astro
-    │   ├── ToolCard.astro
-    │   ├── PrivacyBadge.astro
-    │   ├── FAQ.astro
-    │   └── tools/
-    │       └── PdfMerge.astro  # The actual merge tool
-    ├── pages/
-    │   ├── index.astro             # Homepage
-    │   ├── about.astro
-    │   ├── privacy.astro
-    │   ├── terms.astro
-    │   ├── contact.astro
-    │   └── tools/
-    │       └── merge-pdf.astro
-    └── styles/
-        └── global.css       # Design tokens (colors, fonts, theme)
-```
-
-## Adding a new tool — workflow
-
-1. **Add it to the registry** in `src/data/tools.ts` (set `status: "live"`).
-2. **Create the interactive component** at `src/components/tools/YourTool.astro`.
-3. **Create the page** at `src/pages/tools/your-tool.astro` using `ToolLayout`.
+1. Register it in [`src/data/tools.ts`](src/data/tools.ts) (`status: "live"` when ready).
+2. Build the interactive component in `src/components/tools/YourTool.astro`. Keep the `<script>` tag *without* an explicit `type="module"` — Astro only bundles inline scripts it controls the `type` attribute for; an explicit `type="module"` opts a script out of bundling entirely and Astro emits it byte-for-byte, unresolved bare imports included.
+3. Add the page at `src/pages/tools/your-tool.astro` using `ToolLayout`.
 4. The homepage, sitemap, and footer pick it up automatically.
 
-Each tool page should hit ~800–1200 words of supporting content
-(How-to + Use cases + Technical explanation + Limits + FAQ) — this is the
-template that wins for SEO and unlocks AdSense approval.
+Each tool page carries ~800–1200 words of supporting content (how-to, use cases, technical explanation, limits, FAQ) alongside the tool itself.
 
-## Deploying to Cloudflare Pages
+## Contributing
 
-### One-time setup
-
-1. Push this repo to GitHub.
-2. Go to [pages.cloudflare.com](https://pages.cloudflare.com) → Create Project → Connect to Git.
-3. Select the repo. Build settings:
-   - **Framework preset:** Astro
-   - **Build command:** `npm run build`
-   - **Output directory:** `dist`
-   - **Node version:** 22 (set in environment variables: `NODE_VERSION=22`)
-4. Click Deploy. First build takes ~2 minutes.
-5. You'll get a free `keptlocal.pages.dev` URL.
-
-### Custom domain (once you buy keptlocal.com)
-
-1. In Cloudflare Pages project → Custom domains → Set up a domain.
-2. Add `keptlocal.com` and `www.keptlocal.com`.
-3. Cloudflare guides you through DNS records.
-4. SSL is automatic and free.
-
-### Branch previews
-
-Every push to a non-main branch gets its own preview URL — useful for testing
-new tools before merging.
-
-## AdSense setup (do this at week 8, not week 1)
-
-1. Apply at [adsense.google.com](https://adsense.google.com) once you have:
-   - 20+ live tool pages + supporting content
-   - 4 legal pages (✓ already shipped)
-   - Real author bio with photo on About page
-   - 6+ weeks of consistent activity
-   - Live traffic (even modest)
-2. Once approved, paste your AdSense script into `BaseLayout.astro` at the
-   commented `<!-- AdSense placeholder -->` block.
-3. The `.ad-slot` div in `ToolLayout.astro` is already positioned in the
-   highest-RPM spots: below the tool output and in the right sidebar.
-
-## Performance targets (we must hit these for AdSense to make real money)
-
-- **LCP** ≤ 2.5s (mobile)
-- **INP** ≤ 200ms
-- **CLS** ≤ 0.1
-- Lighthouse Performance ≥ 95 on mobile
-
-Run `npm run build && npm run preview`, then test with PageSpeed Insights.
-Ad slots reserve their space via `min-height` — this prevents the CLS spike
-that kills 90% of ad-monetized sites.
-
-## SEO checklist for each new tool page
-
-- [ ] H1 matches the primary target keyword exactly
-- [ ] Tool component visible above the fold (no big hero pushing it down)
-- [ ] 800–1200 words of supporting content below
-- [ ] FAQ with 5–10 questions (schema auto-generated by ToolLayout)
-- [ ] WebApplication schema (auto-generated)
-- [ ] BreadcrumbList schema (auto-generated)
-- [ ] Internal links to 3–5 related tools
-- [ ] Mobile-friendly tested in dev tools
-- [ ] Loads in <2.5s on slow 3G
+Issues and pull requests are welcome — new tools, bug fixes, and correctness fixes especially. If you're fixing a tool that produces incorrect output (a bad PDF, wrong colors, a corrupted file), please include a way to reproduce it.
 
 ## License
 
-MIT. See LICENSE file.
+[MIT](LICENSE)
 
 ## Author
 
-Built by Hiten Mahalwar. Reach me via the contact page.
+Built by [Hitendra Patel](https://keptlocal.com/about/).

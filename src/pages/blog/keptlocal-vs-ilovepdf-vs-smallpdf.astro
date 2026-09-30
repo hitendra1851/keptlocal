@@ -1,0 +1,89 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="keptlocal vs. iLovePDF vs. Smallpdf: Which Should You Use in 2026?"
+  description="A direct comparison of keptlocal, iLovePDF, and Smallpdf — upload requirements, free-tier limits, pricing, and which one actually fits your situation."
+  publishDate="2026-12-11"
+  readTime={7}
+  tags={["PDF", "Privacy"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  iLovePDF and Smallpdf are the two names most people land on first when they search for a free PDF tool — both get hundreds of millions of visits a month, both are genuinely capable, and both work by uploading your file to their servers. keptlocal takes a different approach: everything runs in your browser instead. Here's an honest, feature-by-feature comparison to help you pick the right one for what you're actually doing.
+</p>
+
+<h2>The core architectural difference</h2>
+<p>
+  This is the one difference every other comparison in this article follows from. iLovePDF and Smallpdf process files server-side: your PDF uploads to their infrastructure, gets processed there, and the result downloads back to you. keptlocal processes files client-side: the same operations run in JavaScript inside your browser tab, and the file never leaves your device.
+</p>
+<p>
+  Neither approach is universally "better" — server-side processing genuinely enables some things a browser can't do yet (heavy OCR, some PDF-to-Word conversions, extreme multi-pass compression). But for the large majority of everyday PDF tasks — merging, splitting, rotating, watermarking, compressing, converting to images, filling forms, adding page numbers — a browser can now do the same job, and the privacy and speed profile is meaningfully different when it does.
+</p>
+
+<h2>Feature comparison</h2>
+<div class="overflow-x-auto my-6 rounded-lg border border-[var(--color-rule)]">
+  <table class="w-full text-sm border-collapse">
+    <thead>
+      <tr class="bg-[var(--color-paper-dark)] text-left">
+        <th class="px-3 py-2 font-medium">Factor</th>
+        <th class="px-3 py-2 font-medium">keptlocal</th>
+        <th class="px-3 py-2 font-medium">iLovePDF</th>
+        <th class="px-3 py-2 font-medium">Smallpdf</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">File processing</td><td class="px-3 py-2">Entirely in your browser</td><td class="px-3 py-2">Uploaded to their servers</td><td class="px-3 py-2">Uploaded to their servers</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">Account required</td><td class="px-3 py-2">Never</td><td class="px-3 py-2">Not for basic use; pushed for more</td><td class="px-3 py-2">Not for basic use; pushed for more</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">Daily task limit (free)</td><td class="px-3 py-2">None</td><td class="px-3 py-2">Limited tasks/hour on free tier</td><td class="px-3 py-2">2 tasks/day on free tier</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">File size limit</td><td class="px-3 py-2">Limited only by your device's RAM</td><td class="px-3 py-2">Free tier caps file size</td><td class="px-3 py-2">Free tier caps file size</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">Paid tier</td><td class="px-3 py-2">None — free forever, ad-supported</td><td class="px-3 py-2">Yes, subscription for full features</td><td class="px-3 py-2">Yes, subscription for full features</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">Works offline</td><td class="px-3 py-2">Yes, after first visit</td><td class="px-3 py-2">No</td><td class="px-3 py-2">No</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">PDF-to-Word / OCR</td><td class="px-3 py-2">Not currently offered</td><td class="px-3 py-2">Yes</td><td class="px-3 py-2">Yes</td></tr>
+      <tr class="border-t border-[var(--color-rule)]"><td class="px-3 py-2 font-medium">Total tools</td><td class="px-3 py-2">46 (PDF, image, utility)</td><td class="px-3 py-2">25+ (PDF-focused)</td><td class="px-3 py-2">20+ (PDF-focused)</td></tr>
+    </tbody>
+  </table>
+</div>
+<p class="text-xs text-[var(--color-ink-muted)]">
+  Feature details for iLovePDF and Smallpdf reflect publicly available information on their sites as of late 2026 and may change — always check each provider's current pricing page for the latest terms.
+</p>
+
+<h2>Where iLovePDF and Smallpdf genuinely win</h2>
+<p>
+  It would be dishonest to pretend keptlocal covers everything these two do. Their real advantages:
+</p>
+<ul>
+  <li><strong>PDF to Word, PDF to Excel with table extraction, and OCR on scanned documents.</strong> These require either heavy server-side processing or specialized models that don't yet run practically in a browser tab. If you regularly need to convert a scanned contract into an editable Word document, both platforms handle this and keptlocal currently doesn't.</li>
+  <li><strong>Mobile apps.</strong> Both have dedicated iOS/Android apps with deeper OS integration (share-sheet actions, background processing) than a mobile browser tab can offer.</li>
+  <li><strong>Established brand trust and scale.</strong> Both process enormous volumes daily and have refined their UX over many years — for some tasks that's a real advantage in polish and edge-case handling.</li>
+</ul>
+
+<h2>Where keptlocal is the better fit</h2>
+<ul>
+  <li><strong>Anything with confidential content.</strong> A contract, a medical record, financial statements, HR documents — anything where you'd rather not have a copy briefly (or not-so-briefly) sitting on a third party's server. This is the core reason keptlocal exists.</li>
+  <li><strong>No usage caps to manage.</strong> Smallpdf's free tier limits you to 2 tasks per day; iLovePDF rate-limits free usage per hour. If you're processing a batch of files in one sitting, you'll hit those limits. keptlocal has no such cap because there's no server-side cost per task to manage.</li>
+  <li><strong>Working offline or on an unreliable connection.</strong> Once a keptlocal tool page has loaded once, it keeps working with no connection at all — useful on a flight, in a basement office, or anywhere connectivity is spotty. Server-based tools stop working the moment your connection drops.</li>
+  <li><strong>Speed for routine tasks.</strong> No upload-wait-download round trip — processing starts the instant you drop a file in, since there's no network transfer involved.</li>
+</ul>
+
+<h2>A practical way to decide</h2>
+<p>
+  If the task is PDF-to-Word conversion, OCR on a scan, or anything genuinely requiring server-side horsepower, iLovePDF or Smallpdf are the right tool today — that's simply outside what a browser can currently do well. For everything else — which, for most people, is the large majority of what "PDF tools" actually get used for (merge, split, compress, convert to image, watermark, protect, sign, fill a form) — a browser-based tool avoids the upload entirely, with no account, no daily limit, and no subscription nag screen.
+</p>
+<p>
+  A reasonable approach many people land on: default to a browser-based tool for routine work and confidential documents, and keep a server-based tool bookmarked for the handful of operations (OCR, Word conversion) that genuinely need it.
+</p>
+
+<h2>Privacy: how to verify the claim yourself</h2>
+<p>
+  Don't take "runs in your browser" on faith from any tool, including this one. Open DevTools (F12) → Network tab, run any keptlocal tool, and watch for outbound requests carrying your file. You'll see none. Do the same on iLovePDF or Smallpdf and you'll see the upload happen in real time — which isn't a criticism of either service, just a factual difference in how they work, and one worth seeing directly rather than trusting either company's description of it.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

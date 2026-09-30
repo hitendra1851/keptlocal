@@ -1,0 +1,61 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Is It Legal to Upload Documents to Free Online Tools? What GDPR Actually Says"
+  description="Uploading a file to a free PDF tool isn't illegal, but it does have real legal implications for personal data under GDPR and similar laws. Here's what actually applies."
+  publishDate="2026-10-07"
+  readTime={6}
+  tags={["Privacy", "PDF"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  Uploading a document to a free online converter isn't against the law — there's no statute that prohibits it. But "not illegal" and "no legal implications" aren't the same thing, and if the document contains other people's personal information, the actual legal picture is more specific than most people assume.
+</p>
+
+<h2>What GDPR actually regulates</h2>
+<p>
+  The EU's General Data Protection Regulation (and equivalent frameworks elsewhere — UK GDPR, and similar principles under US state laws like the CCPA) doesn't regulate uploading files in general. It regulates what happens to <strong>personal data</strong> — information that identifies or could identify a specific person: names, addresses, ID numbers, financial details, health information, and more.
+</p>
+<p>
+  If a PDF contains someone else's personal data — a client list, an employee record, a signed contract with another person's details — and you upload it to a third-party tool to process it, you've made that third party a <strong>data processor</strong> under GDPR's terminology. Article 28 requires that this relationship be governed by a written agreement (a Data Processing Agreement) specifying how the processor will handle the data. A free online tool's general terms of service almost never constitutes this — meaning the upload, strictly speaking, happens outside the legal framework GDPR expects for that kind of data handling.
+</p>
+
+<h2>Does this apply to individuals, or only businesses?</h2>
+<p>
+  GDPR's obligations formally attach to organizations acting as data controllers, not individuals processing data for purely personal reasons — the regulation has a "household exemption" for genuinely personal, non-commercial activity. But the moment a document relates to your job, your business, a client, a patient, or a service you provide to others, you're generally acting as (or on behalf of) a data controller, and the exemption doesn't apply. A freelancer uploading a client contract, an employee uploading a coworker's HR file, a landlord uploading a tenant's application — these are the situations where the regulation's obligations are actually engaged.
+</p>
+
+<h2>What the actual risk looks like in practice</h2>
+<p>
+  For an individual accidentally uploading one client document to a free tool, the realistic consequence isn't a GDPR fine — enforcement at that scale essentially never happens against individuals for a one-off upload. The more realistic exposure sits with organizations: a company with a documented policy (or lack of one) around where employee and customer documents can go, facing a genuine audit, a breach investigation, or a regulator's inquiry after some other incident. In that context, "we routinely upload customer PDFs to a free online tool with no data processing agreement" is exactly the kind of finding an auditor flags.
+</p>
+<p>
+  There's also a simpler, non-legal risk that applies regardless of company size: you generally don't know what a free tool's server actually does with your file — how long it's retained, whether it's logged, whether it's used to train anything, who at the company can access it. The tool's privacy policy makes promises; you have no way to verify them.
+</p>
+
+<h2>What the law does clearly require: telling people</h2>
+<p>
+  If your organization has a privacy policy (most do, and most jurisdictions with data protection laws require one for entities handling personal data), that policy is supposed to accurately describe how personal data is processed — including third parties involved. Quietly routing customer or employee documents through an unlisted free tool that isn't disclosed in that policy is its own compliance gap, independent of whether the tool itself does anything wrong with the file.
+</p>
+
+<h2>The practical, non-legalese takeaway</h2>
+<ul>
+  <li><strong>Your own personal documents</strong> (a resume, a personal tax form, a photo) — upload wherever you want; GDPR's household exemption covers this, and the only consideration is whether you personally trust the tool.</li>
+  <li><strong>Documents containing other people's personal data</strong> handled in a work or business context — this is where a data processing agreement matters, and where most free tools simply don't offer one. Browser-based processing sidesteps the question entirely: if the file never reaches a third-party server, there's no third-party processor relationship to document.</li>
+  <li><strong>If your organization has a privacy policy</strong>, check that it actually reflects which tools handle personal data, including any free ones employees might be using informally.</li>
+</ul>
+
+<h2>Why browser-based processing simplifies this</h2>
+<p>
+  Running a PDF operation entirely in your browser (as every keptlocal tool does) means the file never reaches a third-party server in the first place — there's no processor relationship to document, no data processing agreement question to resolve, because no external processing is happening. This isn't a workaround for GDPR obligations; it's a structurally different situation the regulation doesn't need to address, the same way it wouldn't need to address opening a file in a desktop application on your own computer.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  This article is general information, not legal advice — consult a qualified professional for guidance specific to your situation. Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

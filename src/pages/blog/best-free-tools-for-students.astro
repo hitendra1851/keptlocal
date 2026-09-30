@@ -1,0 +1,63 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="The Best Free Tools for Students"
+  description="Research papers, group projects, scanned lecture notes, and resumes — the recurring file tasks of student life, handled free without uploading your work anywhere."
+  publishDate="2026-10-05"
+  readTime={6}
+  tags={["PDF", "Image"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  Between papers, group projects, scanned readings, and job applications, students generate a steady stream of small document tasks — usually on a laptop with limited storage, sometimes on a shared campus computer, and often on work that hasn't been graded yet and shouldn't be casually uploaded anywhere.
+</p>
+
+<h2>Writing and submitting papers</h2>
+<ul>
+  <li><a href="/tools/word-counter/">Word Counter</a> — check a paper against a professor's word or character count requirement before submitting.</li>
+  <li><a href="/tools/merge-pdf/">Merge PDF</a> — combine a cover page, the paper itself, and a works-cited page exported separately into one submission file.</li>
+  <li><a href="/tools/compress-pdf/">Compress PDF</a> — shrink a paper with embedded images or charts before a learning management system's upload limit rejects it.</li>
+  <li><a href="/tools/pdf-page-count/">PDF Info Viewer</a> — confirm a submission's page count matches an assignment's stated limit before turning it in.</li>
+</ul>
+
+<h2>Group projects</h2>
+<ul>
+  <li><a href="/tools/reorder-pdf/">Reorder PDF Pages</a> — fix the order of a group presentation assembled from sections written by different teammates.</li>
+  <li><a href="/tools/jpg-to-pdf/">JPG to PDF</a> — combine photographed whiteboard notes or sketched diagrams from a group brainstorm into a single shareable file.</li>
+  <li><a href="/tools/add-page-numbers-pdf/">Add Page Numbers to PDF</a> — number a combined group report so a professor's feedback can reference specific pages.</li>
+</ul>
+
+<h2>Scanned readings and lecture materials</h2>
+<ul>
+  <li><a href="/tools/rotate-pdf/">Rotate PDF</a> — fix a scanned reading packet that came out sideways.</li>
+  <li><a href="/tools/crop-pdf/">Crop PDF</a> — trim wide margins from a scanned textbook chapter before printing or reading on a small screen.</li>
+  <li><a href="/tools/pdf-to-jpg/">PDF to JPG</a> — pull a single diagram or chart out of a lecture slide PDF to paste into your own notes.</li>
+</ul>
+
+<h2>Job and internship applications</h2>
+<ul>
+  <li><a href="/tools/merge-pdf/">Merge PDF</a> — combine a resume, cover letter, and writing sample into one application PDF.</li>
+  <li><a href="/tools/fill-pdf-form/">Fill PDF Form</a> — complete an internship or scholarship application form digitally.</li>
+  <li><a href="/tools/compress-image/">Compress Image</a> — shrink a headshot for an application portal with a strict file size limit.</li>
+  <li><a href="/tools/password-generator/">Password Generator</a> — generate a strong password for a new job portal or campus account.</li>
+</ul>
+
+<h2>Why this matters for unsubmitted work specifically</h2>
+<p>
+  A paper before it's turned in, a group project before the deadline, a scholarship essay before submission — this is exactly the kind of content people don't want sitting on a random third-party server, whether out of plagiarism-detection anxiety, plain privacy preference, or simply not wanting an unfinished draft to exist anywhere outside your own device. Free online PDF and image tools that upload files to process them are a reasonable trade for something low-stakes; a much less obviously reasonable one for a paper you haven't submitted yet. Running the same operations in the browser keeps the file on your device the entire time.
+</p>
+
+<h2>Privacy: verifying it yourself</h2>
+<p>
+  Open DevTools (F12) → Network tab, run any keptlocal tool, and confirm nothing uploads. It takes under a minute and is worth doing once before making a tool part of your regular workflow.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

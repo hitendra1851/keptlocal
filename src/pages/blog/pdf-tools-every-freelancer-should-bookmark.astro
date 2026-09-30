@@ -1,0 +1,65 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="PDF Tools Every Freelancer Should Bookmark"
+  description="Invoices, contracts, proposals, and client deliverables — the recurring document tasks of freelancing, handled free without uploading client files anywhere."
+  publishDate="2026-12-22"
+  readTime={6}
+  tags={["PDF", "Utility"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  Freelancing means running a one-person back office alongside the actual client work — invoicing, contracts, proposals, deliverable packaging — usually without the budget for dedicated software for each of these small, recurring tasks. A handful of browser tools cover most of it.
+</p>
+
+<h2>Contracts and proposals</h2>
+<ul>
+  <li><a href="/tools/merge-pdf/">Merge PDF</a> — combine a proposal, a contract, and a portfolio sample into one document to send a client.</li>
+  <li><a href="/tools/sign-pdf/">Sign PDF</a> — sign a contract or statement of work without a full e-signature subscription for routine agreements.</li>
+  <li><a href="/tools/fill-pdf-form/">Fill PDF Form</a> — complete a client's standard vendor or contractor intake form.</li>
+  <li><a href="/tools/protect-pdf/">Protect PDF</a> — add real password encryption to a contract containing rate or payment details before emailing it.</li>
+  <li><a href="/tools/watermark-pdf/">Watermark PDF</a> — mark a proposal draft or a portfolio sample as "DRAFT" or with your business name before sharing it publicly.</li>
+</ul>
+
+<h2>Invoicing and financial documents</h2>
+<ul>
+  <li><a href="/tools/compress-pdf/">Compress PDF</a> — shrink a scanned receipt or expense document before attaching it to an email.</li>
+  <li><a href="/tools/jpg-to-pdf/">JPG to PDF</a> — turn photographed receipts into a single PDF for expense records or client billing.</li>
+  <li><a href="/tools/flatten-pdf/">Flatten PDF</a> — lock the values on a filled-out invoice template before sending, so figures can't be silently edited afterward.</li>
+</ul>
+
+<h2>Delivering client work</h2>
+<ul>
+  <li><a href="/tools/compress-image/">Compress Image</a> — shrink final image deliverables for faster download without a visible quality hit.</li>
+  <li><a href="/tools/convert-image/">Convert Image</a> — deliver final assets in whatever format a client's platform actually requires.</li>
+  <li><a href="/tools/pdf-to-jpg/">PDF to JPG</a> — extract a single page from a larger PDF deliverable as a standalone preview image.</li>
+  <li><a href="/tools/image-watermark/">Image Watermark</a> — watermark preview images before final payment clears, for photography, design, and illustration work.</li>
+</ul>
+
+<h2>Everyday utility</h2>
+<ul>
+  <li><a href="/tools/password-generator/">Password Generator</a> — generate a strong password for a new client portal or project management account.</li>
+  <li><a href="/tools/word-counter/">Word Counter</a> — check a proposal or blog deliverable against a client's specified word count.</li>
+  <li><a href="/tools/json-formatter/">JSON Formatter</a> — validate an API response or config file for developer and technical freelancers.</li>
+  <li><a href="/tools/uuid-generator/">UUID Generator</a> — generate unique identifiers for test data or client project references.</li>
+</ul>
+
+<h2>Why this matters for freelance work specifically</h2>
+<p>
+  Freelance documents routinely carry information that shouldn't be casually passed through a third-party server: client payment terms, contract rates, bank details on an invoice, unreleased creative work under an NDA. Free online converters that upload files to process them are a reasonable trade for a low-stakes public document — a much less reasonable one for a signed NDA or a client's financial information. Running these operations in the browser instead keeps the file on your own device the entire time, which matters specifically for the kind of documents freelance work generates.
+</p>
+
+<h2>Privacy: verifying it yourself</h2>
+<p>
+  Open DevTools (F12) → Network tab, run any keptlocal tool, and confirm nothing uploads. It takes under a minute, and it's worth doing once before relying on any of these tools for client-facing paperwork.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

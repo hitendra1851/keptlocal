@@ -1,0 +1,58 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Watermark a Photo for Free"
+  description="Add a text watermark to a photo in your browser — pick the text, color, position, and opacity, and download instantly without uploading the file."
+  publishDate="2026-11-12"
+  readTime={3}
+  tags={["Image"]}
+  toolSlug="image-watermark"
+  toolName="Image Watermark"
+  toolTagline="Stamp text across a photo — free, in your browser."
+  faqs={[
+    { q: "Does a watermark actually stop people from using my photos?", a: "It discourages casual reuse and makes unauthorized use easy to spot, but it isn't a technical barrier — someone determined can crop it out or edit around it, especially a corner-placed mark. A diagonal center watermark spanning the frame is much harder to remove without visibly damaging the image." },
+    { q: "What size and opacity should I start with?", a: "Around 6% of the image's shorter dimension for size, and 25-30% opacity, is a reasonable starting point for a visible-but-not-overwhelming mark — adjust from there based on the live preview." },
+    { q: "Can I watermark multiple photos at once?", a: "This tool processes one image at a time so you can preview and adjust the exact placement for each photo. For batch processing many photos with identical settings, that's a workflow this tool doesn't currently support in one pass." },
+    { q: "Will the watermark show up if someone screenshots the image instead of downloading it?", a: "Yes — the watermark is part of the rendered pixel data, not a separate overlay layer, so it appears in screenshots the same as in the original file." },
+    { q: "Does adding a watermark change the image's file size significantly?", a: "Only marginally — the watermark text adds a small amount of additional visual detail for the encoder to represent, but the effect on file size is minor compared to the image's overall content." },
+  ]}
+>
+
+<p class="lead">
+  Sharing a photo publicly — a portfolio preview, a proof for a client, an image meant to be attributed if reposted — often calls for a visible mark showing where it came from. Here's how to add one without an image editor.
+</p>
+
+<h2>Watermark a photo in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/image-watermark/">Image Watermark tool</a> on keptlocal stamps text onto a photo with a live preview, entirely on your device.
+</p>
+<ol>
+  <li>Drop your photo onto the tool.</li>
+  <li>Type the watermark text.</li>
+  <li>Pick a color and a position — a diagonal center mark, or a corner/edge placement.</li>
+  <li>Adjust size and opacity while watching the live preview.</li>
+  <li>Click <strong>Download</strong>.</li>
+</ol>
+
+<h2>Diagonal center vs. corner placement</h2>
+<p>
+  A diagonal watermark across the center of the frame is the standard choice for stock photo previews and portfolio proofs, for a specific reason: it can't be cropped out without also cutting away the photo's main subject, which sits in the center of most compositions. A corner placement is much easier to crop off entirely, which makes it a weaker deterrent — but it's also far less visually intrusive, which is the right tradeoff when the goal is attribution (a website URL, a handle) rather than actively discouraging reuse.
+</p>
+
+<h2>Getting the opacity right</h2>
+<p>
+  Too low, and the mark is barely visible — easy to miss, and not much of a deterrent either. Too high, and it competes with the photo itself for attention, defeating the purpose of showing the work in the first place. Somewhere around 20–30% opacity tends to be the sweet spot for a mark that's clearly visible without seriously interfering with viewing the image — adjust from there depending on whether the priority is subtlety or visibility.
+</p>
+
+<h2>Privacy: what happens to your photo</h2>
+<p>
+  The watermark is drawn directly onto the image using the Canvas API — your photo is never uploaded. Open DevTools → Network while using the tool and you'll see no outbound requests, which matters if the photo itself is something you'd rather not send through a third-party server before it's even published.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Watermark a photo now with <a href="/tools/image-watermark/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Image Watermark tool</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

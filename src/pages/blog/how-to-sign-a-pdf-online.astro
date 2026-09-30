@@ -1,0 +1,72 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Sign a PDF Online for Free (No Account Needed)"
+  description="Add a drawn or typed signature to a PDF in your browser, free and without an account. Also covers what this kind of signature does and doesn't prove."
+  publishDate="2026-09-20"
+  readTime={5}
+  tags={["PDF"]}
+  toolSlug="sign-pdf"
+  toolName="Sign PDF"
+  toolTagline="Draw or type a signature and stamp it onto any PDF — free, in your browser."
+  faqs={[
+    { q: "Is this a legally binding e-signature like DocuSign?", a: "Not in the same sense. This tool stamps an image of your signature onto the PDF — it doesn't create the cryptographic audit trail (identity verification, timestamped consent record, tamper-evident seal) that dedicated e-signature platforms like DocuSign or Adobe Sign provide. For routine paperwork it's often sufficient; for contracts where enforceability might be disputed, use a platform built for that." },
+    { q: "Can I draw my signature with a mouse and have it look natural?", a: "It's harder with a mouse than a finger or stylus. On a touchscreen device, drawing with your finger or a stylus produces a much more natural-looking signature than a mouse." },
+    { q: "Where does the signature get placed on the page?", a: "Choose the first page, last page, or every page, and a corner position (bottom-right, bottom-left, bottom-center, or top-right), plus a size. Most signature blocks belong on the last page, bottom-right." },
+    { q: "Is my signature image stored anywhere?", a: "No. The signature is drawn directly into the PDF in your browser and never uploaded. Once you close the tab, it's gone unless you saved the output file." },
+    { q: "Can I sign a PDF that already has a signature line or form field?", a: "You can place your signature over an existing line visually, but this tool doesn't detect or fill AcroForm signature fields specifically — it draws an image at the position you choose. For filling out actual form fields (text boxes, checkboxes), use keptlocal's Fill PDF Form tool instead." },
+  ]}
+>
+
+<p class="lead">
+  Most PDFs that need a signature — a lease addendum, a permission slip, a vendor form — don't need a notarized, cryptographically verified e-signature. They need your name to visibly appear on the page in a way that looks like you signed it. Here's how to do that free, without creating an account anywhere.
+</p>
+
+<h2>Sign it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/sign-pdf/">Sign PDF tool</a> on keptlocal lets you draw or type a signature and stamp it onto a PDF, entirely on your device.
+</p>
+<ol>
+  <li><strong>Create your signature.</strong> Draw it with your mouse, finger, or stylus on the canvas, or switch to the Type tab and type your name in a handwriting-style font.</li>
+  <li><strong>Upload the PDF</strong> you need to sign.</li>
+  <li><strong>Choose placement:</strong> which page (first, last, or all), which corner, and how large.</li>
+  <li>Click <strong>Sign PDF</strong> — the signed file downloads immediately.</li>
+</ol>
+<p>
+  The signature becomes a permanent image embedded in the PDF, not a floating annotation someone could accidentally delete — it's part of the page content once saved.
+</p>
+
+<h2>What this kind of signature actually is</h2>
+<p>
+  It's worth being precise about what "signing a PDF" means, because the phrase covers two very different things:
+</p>
+<ul>
+  <li><strong>A visual signature</strong> — an image of your handwriting (or a typed approximation) placed on the document. This is what this tool, and most free browser-based tools, produce. It communicates intent and looks like a signed document, but there's no cryptographic proof of who signed it or when.</li>
+  <li><strong>A digital signature</strong> — a cryptographic operation using a certificate tied to a verified identity, which creates a tamper-evident seal: if the document changes after signing, the signature becomes invalid. This is what DocuSign, Adobe Sign, and similar platforms provide, along with an audit trail (IP address, timestamp, consent confirmation) that can hold up as evidence in a dispute.</li>
+</ul>
+<p>
+  For internal approvals, permission slips, informal agreements, and paperwork where nobody is likely to contest that you signed it, a visual signature is fine. For contracts with real financial or legal stakes — a lease, a settlement, anything where enforceability might later be questioned — use a proper e-signature platform instead.
+</p>
+
+<h2>Drawing vs. typing</h2>
+<p>
+  Drawing produces a more personal result, especially on a touchscreen — a finger or stylus on a tablet or phone gives a genuinely handwriting-like line. On a laptop trackpad or mouse, drawing tends to look shaky; typing your name in the handwriting-style font often looks cleaner in that case. Neither is more "official" than the other — both produce the same kind of visual signature.
+</p>
+
+<h2>Placement conventions</h2>
+<p>
+  Bottom-right of the last page is the most common convention for a standard signature block — it's where readers expect to find it, next to a printed name and date line if the document has one. Top-right placement suits documents where each page needs individual initialing rather than a single closing signature. Signing all pages is useful for contracts where every page should carry a mark to prevent pages being swapped after signing.
+</p>
+
+<h2>Privacy: what happens to your files</h2>
+<p>
+  Your PDF and your signature image never leave your device — signing happens locally using pdf-lib, a JavaScript PDF library running in your browser tab. Open DevTools → Network while signing and you'll see no upload requests. For documents with sensitive content, that matters more than it might seem: most "free" online signing tools upload your file to process it server-side, which means a third party's server briefly holds a contract, a lease, or a form with your personal information on it.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Sign a PDF now with <a href="/tools/sign-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Sign PDF tool</a> — no upload, no signup. Need to fill in form fields first? Try <a href="/tools/fill-pdf-form/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Fill PDF Form</a>.
+</p>
+
+</BlogLayout>

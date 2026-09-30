@@ -1,0 +1,68 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How Word Count Actually Works (and Why Tools Disagree)"
+  description="Why Word, Google Docs, and other tools sometimes report different word counts for the same text, and how reading-time estimates are actually calculated."
+  publishDate="2026-10-08"
+  readTime={4}
+  tags={["Utility"]}
+  toolSlug="word-counter"
+  toolName="Word Counter"
+  toolTagline="Count words, characters, and reading time — free, in your browser."
+  faqs={[
+    { q: "Why does this tool show a different count than Microsoft Word for the same text?", a: "Almost always a hyphenation or number-handling difference. Most counters, including this one, treat a hyphenated word like \"well-known\" as one word and count standalone numbers as words; edge cases around em-dashes, ellipses, and special characters can vary slightly between implementations." },
+    { q: "Does it count characters with or without spaces?", a: "Both are shown separately, since different limits (social media character counts, form field limits) specify one or the other." },
+    { q: "How accurate is the reading time estimate?", a: "It's an estimate based on 238 words per minute, a commonly cited average for adult silent reading of general text. Actual reading speed varies substantially by content complexity, familiarity with the subject, and individual reader — treat it as a rough guide, not a guarantee." },
+    { q: "Is there a limit on how much text I can paste in?", a: "No hard limit. The tool handles book-length text without issue; counting is near-instant even for very large inputs." },
+    { q: "Is my text sent anywhere to be counted?", a: "No. All counting happens locally as you type, using the browser's own string-processing — nothing is transmitted." },
+  ]}
+>
+
+<p class="lead">
+  Paste the same paragraph into Word, Google Docs, and a browser-based word counter, and you can sometimes get three slightly different numbers. None of them are wrong, exactly — they're just counting by marginally different rules.
+</p>
+
+<h2>Count in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/word-counter/">Word Counter</a> on keptlocal counts words, characters, sentences, paragraphs, and estimated reading time as you type — nothing is sent anywhere.
+</p>
+
+<h2>What actually counts as a "word"</h2>
+<p>
+  It sounds like it should be unambiguous, but word counting requires a definition, and different tools quietly choose slightly different ones. The most common convention — and the one this tool uses — treats a word as a sequence of characters separated by whitespace or line breaks. That produces a few results worth knowing:
+</p>
+<ul>
+  <li><strong>Hyphenated words count as one.</strong> "well-known," "twenty-five," and "state-of-the-art" are each one word, not two or four, because there's no whitespace inside them.</li>
+  <li><strong>Numbers count as words.</strong> "2026" and "42" each count as one word, same as any other token.</li>
+  <li><strong>Em-dashes and en-dashes can split or not split words</strong> depending on whether whitespace surrounds them — "word—word" (no spaces) is one token in some counters, two in others that treat the dash itself as a separator.</li>
+  <li><strong>URLs and email addresses</strong> usually count as a single word despite containing dots and slashes, since there's no whitespace breaking them up.</li>
+</ul>
+<p>
+  Microsoft Word and Google Docs use similar rules but aren't identical to each other or to this tool in every edge case — which is why a 2,000-word document might show 1,998 in one tool and 2,003 in another. The difference is almost always in how hyphens, numbers, or special punctuation get tokenized, not a bug in either tool.
+</p>
+
+<h2>Where reading time estimates come from</h2>
+<p>
+  The reading-time figure — "6 min read," commonly shown on articles including this one — comes from dividing word count by an assumed reading speed, typically 200–250 words per minute for adult silent reading of general-audience text. This tool uses 238 wpm, a figure from published reading-speed research. It's a population average, not a prediction for any specific reader: technical or unfamiliar material reads slower, skimming reads faster, and reading speed varies meaningfully between individuals. Treat reading-time estimates as a rough sense of an article's length, not a countdown timer.
+</p>
+
+<h2>Common places word and character limits actually matter</h2>
+<ul>
+  <li><strong>Social platforms:</strong> X/Twitter posts (280 characters), LinkedIn posts (3,000 characters), Instagram captions (2,200 characters) — all counted in characters, not words.</li>
+  <li><strong>Academic and professional writing:</strong> essay word limits, abstract limits (often 150–300 words), cover letter guidance (typically under 400 words).</li>
+  <li><strong>SEO meta descriptions:</strong> roughly 150–160 characters before search engines truncate the display.</li>
+  <li><strong>Forms and applications:</strong> many online forms enforce hard character limits on text fields — knowing your count before pasting avoids losing content to truncation.</li>
+</ul>
+
+<h2>Privacy: what happens to your text</h2>
+<p>
+  Counting happens locally in your browser as you type — nothing is transmitted, logged, or stored. This matters for anything you wouldn't want passing through a third-party server before it's finished: an unpublished draft, a confidential report, a cover letter with personal details.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Count words now with <a href="/tools/word-counter/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Word Counter</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

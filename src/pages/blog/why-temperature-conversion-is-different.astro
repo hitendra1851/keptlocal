@@ -1,0 +1,54 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Why Temperature Conversion Isn't Just Multiplication"
+  description="Most unit conversions are a simple scale factor. Temperature isn't, because Celsius, Fahrenheit, and Kelvin don't share a zero point — here's the actual math."
+  publishDate="2026-10-26"
+  readTime={3}
+  tags={["Utility"]}
+  toolSlug="unit-converter"
+  toolName="Unit Converter"
+  toolTagline="Convert length, weight, volume, area, speed, and temperature — free, in your browser."
+  faqs={[
+    { q: "What's the actual formula for Celsius to Fahrenheit?", a: "°F = (°C × 9/5) + 32. Going the other direction: °C = (°F − 32) × 5/9. The 9/5 (or 5/9) accounts for the different-sized degree; the +32 or −32 accounts for the different zero point." },
+    { q: "Why is Kelvin simpler than Fahrenheit to convert?", a: "Kelvin uses the same size degree as Celsius — only the zero point differs (0 K = −273.15°C, absolute zero). So Celsius to Kelvin is pure addition (add 273.15), with no scaling factor needed, unlike Celsius to Fahrenheit, which needs both a scale and an offset." },
+    { q: "Why does Fahrenheit exist at all if Celsius is simpler?", a: "Historical accident, mostly — Fahrenheit predates Celsius by about 15 years and became entrenched in US measurement before Celsius (and later the metric system generally) became the international standard. The US, along with a small number of other countries, never fully switched." },
+    { q: "Is there a temperature scale with no negative numbers at all in everyday use?", a: "Kelvin — it starts at absolute zero, the coldest physically possible temperature, so 0 K and everything above it is non-negative. Everyday Earth temperatures sit around 250–320 K, which is part of why Kelvin isn't used for weather reports despite being scientifically fundamental." },
+    { q: "Can I convert temperature along with other units in one tool?", a: "Yes — keptlocal's Unit Converter includes Temperature as one of its categories alongside length, weight, volume, area, and speed." },
+  ]}
+>
+
+<p class="lead">
+  Almost every unit conversion you'll ever do is a multiplication: a mile is always 1.609 kilometers, a pound is always 0.4536 kilograms, no matter what the actual value is. Temperature breaks that pattern, and the reason is worth understanding rather than just memorizing the formula.
+</p>
+
+<h2>Convert temperature in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/unit-converter/">Unit Converter</a> on keptlocal includes Temperature as one of its categories — Celsius, Fahrenheit, and Kelvin, converting instantly as you type.
+</p>
+
+<h2>The actual reason: different zero points</h2>
+<p>
+  Most units share a zero point by definition — zero meters is zero meters is zero feet, however you measure it. Temperature scales don't. 0°C is the freezing point of water, a specific physical temperature. 0°F is a different, colder physical temperature (about −17.8°C), based on a reference point Daniel Fahrenheit chose in 1724 involving a brine solution. Since the two scales don't agree on where zero is, you can't convert between them with a single multiplication — you need to shift by an offset as well as scale by a ratio.
+</p>
+<p>
+  The formula: <strong>°F = (°C × 9/5) + 32</strong>. The 9/5 accounts for Fahrenheit degrees being smaller than Celsius degrees (180 Fahrenheit degrees span the same range as 100 Celsius degrees, between freezing and boiling water — hence 180/100 = 9/5). The +32 shifts for the different zero point. Skip the +32 and every conversion is wrong by a constant 32 degrees, however carefully you get the ratio right — a common manual-conversion mistake.
+</p>
+
+<h2>Kelvin: the one that's actually simple</h2>
+<p>
+  Kelvin uses exactly the same size degree as Celsius — a 1-degree change means the same thing in both scales — so converting between them is pure addition, no scaling required: <strong>K = °C + 273.15</strong>. The offset exists because Kelvin's zero point is absolute zero, the coldest temperature physically possible (roughly −273.15°C), rather than water's freezing point. This is why Kelvin is the standard in physics and chemistry: it has a genuine, physically meaningful zero, which makes ratios ("twice as hot") actually meaningful in Kelvin in a way they aren't in Celsius or Fahrenheit (20°C is not "twice as hot" as 10°C in any physical sense; 200 K actually is half the absolute temperature of 400 K).
+</p>
+
+<h2>Why this matters beyond trivia</h2>
+<p>
+  Any conversion tool — including a calculator built by hand in a spreadsheet — that treats temperature the same way it treats length or weight (pure multiplication) will produce systematically wrong results. It's a useful example of a broader point: not every unit relationship is a simple ratio, and building (or trusting) a converter means checking whether the underlying quantities actually share a zero point, not assuming they do.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert temperature and five other unit categories now with <a href="/tools/unit-converter/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Unit Converter</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

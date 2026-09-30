@@ -1,0 +1,109 @@
+---
+---
+
+<div id="hash-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+  <div class="p-5 space-y-4">
+    <div>
+      <label for="hash-input" class="block text-sm font-medium text-[var(--color-ink)] mb-2">Text to hash</label>
+      <textarea
+        id="hash-input"
+        rows="5"
+        spellcheck="false"
+        class="w-full font-mono text-sm text-[var(--color-ink)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-lg px-4 py-3 leading-relaxed resize-y focus:outline-none focus:border-[var(--color-accent)]"
+        placeholder="Type or paste text here"
+      ></textarea>
+    </div>
+
+    <div id="results" class="space-y-2">
+      {["MD5", "SHA-1", "SHA-256", "SHA-384", "SHA-512"].map((algo) => (
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono font-semibold text-[var(--color-accent)] w-16 shrink-0">{algo}</span>
+          <input
+            type="text"
+            readonly
+            data-algo={algo}
+            class="hash-output flex-1 min-w-0 font-mono text-xs text-[var(--color-ink-soft)] bg-[var(--color-paper-dark)] border border-[var(--color-rule)] rounded-md px-2.5 py-2 select-all focus:outline-none"
+            value=""
+          />
+          <button type="button" data-copy={algo} class="copy-one-btn shrink-0 px-2 py-2 rounded-md border border-[var(--color-rule)] text-[var(--color-ink-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors" title="Copy">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex items-center justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)]">Hashes update as you type.</div>
+    <label class="flex items-center gap-2 cursor-pointer text-xs text-[var(--color-ink-soft)]">
+      <input type="checkbox" id="opt-uppercase" class="accent-[var(--color-accent)] w-3.5 h-3.5 cursor-pointer" />
+      Uppercase
+    </label>
+  </div>
+</div>
+
+<script>
+  import md5 from "blueimp-md5";
+
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+  const $$ = (sel: string) => Array.from(document.querySelectorAll(sel)) as HTMLElement[];
+
+  const toHex = (buf: ArrayBuffer) =>
+    Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  let debounceTimer: ReturnType<typeof setTimeout>;
+
+  const compute = async () => {
+    const text = ($("hash-input") as HTMLTextAreaElement).value;
+    const uppercase = ($("opt-uppercase") as HTMLInputElement).checked;
+
+    if (!text) {
+      $$(".hash-output").forEach((el) => ((el as HTMLInputElement).value = ""));
+      $("status-msg").textContent = "Hashes update as you type.";
+      return;
+    }
+
+    const enc = new TextEncoder().encode(text);
+    const [sha1, sha256, sha384, sha512] = await Promise.all([
+      crypto.subtle.digest("SHA-1", enc),
+      crypto.subtle.digest("SHA-256", enc),
+      crypto.subtle.digest("SHA-384", enc),
+      crypto.subtle.digest("SHA-512", enc),
+    ]);
+
+    const values: Record<string, string> = {
+      MD5: md5(text),
+      "SHA-1": toHex(sha1),
+      "SHA-256": toHex(sha256),
+      "SHA-384": toHex(sha384),
+      "SHA-512": toHex(sha512),
+    };
+
+    $$(".hash-output").forEach((el) => {
+      const algo = (el as HTMLElement).dataset.algo!;
+      const v = values[algo];
+      (el as HTMLInputElement).value = uppercase ? v.toUpperCase() : v;
+    });
+
+    $("status-msg").textContent = `${text.length.toLocaleString()} character${text.length === 1 ? "" : "s"} hashed.`;
+  };
+
+  $("hash-input").addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(compute, 150);
+  });
+  $("opt-uppercase").addEventListener("change", compute);
+
+  $$(".copy-one-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const algo = btn.dataset.copy!;
+      const input = document.querySelector(`.hash-output[data-algo="${algo}"]`) as HTMLInputElement;
+      if (!input.value) return;
+      navigator.clipboard.writeText(input.value).then(() => {
+        const svg = btn.innerHTML;
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        setTimeout(() => { btn.innerHTML = svg; }, 1400);
+      });
+    });
+  });
+</script>

@@ -1,0 +1,45 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import CaseConverter from "../../components/tools/CaseConverter.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "case-converter")!;
+---
+
+<ToolLayout tool={tool}>
+  <CaseConverter slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert text case</h2>
+    <ol>
+      <li>Type or paste text into the box.</li>
+      <li>All eight case variants update simultaneously below it.</li>
+      <li>Click the copy icon next to whichever one you need.</li>
+    </ol>
+
+    <h2>The eight cases, and when to use each</h2>
+    <ul>
+      <li><strong>UPPERCASE</strong> — every letter capitalized. Used for emphasis, acronyms, and some legal or formal headers. Overused, it reads as shouting; used sparingly, it draws attention effectively.</li>
+      <li><strong>lowercase</strong> — no capital letters at all. Common in casual writing, some brand styling (a deliberate stylistic choice for logos and taglines), and as a normalization step before comparing or searching text.</li>
+      <li><strong>Title Case</strong> — the first letter of most words capitalized, following common heading conventions. Used for article titles, book titles, and headings.</li>
+      <li><strong>Sentence case</strong> — only the first letter of each sentence capitalized, like ordinary prose. The standard for body text and most UI labels in modern design systems.</li>
+      <li><strong>camelCase</strong> — first word lowercase, each subsequent word capitalized, no spaces or punctuation. The standard naming convention for variables and functions in JavaScript, Java, and many other languages.</li>
+      <li><strong>PascalCase</strong> — every word capitalized, no spaces. Used for class names and, in many frameworks, component names (React components, for instance, are conventionally PascalCase).</li>
+      <li><strong>snake_case</strong> — all lowercase, words separated by underscores. The standard convention in Python, Ruby, and most SQL database column and table names.</li>
+      <li><strong>kebab-case</strong> — all lowercase, words separated by hyphens. The standard for URL slugs, CSS class names, and HTML attribute names.</li>
+    </ul>
+
+    <h2>Why programming conventions vary by language</h2>
+    <p>
+      The four programming-style cases aren't interchangeable by accident — each grew out of constraints or conventions specific to where it's used. Early programming languages and file systems didn't allow spaces or certain punctuation in identifiers, so words had to be joined somehow: capitalization (camelCase, PascalCase) or a separator character (snake_case, kebab-case) both solve that, and different language communities standardized on different solutions. Python's style guide (PEP 8) specifies snake_case for variables and functions; JavaScript's dominant convention is camelCase; URLs conventionally use kebab-case partly because underscores can be visually ambiguous with hyphens and some older systems treated them differently in search indexing.
+    </p>
+    <p>
+      Converting between them by hand is tedious and error-prone — splitting words correctly requires detecting the original word boundaries (capital letters, underscores, or hyphens) before reassembling them in the target style, which is exactly what this tool automates.
+    </p>
+
+    <h2>Privacy: what happens to your text</h2>
+    <p>
+      Every conversion runs locally using standard JavaScript string methods as you type — nothing is transmitted, logged, or stored. This matters for anything you wouldn't want passing through a third-party server before it's finished, like an unpublished draft or a variable name that reveals unreleased product details.
+    </p>
+  </Fragment>
+</ToolLayout>

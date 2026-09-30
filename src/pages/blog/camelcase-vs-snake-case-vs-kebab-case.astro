@@ -1,0 +1,62 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="camelCase vs. snake_case vs. kebab-case: When to Use Each"
+  description="A practical guide to the four programming naming conventions — where each one is the standard, and why they exist instead of just using spaces."
+  publishDate="2026-10-29"
+  readTime={4}
+  tags={["Utility", "Developer"]}
+  toolSlug="case-converter"
+  toolName="Case Converter"
+  toolTagline="Convert between UPPERCASE, Title Case, camelCase, snake_case, and more — free, in your browser."
+  faqs={[
+    { q: "Why can't identifiers just use spaces?", a: "In most programming languages, a space ends a token — the parser would read \"my variable\" as two separate things, not one name. Since identifiers can't contain spaces, every naming convention is really a strategy for marking word boundaries some other way: capitalization or a separator character." },
+    { q: "Is there one convention that's objectively best?", a: "No — each is the established standard within its own ecosystem, and consistency with that ecosystem matters more than any convention's inherent merits. Writing snake_case in a JavaScript codebase, or camelCase in Python, works technically but reads as inconsistent to anyone familiar with that language's norms." },
+    { q: "What's the difference between camelCase and PascalCase exactly?", a: "Only the first letter: camelCase starts lowercase (myVariableName), PascalCase starts every word — including the first — with a capital (MyClassName). The distinction is used deliberately in many languages to signal what kind of thing an identifier refers to." },
+    { q: "Why do URLs use kebab-case instead of underscores?", a: "Partly convention, partly a historical technical wrinkle: some older systems and search engines treated underscores as a word-joining character rather than a separator, effectively merging \"two_words\" into \"twowords\" for indexing purposes. Hyphens didn't have that ambiguity, so kebab-case became the safer, and now standard, choice for URL slugs." },
+    { q: "Do I need to know all four to write code professionally?", a: "Recognizing them is more important than having them memorized — you'll encounter all four regularly (a Python backend using snake_case, calling a JavaScript frontend using camelCase, rendering to a URL in kebab-case), and knowing which convention belongs where prevents subtle bugs from typos across the boundary." },
+  ]}
+>
+
+<p class="lead">
+  Every programming language needs a way to name things — variables, functions, files, URLs — and since most languages don't allow spaces inside a name, four different conventions emerged to mark word boundaries instead. Knowing which one belongs where is a small thing that immediately signals (or undermines) familiarity with a codebase's conventions.
+</p>
+
+<h2>Convert between them in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/case-converter/">Case Converter</a> on keptlocal converts text into all eight common cases at once — including all four naming conventions — as you type.
+</p>
+
+<h2>The four naming conventions</h2>
+<ul>
+  <li><strong>camelCase</strong> — <code>firstWordLowercase</code>, each subsequent word capitalized, no separators. The dominant convention for variables and function names in JavaScript, TypeScript, Java, and C#.</li>
+  <li><strong>PascalCase</strong> — <code>EveryWordCapitalized</code>, no separators. Used for class names across most object-oriented languages, and for component names in frameworks like React and Vue.</li>
+  <li><strong>snake_case</strong> — <code>every_word_lowercase</code>, joined with underscores. The standard for Python (per its official style guide, PEP 8), Ruby, and most SQL database column and table names.</li>
+  <li><strong>kebab-case</strong> — <code>every-word-lowercase</code>, joined with hyphens. The standard for URL slugs, CSS class names, and HTML custom element and attribute names.</li>
+</ul>
+
+<h2>Why the split happened</h2>
+<p>
+  Early languages and file systems restricted what characters an identifier could contain — no spaces, and often limited punctuation. That constraint forced every language community to pick a convention for marking where one word ends and the next begins, and once a community settles on one, consistency within that ecosystem becomes more valuable than any inherent merit of the convention itself. Python's official style guide explicitly recommends snake_case; JavaScript's dominant style (used by most style guides and linters) is camelCase for variables and PascalCase for classes/components. Neither is "more correct" in the abstract — they're just what each community standardized on, decades apart, for reasons that made sense in each context.
+</p>
+<p>
+  URLs and CSS ended up on kebab-case partly for a subtler reason: some older systems (including early search engine indexing) treated an underscore as joining two words into one token rather than separating them, which could hurt SEO or break word-based matching. Hyphens didn't have that ambiguity, so kebab-case became the safe default for anything user- or search-engine-facing — URL slugs, CSS classes, HTML attributes.
+</p>
+
+<h2>Where mixing conventions causes real bugs</h2>
+<p>
+  The most common place this bites in practice: a backend written in Python (snake_case) exposing a JSON API consumed by a JavaScript frontend (camelCase). If the API returns <code>user_name</code> and the frontend code expects <code>userName</code>, that's a silent bug — no error, just a value that's always <code>undefined</code>. Some frameworks handle this conversion automatically at the API boundary; where they don't, it's a manual translation step worth being deliberate about, and exactly the kind of thing a case converter speeds up while double-checking the field names match.
+</p>
+
+<h2>Privacy: what happens to your text</h2>
+<p>
+  Every conversion runs locally in your browser using standard JavaScript string methods — nothing is transmitted or stored.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert text case now with <a href="/tools/case-converter/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Case Converter</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

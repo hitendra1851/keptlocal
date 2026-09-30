@@ -1,0 +1,61 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import JsonFormatter from "../../components/tools/JsonFormatter.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "json-formatter")!;
+---
+
+<ToolLayout tool={tool}>
+  <JsonFormatter slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to format and validate JSON</h2>
+    <ol>
+      <li>Paste your JSON into the input box — a full API response, a config file, or a single object.</li>
+      <li>Choose an indent width (2 spaces, 4 spaces, or tabs) to match your project's style.</li>
+      <li>Click <strong>Format &amp; validate</strong>. Valid JSON is reprinted with consistent indentation; invalid JSON shows exactly where parsing failed.</li>
+      <li>Need a compact version instead? Click <strong>Minify</strong> to strip all whitespace.</li>
+      <li>Click <strong>Copy result</strong> to grab the output.</li>
+    </ol>
+    <p>
+      Formatting and validation both run through the browser's native <code>JSON.parse</code> and <code>JSON.stringify</code> — the same engine your code will use to consume the data. Nothing is uploaded.
+    </p>
+
+    <h2>Why JSON errors are hard to find by eye</h2>
+    <p>
+      A single missing comma, an extra trailing comma, or an unescaped quote inside a string can make an entire JSON document unparseable — and the failure is often several lines away from where the mistake actually is, because the parser doesn't know it's broken until it hits something that can't possibly follow. Scanning a 200-line minified API response by eye for a missing brace is slow and error-prone.
+    </p>
+    <p>
+      This tool surfaces the browser's native parse error along with a line and column number, so instead of scanning the whole document you can jump straight to the problem. The most common culprits, in order of frequency:
+    </p>
+    <ul>
+      <li><strong>Trailing commas</strong> — <code>{"{"}"a": 1, "b": 2,{"}"}</code> — valid in JavaScript object literals, invalid in strict JSON.</li>
+      <li><strong>Single quotes</strong> — JSON strings must use double quotes. <code>{"{"}'key': 'value'{"}"}</code> is not valid JSON, even though it's valid JavaScript.</li>
+      <li><strong>Unquoted keys</strong> — <code>{"{"}key: "value"{"}"}</code> is JavaScript object shorthand, not JSON. Keys must be quoted strings.</li>
+      <li><strong>Unescaped control characters or quotes inside strings</strong> — a literal <code>"</code> inside a string value needs to be escaped as <code>\"</code>.</li>
+      <li><strong>Comments</strong> — JSON has no comment syntax. <code>// like this</code> or <code>/* like this */</code> will fail to parse, even though some JSON-adjacent formats (JSON5, JSONC) allow them.</li>
+    </ul>
+
+    <h2>Format vs. minify: when to use each</h2>
+    <p>
+      <strong>Formatted (indented) JSON</strong> is for humans — reading API responses during debugging, reviewing config files in a pull request, or writing documentation examples. The extra whitespace costs nothing when a human is going to read it once and move on.
+    </p>
+    <p>
+      <strong>Minified JSON</strong> is for machines and networks. Every space and newline is a byte that has to be transmitted and parsed; stripping them shrinks payload size, which matters at scale — a public API serving millions of requests a day saves real bandwidth by minifying responses. It also shows up as the default output of most <code>JSON.stringify()</code> calls with no arguments, and as what you'll see in browser network tabs and log files. Minify here to see exactly what a compact payload will look like, or to shrink a formatted file back down before pasting it somewhere space-constrained (an environment variable, a URL parameter, a database column with a size limit).
+    </p>
+
+    <h2>JSON vs. JSON5 vs. JSONC</h2>
+    <p>
+      Strict JSON (RFC 8259) — what this tool validates — is deliberately minimal: it has no comments, no trailing commas, no unquoted keys, and no single-quoted strings. That minimalism is a feature: it's what makes JSON parseable identically in every language with almost no ambiguity, which is why it won as the universal data-interchange format.
+    </p>
+    <p>
+      Some tools accept relaxed variants — <strong>JSON5</strong> adds comments, trailing commas, and unquoted keys for hand-written config files; <strong>JSONC</strong> (JSON with Comments) is what VS Code uses for its own settings files. If your input is one of these relaxed formats rather than strict JSON, this tool will correctly flag it as invalid — because it isn't valid JSON, even if a specific tool happens to accept it.
+    </p>
+
+    <h2>Privacy: what happens to your data</h2>
+    <p>
+      JSON often contains sensitive data — API keys, auth tokens, customer records, internal config. This tool never sends what you paste anywhere; parsing and formatting happen with browser-native functions, locally, in the tab. Open DevTools → Network while using it and you'll see no requests fire. Nothing is logged, cached remotely, or stored beyond your current browser session.
+    </p>
+  </Fragment>
+</ToolLayout>

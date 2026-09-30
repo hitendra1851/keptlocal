@@ -1,0 +1,74 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="What Is EXIF Data, and Why You Might Want to Strip It"
+  description="Every photo your camera or phone takes carries hidden metadata — sometimes including your exact GPS location. Here's what's actually in there and when to remove it."
+  publishDate="2026-11-09"
+  readTime={4}
+  tags={["Image", "Privacy"]}
+  toolSlug="remove-image-exif"
+  toolName="Remove Image Metadata"
+  toolTagline="Strip GPS, camera data, and date taken — free, in your browser."
+  faqs={[
+    { q: "Do all photos have GPS location data in them?", a: "Only if location services were enabled on the device when the photo was taken — most smartphones default to this on, most standalone cameras don't have GPS at all unless it's a specific GPS-equipped model. If location was on, the exact coordinates where the photo was taken are typically embedded." },
+    { q: "Which platforms strip EXIF data automatically, and which don't?", a: "Major social platforms (Facebook, Instagram, Twitter/X) strip most or all EXIF data from uploaded photos as part of their processing pipeline. Email attachments, direct file transfers, messaging apps that send original-quality files, and personal or business websites typically do not strip anything — the file you send is the file that arrives, metadata included." },
+    { q: "Does stripping EXIF data affect image quality?", a: "No — EXIF is metadata stored alongside the pixel data, not part of it. Removing it doesn't touch a single pixel; the visible image is completely unchanged." },
+    { q: "Can I remove metadata from multiple photos at once?", a: "Yes — the tool accepts multiple files and bundles the results into a ZIP for batch processing." },
+    { q: "What information does removing EXIF NOT protect against?", a: "Stripping metadata removes what's embedded in the file itself, but doesn't affect what a viewer can infer from the image's actual visible content — a recognizable landmark, a street sign, a reflection. It also doesn't undo location or metadata already attached by a platform you've previously uploaded the photo to." },
+  ]}
+>
+
+<p class="lead">
+  Every photo taken on a modern phone or camera carries a layer of information you can't see just by looking at it — when it was taken, what device took it, camera settings, and often, exactly where. That data is called EXIF, and it travels with the file by default.
+</p>
+
+<h2>Strip it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/remove-image-exif/">Remove Image Metadata tool</a> on keptlocal strips EXIF data from JPG and PNG photos, entirely on your device.
+</p>
+<ol>
+  <li>Drop one or more photos onto the tool.</li>
+  <li>Click <strong>Strip metadata</strong>.</li>
+  <li>Download the result — a single file, or a ZIP if you processed multiple.</li>
+</ol>
+
+<h2>What's actually in EXIF data</h2>
+<p>
+  EXIF (Exchangeable Image File Format) is a metadata standard embedded directly in JPG and TIFF files (PNG uses a related but different metadata mechanism) by the camera or phone that captured the image. A typical smartphone photo's EXIF data can include:
+</p>
+<ul>
+  <li><strong>GPS coordinates</strong> — the exact latitude and longitude where the photo was taken, down to a precision of a few meters, if location services were enabled.</li>
+  <li><strong>Date and time</strong> — down to the second, including timezone in many cases.</li>
+  <li><strong>Device information</strong> — the exact camera or phone model, sometimes down to the specific lens used.</li>
+  <li><strong>Camera settings</strong> — aperture, shutter speed, ISO, focal length — useful to photographers reviewing their own shot history, largely irrelevant to anyone else.</li>
+  <li><strong>Orientation flag</strong> — which way the image should be displayed, which is why removing all metadata (rather than a selective strip) occasionally requires re-baking orientation into the pixel data so photos don't display sideways afterward.</li>
+</ul>
+
+<h2>Why this matters for privacy</h2>
+<p>
+  GPS coordinates are the specific concern. A photo taken inside your home, at your child's school, or at a location you'd rather not disclose — shared with its original EXIF data intact — reveals the exact coordinates of that location to anyone who checks. This isn't hypothetical: journalists, researchers, and security professionals have repeatedly demonstrated locating people from EXIF data in photos shared through channels that don't strip it (personal blogs, direct messaging apps, email).
+</p>
+<p>
+  The practical risk depends entirely on where the photo is going. Uploading to Instagram or Facebook: the platform strips this data during processing, so it's not a live concern on the platform itself (though the platform itself now has the data). Emailing a full-resolution photo directly, posting it to a personal website, or sending it through a messaging app that preserves originals: the EXIF data travels intact unless you strip it first.
+</p>
+
+<h2>When stripping metadata matters most</h2>
+<ul>
+  <li><strong>Real estate photos</strong> shared before a listing goes live, where the address shouldn't be inferable ahead of the public listing.</li>
+  <li><strong>Photos of children</strong> shared publicly, where a location trail isn't something most parents want attached.</li>
+  <li><strong>Personal or sensitive locations</strong> — home, workplace, a private event — in photos posted anywhere the audience isn't fully trusted.</li>
+  <li><strong>Professional submissions</strong> where camera/device metadata isn't relevant and cleaner files are simply more professional to submit.</li>
+</ul>
+
+<h2>Privacy: what happens to your photos</h2>
+<p>
+  Metadata stripping happens entirely in your browser — photos are never uploaded to check or remove their EXIF data, which matters more than usual for a privacy-focused tool: sending a photo to a server specifically to strip its location data would mean trusting that server with the very location data you're trying to protect.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Strip EXIF data now with <a href="/tools/remove-image-exif/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Remove Image Metadata tool</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

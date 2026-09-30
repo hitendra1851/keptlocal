@@ -1,0 +1,64 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Check a PDF's Page Count and Metadata"
+  description="See a PDF's page count, title, author, creation date, and other embedded metadata instantly, without opening it in a full PDF reader or uploading it anywhere."
+  publishDate="2026-12-04"
+  readTime={3}
+  tags={["PDF"]}
+  toolSlug="pdf-page-count"
+  toolName="PDF Info Viewer"
+  toolTagline="See page count and metadata instantly — free, in your browser."
+  faqs={[
+    { q: "Why would I need page count without opening the PDF fully?", a: "Common cases: confirming a scanned document captured every page before closing the scanner app, checking a document meets a page-count requirement before submitting it, or quickly comparing two versions of a file without opening a full PDF reader." },
+    { q: "What metadata does a typical PDF actually contain?", a: "Commonly: title, author, subject, keywords, the software that created it, and creation/modification timestamps. Not every PDF has all of these filled in — many are blank or generic, depending on what the creating software chose to embed." },
+    { q: "Can I edit the metadata, or only view it?", a: "This tool is read-only — it displays what's embedded without modifying the file. Editing metadata requires a different tool." },
+    { q: "Does viewing metadata require uploading the file?", a: "No — the tool reads the file's internal structure locally in your browser using pdf-lib, without ever transmitting it." },
+    { q: "Can metadata reveal information I didn't intend to share?", a: "Yes, occasionally — author names, the software and sometimes the company that created the document, and creation dates can all be present in metadata, even if that information doesn't appear anywhere in the visible page content. Worth checking before sharing a sensitive document externally." },
+  ]}
+>
+
+<p class="lead">
+  Sometimes you need one fact about a PDF — how many pages, who created it, when — without the overhead of opening it in a full reader. A quick metadata check handles that in seconds.
+</p>
+
+<h2>Check it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/pdf-page-count/">PDF Info Viewer</a> on keptlocal reads a PDF's page count and embedded metadata instantly, entirely on your device.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>See page count, title, author, subject, creation and modification dates, and the software that created it, all at once.</li>
+  <li>Click <strong>Copy</strong> to grab the details as text.</li>
+</ol>
+
+<h2>What's actually stored in a PDF's metadata</h2>
+<p>
+  Every PDF carries a document information dictionary — a small block of metadata separate from the visible page content. What's commonly present:
+</p>
+<ul>
+  <li><strong>Title, Author, Subject, Keywords</strong> — fields the creating software may have filled in automatically or left for the author to set manually. Word documents exported to PDF often carry over the document's saved author name and title, for instance.</li>
+  <li><strong>Creator and Producer</strong> — the application that created the original document (Creator) and the software that generated the actual PDF file (Producer) — sometimes the same tool, sometimes different (a document written in one application and exported to PDF by another).</li>
+  <li><strong>CreationDate and ModDate</strong> — timestamps for when the PDF was first generated and last modified, stored in the file's internal structure regardless of what any visible date on the page content says.</li>
+</ul>
+<p>
+  None of this is guaranteed to be filled in accurately, or at all — it depends entirely on what the software that created the PDF chose to embed. A scanned document might have essentially blank metadata; a PDF exported from a well-configured publishing tool might have everything filled in precisely.
+</p>
+
+<h2>Why this occasionally matters for privacy</h2>
+<p>
+  Metadata can reveal information that isn't visible anywhere in the document's actual pages — an author's real name on a document meant to be shared anonymously, the name of the software (and sometimes the company) that produced it, or a creation date that doesn't match a claimed document date. Before sharing a sensitive PDF externally, a quick metadata check is worth doing alongside checking the visible content.
+</p>
+
+<h2>Privacy: what happens to your file</h2>
+<p>
+  Reading metadata happens entirely in your browser using pdf-lib — the file is never uploaded, which is particularly relevant for a tool whose whole purpose is inspecting potentially sensitive document details.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Check a PDF's info now with <a href="/tools/pdf-page-count/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free PDF Info Viewer</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

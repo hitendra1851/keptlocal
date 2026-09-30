@@ -1,0 +1,69 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Rotate PDF Pages Without Losing Quality"
+  description="Fix sideways or upside-down PDF pages in seconds. Covers browser-based rotation, Adobe Acrobat, and why rotating beats re-scanning."
+  publishDate="2026-09-16"
+  readTime={4}
+  tags={["PDF"]}
+  toolSlug="rotate-pdf"
+  toolName="Rotate PDF"
+  toolTagline="Fix sideways or upside-down pages — free, in your browser."
+  faqs={[
+    { q: "Does rotating a PDF reduce its quality?", a: "No. Rotation changes a page's orientation metadata (or redraws vector content at a new angle) — it doesn't re-render, re-compress, or resample anything. Text stays selectable and images stay at their original resolution." },
+    { q: "Can I rotate just one page in a multi-page PDF?", a: "Yes. The tool lets you select individual pages or page ranges and rotate only those, leaving the rest of the document untouched." },
+    { q: "Why is my PDF sideways in the first place?", a: "Almost always a scanning issue — the page was fed into the scanner in landscape orientation, or a phone camera app saved a photo-based PDF with the wrong EXIF orientation flag that the PDF export ignored." },
+    { q: "Is 90°, 180°, and 270° rotation all supported?", a: "Yes — rotate any page a quarter turn, half turn, or three-quarter turn, in either direction, as many times as needed." },
+    { q: "Will the rotation stick when I print the PDF?", a: "Yes. The rotation is written into the PDF's page objects, not just how your current viewer happens to display it, so it prints and displays correctly everywhere — other PDF readers, print dialogs, mobile viewers." },
+  ]}
+>
+
+<p class="lead">
+  A sideways PDF page is one of the most common — and most annoying — small formatting problems. It usually comes from a scanner, a phone camera app, or a fax gateway that got the orientation wrong. Fixing it takes seconds once you know where to look.
+</p>
+
+<h2>Fix it in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/rotate-pdf/">Rotate PDF tool</a> on keptlocal rotates any page, or the whole document, without uploading the file anywhere.
+</p>
+<ol>
+  <li>Drop your PDF onto the tool.</li>
+  <li>Pick a rotation: 90° left, 180°, or 90° right.</li>
+  <li>Choose <strong>All pages</strong>, or <strong>Specific pages</strong> and enter a range like <code>1, 3, 5-8</code>.</li>
+  <li>Click <strong>Rotate &amp; download</strong>.</li>
+</ol>
+<p>
+  Rotation is a page-object property in the PDF format, not a re-render — the underlying text and images are untouched, so there's no quality loss and no re-compression.
+</p>
+
+<h2>Why this happens</h2>
+<p>
+  Most sideways PDFs trace back to one of three sources. Flatbed and sheet-fed scanners record a fixed physical orientation regardless of how the paper was fed, so a document scanned in landscape shows up rotated when the software assumes portrait. Phone scanning apps sometimes bake in the camera's EXIF orientation incorrectly when converting a photo to PDF. And fax-to-PDF gateways, still common in legal and healthcare workflows, occasionally rotate pages during the format conversion.
+</p>
+<p>
+  Whatever the cause, re-scanning the original document is almost never necessary — rotation is a metadata-level fix, not a content fix.
+</p>
+
+<h2>Other ways to rotate a PDF</h2>
+<p>
+  <strong>Adobe Acrobat</strong> (paid): Tools → Organize Pages → select pages → Rotate. Gives the same result with a more involved interface, useful if you're already inside Acrobat for other edits.
+</p>
+<p>
+  <strong>Your PDF reader's print dialog</strong>: Some readers let you set orientation at print time without changing the underlying file — fine for a one-off printout, but the fix doesn't persist for anyone else who opens the file.
+</p>
+<p>
+  <strong>Preview on macOS</strong>: Open the PDF, select a page in the thumbnail sidebar, use the rotate buttons in the toolbar, then File → Export. Built into every Mac, no installation needed.
+</p>
+
+<h2>Rotation vs. re-scanning</h2>
+<p>
+  It's worth being explicit about this because people sometimes assume a sideways scan means starting over: rotating a PDF page never loses information the original scan captured. The pixels or vector content are identical before and after — only the orientation flag or page transform changes. Re-scanning is only necessary if the original page was physically cut off, out of focus, or otherwise poorly captured — not because it's facing the wrong way.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Fix sideways pages with <a href="/tools/rotate-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Rotate PDF tool</a> — no upload, no signup. Combining scanned pages first? Try <a href="/tools/merge-pdf/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Merge PDF</a>.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,67 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="What Is Base64 Encoding, and When Should You Use It?"
+  description="Base64 turns binary data into plain text so it can travel through systems built for text. Here's what that actually means and when it's the right tool."
+  publishDate="2026-11-19"
+  readTime={4}
+  tags={["Utility", "Developer"]}
+  toolSlug="image-to-base64"
+  toolName="Image to Base64"
+  toolTagline="Convert an image to a Base64 string — free, in your browser."
+  faqs={[
+    { q: "Does Base64 encoding compress the data?", a: "No — it's the opposite. Base64 encoding increases size by roughly 33%, because it re-represents binary data using only 64 printable characters, which takes more characters to express the same information. It's about compatibility, not size reduction." },
+    { q: "Is Base64 encoding a form of encryption or security?", a: "No, and this is a common misconception. Base64 is fully reversible by anyone with no key or password required — decoding it is a standard, publicly known operation. It provides zero confidentiality. Never use it to \"hide\" or protect sensitive data." },
+    { q: "Why do data URIs start with data:image/png;base64,?", a: "That prefix tells the browser three things: this is a data URI (not a normal URL), the content's MIME type (image/png), and that what follows is Base64-encoded. The browser needs all three to decode and render it correctly." },
+    { q: "When does embedding an image as Base64 actually help performance?", a: "For very small images (icons, tiny UI graphics) embedded directly in HTML or CSS, it can save an extra HTTP request, which matters more on older HTTP/1.1 connections with request-count limits. On modern HTTP/2 connections, and for anything but small images, a normal image file with proper caching usually performs better." },
+    { q: "Can I convert the Base64 string back into an image file?", a: "Yes — pasting a valid data URI into a browser's address bar renders it directly, and most image editors and code environments can decode a Base64 string back into a file." },
+  ]}
+>
+
+<p class="lead">
+  Base64 shows up constantly in web development — embedded images, API payloads, email attachments — and it's frequently misunderstood as either compression or encryption. It's neither. It's a text-compatibility format, and understanding that clears up most of the confusion around it.
+</p>
+
+<h2>Convert an image in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/image-to-base64/">Image to Base64 tool</a> on keptlocal converts an image into a Base64 string — as a plain string or a ready-to-use data URI — entirely on your device.
+</p>
+
+<h2>What Base64 actually does</h2>
+<p>
+  Computers store images, and most other files, as binary data — raw bytes that don't map to readable text. Many older systems and protocols (email, some APIs, certain text-only data formats) were built to reliably transmit only text, specifically a limited set of printable ASCII characters. Send raw binary through one of these text-only channels, and bytes that don't correspond to valid text characters can get corrupted or misinterpreted along the way.
+</p>
+<p>
+  Base64 solves this by re-encoding binary data using only 64 safe, printable characters (A–Z, a–z, 0–9, plus two more symbols, typically + and /). Every 3 bytes of original binary data become 4 Base64 characters. This is why Base64-encoded data is always about 33% larger than the original — it's trading size for guaranteed safe transmission through text-only channels.
+</p>
+
+<h2>What Base64 is not</h2>
+<p>
+  It's worth being explicit about this because the confusion is common and occasionally has real consequences: Base64 is not encryption, not compression, and not a security measure of any kind. Anyone can decode a Base64 string back to its original form instantly, with no key, password, or special tool — decoding is a standard, publicly documented operation built into every programming language and most browsers. If you see credentials or sensitive data encoded as Base64 (this does happen — HTTP Basic Auth headers are Base64, for instance), treat it as equivalent to plain text, not as protected.
+</p>
+
+<h2>Where Base64 is genuinely useful</h2>
+<ul>
+  <li><strong>Data URIs for small embedded images.</strong> A data URI (<code>data:image/png;base64,...</code>) embeds an image's data directly inside HTML or CSS, avoiding a separate file request — useful for small icons where the request overhead outweighs the size cost.</li>
+  <li><strong>Email attachments.</strong> Email's underlying protocols predate reliable binary transmission; attachments are Base64-encoded to travel safely through the email system.</li>
+  <li><strong>Embedding binary data in JSON or XML.</strong> These text-based formats can't contain raw binary directly — Base64 lets a file (an image, a signature, a small document) travel inside a JSON payload as a string field.</li>
+  <li><strong>Basic HTTP authentication headers.</strong> The <code>Authorization: Basic</code> header format Base64-encodes a username:password pair — again, purely for safe text transmission, not for security (which is why Basic Auth requires HTTPS to be safe at all).</li>
+</ul>
+
+<h2>When not to use it</h2>
+<p>
+  For most images loaded on a normal web page, a regular image file (with proper HTTP caching, and served over HTTP/2 or later) outperforms a Base64 data URI — the 33% size increase and the loss of independent browser caching for that image usually cost more than the saved request. Base64 in URLs also has a practical limit: very long Base64 strings can exceed URL length limits in some browsers and servers. Reach for Base64 when compatibility with a text-only channel is the actual constraint, not as a general-purpose way to move images around.
+</p>
+
+<h2>Privacy: what happens to your image</h2>
+<p>
+  The conversion happens entirely in your browser using the FileReader API — your image is never uploaded to encode it.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Convert an image to Base64 now with <a href="/tools/image-to-base64/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Image to Base64 tool</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,60 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import HashGenerator from "../../components/tools/HashGenerator.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "hash-generator")!;
+---
+
+<ToolLayout tool={tool}>
+  <HashGenerator slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to generate a hash</h2>
+    <ol>
+      <li>Type or paste text into the box — every hash below updates automatically as you type.</li>
+      <li>Click the copy icon next to any algorithm to copy that specific hash.</li>
+      <li>Enable <strong>Uppercase</strong> if the system you're matching against expects uppercase hex (some legacy tools and Windows utilities do).</li>
+    </ol>
+    <p>
+      SHA-1, SHA-256, SHA-384, and SHA-512 run through <code>crypto.subtle.digest()</code> — the browser's native, standards-compliant implementation. MD5, which the Web Crypto API doesn't include (it's excluded deliberately, being cryptographically obsolete), runs through a small local JavaScript implementation instead. Both paths stay entirely in your browser.
+    </p>
+
+    <h2>What a hash function actually does</h2>
+    <p>
+      A hash function takes an input of any size and produces a fixed-length output — the "hash" or "digest" — such that the same input always produces the same output, and any change to the input, however small, produces a completely different output. Change one character anywhere in a 10,000-word document and its SHA-256 hash looks nothing like the original. That property is called the avalanche effect, and it's what makes hashes useful for verifying that two pieces of data are exactly identical without comparing them byte by byte.
+    </p>
+
+    <h2>Choosing an algorithm</h2>
+    <ul>
+      <li><strong>MD5 (128-bit):</strong> Fast, universally supported, and still the default checksum format for many older download mirrors and legacy systems. Cryptographically broken — collisions (two different inputs producing the same hash) can be deliberately constructed — so never use it where an adversary might try to forge a match.</li>
+      <li><strong>SHA-1 (160-bit):</strong> Was the web's default for years (Git still uses it internally for object IDs). Also broken for adversarial use since 2017, when researchers demonstrated a practical collision. Still fine for non-adversarial checksums.</li>
+      <li><strong>SHA-256 (256-bit):</strong> Part of the SHA-2 family, no known practical collision attacks, and the current default for almost everything — TLS certificates, Bitcoin's proof-of-work, package manager checksums (npm, pip). Use this unless you have a specific reason not to.</li>
+      <li><strong>SHA-384 / SHA-512 (384/512-bit):</strong> Larger SHA-2 variants. Marginal practical benefit over SHA-256 for most uses, but sometimes specified by systems that want extra headroom against future cryptanalysis.</li>
+    </ul>
+
+    <h2>What hashes are actually used for</h2>
+    <p>
+      <strong>File integrity verification.</strong> Software downloads are often published alongside a SHA-256 or MD5 checksum. After downloading, you hash the file yourself and compare it to the published value — a mismatch means the download was corrupted or tampered with. This is the single most common reason people reach for a hash generator.
+    </p>
+    <p>
+      <strong>Detecting duplicate or changed data.</strong> Instead of comparing two large files byte-by-byte, systems compare their hashes — if the hashes match, the files are (for all practical purposes) identical. Git uses this internally to detect whether file content has changed between commits.
+    </p>
+    <p>
+      <strong>Data structure lookups.</strong> Hash tables — the data structure behind most dictionaries, sets, and caches in every major programming language — use hash functions to map keys to storage locations in roughly constant time.
+    </p>
+    <p>
+      <strong>What hashes are not for:</strong> storing passwords. A general-purpose hash function like SHA-256 is fast — computable billions of times per second on commodity hardware — which is exactly the wrong property for password storage, since it makes brute-forcing a stolen password database cheap. Purpose-built password hashing functions (bcrypt, scrypt, Argon2) are deliberately slow and include built-in salting to prevent this.
+    </p>
+
+    <h2>Text hashing vs. file hashing</h2>
+    <p>
+      This tool hashes the text you type or paste. If you're verifying a downloaded file's checksum, be aware that hashing text copied from the file (or from a webpage describing it) is not the same as hashing the file's actual bytes — encoding differences, invisible characters, or line-ending conversions between operating systems can silently change the result. For verifying an actual file's integrity, use your operating system's built-in checksum utility (<code>certutil -hashfile</code> on Windows, <code>shasum</code> or <code>md5</code> on macOS/Linux) against the file directly.
+    </p>
+
+    <h2>Privacy: what happens to your text</h2>
+    <p>
+      Nothing you type is transmitted anywhere — every algorithm runs locally, either through the browser's built-in Web Crypto API or a small local MD5 implementation. Open DevTools → Network while using the tool and you'll see no requests fire, which matters if you're hashing anything sensitive (an API secret, a password you're checking against a known-breach list) that you wouldn't want to send to a server.
+    </p>
+  </Fragment>
+</ToolLayout>

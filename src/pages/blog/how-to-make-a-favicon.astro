@@ -1,0 +1,68 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Make a Favicon That Doesn't Look Blurry"
+  description="Why a single resized logo makes a blurry favicon, what sizes browsers and phones actually request, and how to design an icon that reads clearly at 16px."
+  publishDate="2026-10-14"
+  readTime={4}
+  tags={["Image"]}
+  toolSlug="favicon-generator"
+  toolName="Favicon Generator"
+  toolTagline="Turn one image into a complete favicon set — free, in your browser."
+  faqs={[
+    { q: "Why is my favicon blurry even though my logo is high resolution?", a: "Almost always because a single image is being scaled down by the browser at display time rather than being resized deliberately for each target size. Downscaling a detailed 512px logo to 16px with generic image scaling loses fine detail; generating a dedicated 16px version — as this tool does — lets you (or the browser) choose which details to keep." },
+    { q: "What's the actual minimum I need — just favicon.ico?", a: "For basic browser tab support, yes. For a polished result across devices — iOS home screen bookmarks, Android \"add to home screen,\" Windows tiles — you need the larger PNG sizes too, particularly the 180×180 apple-touch-icon and 192×192/512×512 for Android and PWA install prompts." },
+    { q: "Do I need to update my HTML, or does the browser find favicon.ico automatically?", a: "Browsers do check /favicon.ico at the site root automatically as a fallback, but explicit <link> tags in your <head> take priority and are required for the apple-touch-icon and larger PNG sizes — browsers don't guess those paths on their own." },
+    { q: "My source logo has a transparent background — does that carry through?", a: "Yes, PNG transparency is preserved through every resize. Keep in mind some contexts (older Windows tile backgrounds, some browser dark-mode tab bars) may render a transparent icon oddly if there's no defined background — test in both light and dark browser themes." },
+    { q: "Can I use a non-square source image?", a: "Yes — the tool crops to a centered square before resizing. If your logo isn't centered in the source image, crop it to a square yourself first for precise control over what's kept." },
+  ]}
+>
+
+<p class="lead">
+  A blurry favicon is one of the more noticeable small polish issues a site can have — browser tabs are small, so any softness in the icon is immediately visible. It's almost always caused by one thing: relying on a single image and letting the browser scale it, instead of generating a dedicated version for each size that actually gets requested.
+</p>
+
+<h2>Generate a full set in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/favicon-generator/">Favicon Generator</a> on keptlocal takes one image and produces every size modern browsers and devices request, entirely on your device.
+</p>
+<ol>
+  <li>Upload a square (or square-ish — it gets center-cropped) image.</li>
+  <li>Check the size previews at 16, 32, 48, and 180px to confirm detail survives the shrink.</li>
+  <li>Click <strong>Generate &amp; download .zip</strong>.</li>
+  <li>Unzip, drop the files into your site's static asset root, and add the included <code>&lt;link&gt;</code> tags to your <code>&lt;head&gt;</code>.</li>
+</ol>
+
+<h2>Why resizing once isn't enough</h2>
+<p>
+  A favicon isn't displayed at one fixed size — it's requested independently, at a specific pixel dimension, by whatever surface is showing it. A browser tab wants 16×16 or 32×32. iOS specifically looks for a 180×180 image tagged as <code>apple-touch-icon</code> when a user bookmarks your site to their home screen — and if it can't find one, it falls back to screenshotting your page, which looks considerably worse than almost any icon would. Android and PWA install prompts look for 192×192 and 512×512 PNGs per the Web App Manifest spec. Serving a single image and relying on the browser to scale it on the fly produces soft edges at small sizes, because generic image scaling doesn't know which details in your logo matter enough to preserve.
+</p>
+
+<h2>Designing something that survives 16 pixels</h2>
+<p>
+  Most blurry-favicon complaints trace back to the source design, not the resizing step. A few things that hold up at small sizes:
+</p>
+<ul>
+  <li><strong>One simple shape, not a full logo.</strong> A wordmark with your company name reads fine at 200px and turns into illegible gray mush at 16px. Use just the symbol or a single initial for the favicon version.</li>
+  <li><strong>Strong contrast.</strong> Favicons sit against both light and dark browser chrome depending on the viewer's OS theme — a mark with low contrast against its background can vanish in one theme even if it looks fine in the other.</li>
+  <li><strong>Minimal fine detail.</strong> Thin lines, small text, and subtle gradients don't survive being scaled down to a handful of pixels. Bold, simple geometry does.</li>
+  <li><strong>Centered composition.</strong> Since non-square sources get center-cropped automatically, keep your subject centered with a little margin so nothing important gets clipped.</li>
+</ul>
+
+<h2>What the ICO format actually contains</h2>
+<p>
+  A <code>.ico</code> file isn't a single image — it's a small container holding multiple images at different sizes, each labeled with its dimensions, so a requesting browser picks the size closest to what it actually needs rather than scaling one image up or down. Older ICO files encoded each size as raw BMP data; modern ones (including what this tool generates) embed standard PNG data instead, which every current browser and operating system reads correctly and which compresses considerably smaller.
+</p>
+
+<h2>Privacy: what happens to your image</h2>
+<p>
+  Every resize happens on an HTML5 canvas in your browser, and the final ZIP is built locally with JSZip. Your source image is never uploaded — open DevTools → Network while generating and you'll see nothing sent.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Generate a favicon set now with <a href="/tools/favicon-generator/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Favicon Generator</a> — no upload, no signup. Need to crop your logo to square first? Try <a href="/tools/crop-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Crop Image</a>.
+</p>
+
+</BlogLayout>

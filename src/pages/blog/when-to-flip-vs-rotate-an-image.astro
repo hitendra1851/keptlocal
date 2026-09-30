@@ -1,0 +1,59 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="Flip vs. Rotate: What's the Actual Difference?"
+  description="Flipping mirrors an image; rotating turns it. They look similar in some cases but solve completely different problems — here's how to tell which one you need."
+  publishDate="2026-11-05"
+  readTime={3}
+  tags={["Image"]}
+  toolSlug="flip-image"
+  toolName="Flip Image"
+  toolTagline="Mirror an image horizontally or vertically — free, in your browser."
+  faqs={[
+    { q: "Is flipping the same as rotating 180°?", a: "No, even though a 180° rotation and a flip can occasionally produce a visually similar result for simple symmetric shapes, they're mathematically different operations. Rotation turns every point around a center; flipping mirrors every point across a line. For an image with text or an asymmetric subject, the difference is obvious — flipped text reads backwards, rotated-180° text reads upside down." },
+    { q: "When would I actually need to flip an image?", a: "Correcting a mirrored photo (some front-facing phone cameras save selfies mirrored compared to how you saw yourself in the preview), creating a mirrored design element intentionally, or fixing a scanned image that was fed into a scanner backwards." },
+    { q: "Does flipping affect text or watermarks already in the image?", a: "Yes — flipping mirrors everything in the frame, including any text, logos, or watermarks baked into the image. Flipped text becomes backwards and unreadable, which is usually a sign the image shouldn't be flipped, or needs the text handled separately." },
+    { q: "Horizontal flip vs. vertical flip — what's the difference?", a: "Horizontal flip mirrors left and right (like looking in a mirror facing the subject). Vertical flip mirrors top and bottom (like the image reflected in still water below it). They're independent operations — flipping both horizontally and vertically is equivalent to a 180° rotation." },
+    { q: "Does flipping reduce image quality?", a: "No — like a 90°/180°/270° rotation, flipping simply repositions existing pixels with no interpolation required, so there's no quality loss." },
+  ]}
+>
+
+<p class="lead">
+  Flip and rotate get confused constantly because both change an image's orientation — but they're solving different problems, and using the wrong one produces a subtly wrong result (or, with text in frame, an obviously wrong one).
+</p>
+
+<h2>Flip an image in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/flip-image/">Flip Image tool</a> on keptlocal mirrors an image horizontally or vertically, entirely on your device.
+</p>
+
+<h2>The actual difference</h2>
+<p>
+  <strong>Rotation</strong> turns an image around a center point, like spinning a photo on a table. Every point moves along a circular arc; the image's basic left-right, top-bottom relationships stay intact — if a person's left hand was on the viewer's left before a 90° rotation, it's now on the viewer's bottom, but their body is still built the same way.
+</p>
+<p>
+  <strong>Flipping</strong> mirrors an image across an axis, like reflecting it in a mirror or in water. A horizontal flip swaps left and right — anything on the left edge moves to the right edge, and vice versa. A vertical flip swaps top and bottom the same way. Critically, flipping reverses handedness: a flipped photo of someone writing with their right hand shows them appearing to write with their left. Text becomes backwards and unreadable. This is the tell that distinguishes the two operations at a glance — rotated text is legible but oriented differently; flipped text is mirror-reversed.
+</p>
+
+<h2>When you actually need to flip</h2>
+<ul>
+  <li><strong>Mirrored selfies.</strong> Many phone front cameras display a mirrored preview while you're framing the shot (so it feels like looking in a mirror), but save the actual file un-mirrored — meaning the saved photo can look "backwards" compared to what you expected on screen. A horizontal flip corrects this.</li>
+  <li><strong>Scanned images fed in backwards.</strong> A photo or document scanned face-down instead of face-up (or reversed in some other way specific to the scanner) can come out mirrored.</li>
+  <li><strong>Intentional mirrored design elements.</strong> Design work sometimes calls for a genuinely mirrored version of an asset — a symmetric pattern, a reversed icon for a different layout direction.</li>
+</ul>
+<p>
+  If your actual problem is that the image displays sideways or upside down — not mirrored — you want <a href="/tools/rotate-image/">Rotate</a>, not Flip.
+</p>
+
+<h2>Privacy: what happens to your photo</h2>
+<p>
+  Flipping happens on an HTML5 canvas in your browser — your photo is never uploaded. Open DevTools → Network while using the tool and you'll see no outbound requests.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Flip an image now with <a href="/tools/flip-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Flip Image tool</a> — no upload, no signup. Need to fix sideways orientation instead? Try <a href="/tools/rotate-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Rotate Image</a>.
+</p>
+
+</BlogLayout>

@@ -1,0 +1,84 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="What Is a UUID? A Practical Guide"
+  description="What UUIDs are, the difference between v1, v4, v5, and v7, and when to use one instead of an auto-increment integer — with a free bulk generator."
+  publishDate="2026-09-27"
+  readTime={5}
+  tags={["Utility", "Developer"]}
+  toolSlug="uuid-generator"
+  toolName="UUID Generator"
+  toolTagline="Generate random UUIDs, one or thousands at a time — free, in your browser."
+  faqs={[
+    { q: "Can two systems generate the same UUID by accident?", a: "For version 4 UUIDs, the probability is close enough to zero to treat as impossible — about 1 in 2.7 × 10³⁸ per pair. You'd need to generate roughly a billion v4 UUIDs per second for about 85 years before the odds of a single collision reach 50%." },
+    { q: "Is a UUID the same thing as a hash?", a: "No. A hash is derived deterministically from input data — the same input always produces the same hash, and it's used to verify data integrity or as a lookup key. A v4 UUID is pure randomness with no relationship to any input. (A v5 UUID is closer to a hash, since it's deterministically derived from a name and namespace.)" },
+    { q: "Can I use a UUID as a short link or public-facing ID?", a: "Technically yes, but 36 characters is long for a URL. If human-readability or URL length matters, consider a shorter random ID (e.g., 8–10 base62 characters) instead — UUIDs are optimized for uniqueness guarantees, not brevity." },
+    { q: "Do all databases support UUID as a native type?", a: "Most modern ones do — PostgreSQL has a native uuid type, MySQL 8+ supports it via BINARY(16) with conversion functions, SQLite stores it as text or blob. Check your specific database version if you're designing a schema around it." },
+    { q: "What's the actual format?", a: "32 hexadecimal digits in five groups separated by hyphens: 8-4-4-4-12, e.g. 550e8400-e29b-41d4-a716-446655440000. Total length is always 36 characters including the hyphens." },
+  ]}
+>
+
+<p class="lead">
+  UUIDs show up everywhere in software — database keys, API responses, log entries, file names — but the format is often copy-pasted from documentation without much thought about what it actually guarantees or when a different approach would serve better.
+</p>
+
+<h2>Generate one in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/uuid-generator/">UUID Generator</a> on keptlocal produces version 4 (random) UUIDs using your browser's native cryptographic random number generator.
+</p>
+<ol>
+  <li>Set how many you need — from a single UUID up to 10,000 at once.</li>
+  <li>Pick a format: one per line, comma-separated, or a JSON array.</li>
+  <li>Click <strong>Generate</strong>, then <strong>Copy all</strong>.</li>
+</ol>
+
+<h2>The core idea</h2>
+<p>
+  A UUID is a 128-bit identifier designed to be unique without any central coordination. That last part is the whole point: a normal auto-increment ID (1, 2, 3…) requires a single authority — the database — to hand out the next number, which means two systems can't independently generate IDs without risking a collision. A UUID sidesteps that entirely. Generate one on a laptop with no network connection, generate another on a server on the other side of the world, and the odds of them matching are, for practical purposes, zero.
+</p>
+
+<h2>The four versions worth knowing</h2>
+<p>
+  RFC 4122 (and its 2024 update, RFC 9562) defines several UUID versions. They solve different problems:
+</p>
+<ul>
+  <li><strong>v1 — timestamp + MAC address.</strong> Encodes when and (originally) where the UUID was generated. Rarely chosen today; embedding a MAC address is a minor privacy leak, and most systems that want sortability now use v7 instead.</li>
+  <li><strong>v4 — random.</strong> 122 random bits, no embedded information. This is the default choice for almost everything, and what keptlocal's generator produces.</li>
+  <li><strong>v5 — deterministic, name-based (SHA-1).</strong> The same namespace + name input always produces the same UUID. Useful for converting an existing stable identifier (a URL, an email address) into UUID form consistently, without needing to store a lookup table.</li>
+  <li><strong>v7 — timestamp-ordered.</strong> Combines a millisecond timestamp prefix with random bits, so UUIDs generated later sort after ones generated earlier — solving the database index fragmentation problem that pure-random v4 UUIDs cause at high insert volumes, while keeping most of v4's unpredictability.</li>
+</ul>
+
+<h2>UUID vs. auto-increment integer: the real tradeoff</h2>
+<p>
+  This comes up in almost every schema design discussion, so it's worth being concrete about the actual tradeoff rather than treating either option as obviously correct.
+</p>
+<p>
+  <strong>Integers win on:</strong> storage size (4–8 bytes vs. 16), index performance (sequential inserts keep B-tree indexes compact and cache-friendly), and human readability in logs and URLs.
+</p>
+<p>
+  <strong>UUIDs win on:</strong> decentralized generation (no round-trip to the database needed before you have an ID — useful for offline-first apps, message queues, and distributed systems), merge safety (combining data from two systems that both used auto-increment integers means ID collisions; UUIDs avoid this by construction), and not leaking business information (a sequential ID exposes your record count and creation order to anyone who can see it).
+</p>
+<p>
+  A common middle ground: use v7 UUIDs, which keep the decentralization and non-collision guarantees of a UUID while restoring most of the index-locality benefit of a sequential integer, since they sort roughly by creation time.
+</p>
+
+<h2>Where UUIDs actually get used</h2>
+<ul>
+  <li>Database primary keys, especially in microservice architectures where services generate their own records independently</li>
+  <li>API correlation/trace IDs, tagging a request as it moves through multiple services for debugging</li>
+  <li>File and upload naming, to guarantee two users' identically-named files never collide</li>
+  <li>Test fixtures and seed data, generating realistic non-sequential sample IDs</li>
+</ul>
+
+<h2>Privacy: what happens to the values you generate</h2>
+<p>
+  Nothing is sent anywhere — <code>crypto.randomUUID()</code> is a built-in browser function, not a keptlocal service. UUIDs exist only in your browser's memory and clipboard until you use them elsewhere.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Generate UUIDs now with <a href="/tools/uuid-generator/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free UUID Generator</a> — one or thousands at once. Also useful: <a href="/tools/json-formatter/" class="text-[var(--color-accent)] hover:underline underline-offset-4">JSON Formatter</a> for shaping the output into a fixture file.
+</p>
+
+</BlogLayout>

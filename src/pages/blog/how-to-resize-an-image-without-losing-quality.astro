@@ -1,0 +1,67 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="How to Resize an Image Without Losing Quality"
+  description="Why shrinking a photo doesn't actually cost quality but enlarging one always does, and how to pick between resizing by dimensions, percentage, or longest side."
+  publishDate="2026-10-23"
+  readTime={4}
+  tags={["Image"]}
+  toolSlug="resize-image"
+  toolName="Resize Image"
+  toolTagline="Resize by exact dimensions, percentage, or longest side — free, in your browser."
+  faqs={[
+    { q: "Does resizing down really not lose quality?", a: "It's a slight simplification — shrinking always discards some pixel data, since there are fewer pixels in the output. But at typical shrink ratios, a good resize algorithm (which browsers use by default) preserves the image well enough that quality loss isn't visible to the eye. The meaningful, visible quality loss happens when enlarging, not shrinking." },
+    { q: "Why does enlarging an image look blurry?", a: "Enlarging requires inventing pixel data that was never captured — the resize algorithm interpolates new pixels based on nearby existing ones, essentially guessing. There is no way to recover detail that wasn't in the original; enlarging just makes existing detail more spread out and soft." },
+    { q: "Which resize mode should I use — dimensions, percentage, or longest side?", a: "Dimensions when you need an exact pixel size (a website's required image size, a print spec). Percentage when you want a proportional shrink without calculating exact numbers (\"make everything 50% smaller\"). Longest side when you want every image in a batch capped at the same maximum dimension regardless of original orientation or aspect ratio — common for prepping photos for web upload." },
+    { q: "Does resizing change the file format?", a: "No — the output keeps the same format as the input (JPG stays JPG, PNG stays PNG). To change format as well as size, use keptlocal's Convert Image tool." },
+    { q: "Should I resize before or after compressing?", a: "Resize first. Compression quality settings work on the pixels that exist — resizing down first means the compression step has fewer pixels to encode, generally producing a smaller file at the same visual quality than compressing a full-size image and resizing after." },
+  ]}
+>
+
+<p class="lead">
+  "Resizing loses quality" is true in one direction and false in the other — and knowing which is which changes how you should think about preparing images for anything from a website to a print job.
+</p>
+
+<h2>Resize in your browser (free, instant)</h2>
+<p>
+  The <a href="/tools/resize-image/">Resize Image tool</a> on keptlocal resizes JPG, PNG, and WebP images using the Canvas API, entirely on your device.
+</p>
+<ol>
+  <li>Drop your image onto the tool.</li>
+  <li>Pick a resize mode: <strong>Dimensions</strong> (exact width/height, with an aspect-ratio lock), <strong>Percentage</strong>, or <strong>Longest side</strong>.</li>
+  <li>Enter the target value.</li>
+  <li>Download the resized image.</li>
+</ol>
+
+<h2>Why shrinking is safe but enlarging isn't</h2>
+<p>
+  An image is a fixed grid of pixels — a 4000×3000 photo has exactly that many pixels, no more, no less. Shrinking it to 2000×1500 means combining groups of original pixels into fewer new ones; a competent resize algorithm (which browsers use automatically) averages the color information intelligently, and because you're starting with more data than you need, the result looks essentially identical to the eye at normal viewing sizes.
+</p>
+<p>
+  Enlarging works the opposite way: stretching that same 4000×3000 photo to 8000×6000 means the algorithm has to invent new pixels that were never captured — it interpolates a guess based on neighboring pixels. There's no way to recover detail that was never recorded in the first place; the result looks softer and less sharp than a photo genuinely taken at that resolution, no matter how good the resizing algorithm is. This is also why AI upscaling tools exist as a separate category — they don't "recover" lost detail either, they generate plausible new detail based on trained patterns, which is a fundamentally different (and much heavier) operation than a standard resize.
+</p>
+
+<h2>Choosing a resize mode</h2>
+<ul>
+  <li><strong>Dimensions</strong> — use when a platform or spec requires an exact pixel size: a website's hero image slot, a print template, a profile photo requirement. The aspect-ratio lock keeps proportions correct when you only need to specify one dimension.</li>
+  <li><strong>Percentage</strong> — use for a quick proportional reduction without doing the math yourself: "shrink this to 50%" is simpler to reason about than calculating the exact target pixel count.</li>
+  <li><strong>Longest side</strong> — use when preparing a batch of photos with different original dimensions (portrait and landscape mixed) and you want every image capped at the same maximum size regardless of orientation — a common requirement for web galleries and upload limits.</li>
+</ul>
+
+<h2>Resize before you compress</h2>
+<p>
+  If the goal is a small file size, resize first and compress second. Compression settings (JPEG quality, for instance) determine how much detail is kept per pixel — but if the image has more pixels than it needs for its final display size, you're spending file size encoding detail nobody will see at that size. Shrinking to the actual needed dimensions first, then compressing, consistently produces smaller files at equivalent visual quality than compressing an oversized image and shrinking afterward.
+</p>
+
+<h2>Privacy: what happens to your image</h2>
+<p>
+  Resizing happens entirely on an HTML5 canvas in your browser — the image is never uploaded. Open DevTools → Network while resizing and you'll see no outbound requests.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Resize an image now with <a href="/tools/resize-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Resize Image tool</a> — no upload, no signup. Need to shrink the file size too? Try <a href="/tools/compress-image/" class="text-[var(--color-accent)] hover:underline underline-offset-4">Compress Image</a>.
+</p>
+
+</BlogLayout>

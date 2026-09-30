@@ -1,0 +1,64 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="The Best Free Browser Tools for Real Estate Agents"
+  description="Listing photos, disclosure forms, signed offers, floor plans — the everyday paperwork of real estate, handled free and without uploading client documents anywhere."
+  publishDate="2026-12-15"
+  readTime={6}
+  tags={["PDF", "Image"]}
+  toolName="Browse all tools"
+  toolTagline="46 free PDF and image tools — no uploads, no signup, no limits."
+>
+
+<p class="lead">
+  Real estate work generates a steady stream of small file tasks — resizing listing photos, merging disclosure documents, watermarking floor plans, filling out the same form for a dozen different clients. None of it is complicated, but it adds up, and much of it involves documents (offers, financial disclosures, ID copies) that shouldn't be casually uploaded to a random online tool.
+</p>
+
+<h2>Listing photos</h2>
+<p>
+  Every major listing platform (MLS systems, Zillow, Redfin, brokerage sites) has its own preferred image dimensions, and getting them wrong means a platform's own auto-crop decides what to keep — sometimes cutting off exactly the feature that made a photo worth using.
+</p>
+<ul>
+  <li><a href="/tools/resize-image/">Resize Image</a> — get photos to an exact pixel size before uploading, so you control the crop instead of the platform.</li>
+  <li><a href="/tools/compress-image/">Compress Image</a> — shrink file sizes for faster upload and page load, without a visible quality hit.</li>
+  <li><a href="/tools/social-image-resizer/">Social Image Resizer</a> — crop a listing photo to the exact size for an Instagram post or story when marketing a property on social media.</li>
+  <li><a href="/tools/image-watermark/">Image Watermark</a> — stamp your brokerage name or a "Coming Soon" mark across exterior photos before they're shared publicly ahead of a formal listing.</li>
+</ul>
+
+<h2>Contracts, disclosures, and offers</h2>
+<p>
+  These are the documents where privacy actually matters — financial disclosures, signed offers with buyer information, inspection reports. Uploading them to a free online converter means a copy briefly sits on a server you don't control, for paperwork that's often legally sensitive.
+</p>
+<ul>
+  <li><a href="/tools/merge-pdf/">Merge PDF</a> — combine a disclosure packet, inspection report, and signed addenda into one document for a file or an email attachment.</li>
+  <li><a href="/tools/fill-pdf-form/">Fill PDF Form</a> — complete standard disclosure and offer forms directly, without printing and scanning.</li>
+  <li><a href="/tools/sign-pdf/">Sign PDF</a> — add a signature to routine paperwork that doesn't require a full e-signature platform.</li>
+  <li><a href="/tools/compress-pdf/">Compress PDF</a> — shrink a large scanned disclosure packet before emailing it, when a mail server's attachment size limit gets in the way.</li>
+  <li><a href="/tools/watermark-pdf/">Watermark PDF</a> — mark a draft offer or a comparative market analysis as "DRAFT" before it's finalized.</li>
+</ul>
+
+<h2>Floor plans and property documents</h2>
+<ul>
+  <li><a href="/tools/rotate-pdf/">Rotate PDF</a> — fix a floor plan or survey scanned in the wrong orientation.</li>
+  <li><a href="/tools/crop-pdf/">Crop PDF</a> — remove excess margins from a scanned property document before sharing it.</li>
+  <li><a href="/tools/jpg-to-pdf/">JPG to PDF</a> — combine multiple property photos or scanned documents into a single PDF packet.</li>
+  <li><a href="/tools/pdf-to-jpg/">PDF to JPG</a> — pull a specific page from a multi-page disclosure or floor plan PDF to use as a standalone image.</li>
+</ul>
+
+<h2>Why this matters more than it seems for real estate specifically</h2>
+<p>
+  Real estate paperwork routinely contains exactly the kind of information privacy-conscious handling is meant to protect: buyers' and sellers' financial details, Social Security numbers on some loan documents, home addresses tied to specific transaction values. Many free "convert this PDF" tools upload the file to a server to process it — reasonable for a public flyer, a real question for a document with someone's financing details on it. Running these operations in the browser instead means the file never leaves the device processing it, which matters specifically because of what real estate documents tend to contain.
+</p>
+
+<h2>Privacy: verifying it yourself</h2>
+<p>
+  Open DevTools (F12) → Network tab in your browser, run any keptlocal tool on a document, and confirm no upload request fires. It takes under a minute and is worth doing once for peace of mind before making any of these tools part of a regular workflow involving client paperwork.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Browse <a href="/tools/" class="text-[var(--color-accent)] hover:underline underline-offset-4">all 46 keptlocal tools</a> — no upload, no signup, no daily limit.
+</p>
+
+</BlogLayout>

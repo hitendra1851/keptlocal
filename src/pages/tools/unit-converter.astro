@@ -1,0 +1,47 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import UnitConverter from "../../components/tools/UnitConverter.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "unit-converter")!;
+---
+
+<ToolLayout tool={tool}>
+  <UnitConverter slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to convert a unit</h2>
+    <ol>
+      <li>Pick a category: Length, Weight, Volume, Area, Speed, or Temperature.</li>
+      <li>Choose the units in each dropdown.</li>
+      <li>Type a value into either field — the other updates instantly.</li>
+      <li>Use the swap button to flip the two units without retyping.</li>
+    </ol>
+    <p>
+      Every conversion is a local calculation — no server round-trip, no delay waiting for a response.
+    </p>
+
+    <h2>Why unit conversion isn't always "just multiply"</h2>
+    <p>
+      Most unit conversions are a straightforward scale factor: multiply a value in one unit by a fixed ratio to get the equivalent in another. A mile is always exactly 1,609.344 meters; a pound is always exactly 0.45359237 kilograms. This tool stores each supported unit as a ratio to a base unit (meters for length, kilograms for weight, and so on) and converts by going through that base — convert to the base unit, then from the base unit to the target.
+    </p>
+    <p>
+      Temperature is the exception. Celsius, Fahrenheit, and Kelvin don't just use different-sized degrees — they have different zero points. 0°C is not the same physical temperature as 0°F (0°C is 32°F), so converting between them requires an offset calculation, not pure multiplication: Fahrenheit = Celsius × 9/5 + 32, not Celsius × some constant. This is a common source of manual conversion errors, and exactly the kind of arithmetic worth letting a tool handle.
+    </p>
+
+    <h2>A note on precision</h2>
+    <p>
+      Some common conversion factors are exact by international standard (an inch is defined as exactly 25.4mm, and everything else in the imperial length system derives from that). Others — most volume and weight conversions between metric and US customary units — are exact rational numbers but with enough decimal places that manual arithmetic invites rounding drift. This tool uses the full-precision conversion factors and only rounds for display, so chaining conversions (convert A→B, then B→C) stays accurate.
+    </p>
+
+    <h2>Metric vs. US customary: a quick reference</h2>
+    <p>
+      Nearly the entire world uses the metric system (meters, kilograms, liters, Celsius) for everyday measurement; the United States primarily uses US customary units (feet/miles, pounds, gallons, Fahrenheit) alongside metric in science, medicine, and some industries. Recipes, home improvement measurements, road signs, and body weight are the categories where US-based readers most often need a metric conversion — and where international readers most often need the reverse.
+    </p>
+
+    <h2>Privacy: what happens to your numbers</h2>
+    <p>
+      Every conversion is plain arithmetic running in your browser — nothing is sent anywhere, logged, or stored.
+    </p>
+  </Fragment>
+</ToolLayout>

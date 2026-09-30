@@ -1,0 +1,71 @@
+---
+import BlogLayout from "../../layouts/BlogLayout.astro";
+---
+
+<BlogLayout
+  title="The Correct Image Sizes for Every Social Platform in 2026"
+  description="Reference dimensions for Instagram, X/Twitter, Facebook, LinkedIn, and YouTube — plus why uploading the wrong aspect ratio gets your image auto-cropped unpredictably."
+  publishDate="2026-11-16"
+  readTime={4}
+  tags={["Image"]}
+  toolSlug="social-image-resizer"
+  toolName="Social Image Resizer"
+  toolTagline="Crop and resize to the exact size each platform expects — free, in your browser."
+  faqs={[
+    { q: "What happens if I upload the wrong size?", a: "The platform auto-crops or letterboxes it to fit its own display format. Auto-crop is the more common behavior and the more unpredictable one — the platform's algorithm doesn't know what matters in your image, so it can cut off faces, text, or key details it has no way of identifying as important." },
+    { q: "Do these dimensions change often?", a: "Occasionally, usually in small increments as platforms adjust their apps and web layouts. The dimensions here reflect commonly published specs as of 2026 and are reliable defaults for everyday posting — for a campaign where exact current compliance matters, check the platform's own current documentation." },
+    { q: "Should I design at a higher resolution and scale down, or exactly at the target size?", a: "Design or photograph at the target size or larger, then resize down (never up) to the exact target dimensions. Upscaling a smaller source to fit a larger target loses sharpness, since new pixel detail has to be invented rather than genuinely captured." },
+    { q: "Why is Instagram Story a different aspect ratio from Instagram Post?", a: "They're displayed in fundamentally different contexts — posts appear in a scrollable feed and grid view (historically square-friendly), while Stories and Reels take over the full phone screen in a tall vertical format. The aspect ratios reflect what actually fills each display context well." },
+    { q: "Can I use the same image for multiple platforms?", a: "You can start from the same source photo, but each platform's exact crop should be prepared separately to control what gets kept — a single generic size uploaded everywhere risks an unpredictable auto-crop on at least some platforms." },
+  ]}
+>
+
+<p class="lead">
+  Every major social platform expects images at a specific aspect ratio, and getting it wrong doesn't just mean the image looks slightly off — it means the platform decides what to crop out of your image for you, based on an algorithm that has no idea what's actually important in the frame.
+</p>
+
+<h2>Crop and resize in your browser (no upload, free)</h2>
+<p>
+  The <a href="/tools/social-image-resizer/">Social Image Resizer</a> on keptlocal center-crops and resizes a photo to any of six platform presets, entirely on your device.
+</p>
+
+<h2>Reference dimensions</h2>
+<table>
+  <thead>
+    <tr><th>Platform</th><th>Dimensions</th><th>Aspect ratio</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Instagram Post</td><td>1080 × 1080</td><td>1:1 (square)</td></tr>
+    <tr><td>Instagram Story</td><td>1080 × 1920</td><td>9:16 (vertical)</td></tr>
+    <tr><td>X / Twitter Post</td><td>1600 × 900</td><td>16:9</td></tr>
+    <tr><td>Facebook Post</td><td>1200 × 630</td><td>~1.91:1</td></tr>
+    <tr><td>LinkedIn Post</td><td>1200 × 627</td><td>~1.91:1</td></tr>
+    <tr><td>YouTube Thumbnail</td><td>1280 × 720</td><td>16:9</td></tr>
+  </tbody>
+</table>
+
+<h2>What happens when you upload the wrong size</h2>
+<p>
+  Platforms handle a mismatched aspect ratio one of two ways: crop, or letterbox. Cropping is more common and more risky — the platform's algorithm picks what to trim based on general heuristics (often centering on detected faces, if any), with no understanding of what matters in your specific image. A product shot with the product off to one side, a screenshot with important text near an edge, or a group photo with someone at the frame's border can all lose exactly the part that matters. Letterboxing (adding bars to preserve the full image) is safer for content but produces a smaller, less visually prominent result surrounded by empty space — rarely the outcome anyone actually wants for a feature post.
+</p>
+
+<h2>Design at the target size, not up to it</h2>
+<p>
+  Always work from an image at least as large as the target dimensions, then resize down. Enlarging a smaller image to hit a target size requires the resize algorithm to invent pixel detail that was never captured, producing a visibly softer result — the same reason a small phone photo blown up to billboard size looks blurry rather than sharp. Shrinking, by contrast, discards data you don't need and looks clean at any reasonable ratio.
+</p>
+
+<h2>Why Instagram's two formats differ so much</h2>
+<p>
+  Instagram Post (square, 1:1) and Instagram Story (vertical, 9:16) reflect two genuinely different viewing contexts within the same app. Posts live in a scrollable feed and a grid-view profile page, where a square format has historically balanced well against both landscape and portrait source photos without excessive cropping either way. Stories and Reels take over the entire phone screen — a vertical format fills that space completely, while a square or horizontal image would leave the top and bottom of the screen empty or force an awkward crop.
+</p>
+
+<h2>Privacy: what happens to your image</h2>
+<p>
+  Cropping and resizing both run on an HTML5 canvas in your browser — your image is never uploaded before you're ready to actually post it.
+</p>
+
+<p class="mt-10 pt-6 border-t border-[var(--color-rule)] text-sm text-[var(--color-ink-muted)]">
+  Resize for any platform now with <a href="/tools/social-image-resizer/" class="text-[var(--color-accent)] hover:underline underline-offset-4">keptlocal's free Social Image Resizer</a> — no upload, no signup.
+</p>
+
+</BlogLayout>

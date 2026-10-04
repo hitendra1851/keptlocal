@@ -54,6 +54,10 @@ if (i >= 0 && ring.length > 1) {
   if (extra) relatedPosts.push(extra);
 }
 
+// Per-post social image, generated at build by src/pages/og/[...slug].png.ts
+// (only for posts in the registry; anything else keeps the default).
+const ogImage = i >= 0 ? `/og/blog/${currentSlug}.png` : "/og-default.png";
+
 const schema = [
   {
     "@context": "https://schema.org",
@@ -63,7 +67,7 @@ const schema = [
     url: pageUrl,
     datePublished: dateIso,
     dateModified: modIso,
-    image: `${siteUrl}/og-default.png`,
+    image: `${siteUrl}${ogImage}`,
     author: {
       "@type": "Person",
       "@id": `${siteUrl}/about/#person`,
@@ -102,7 +106,7 @@ const schema = [
 ];
 ---
 
-<BaseLayout title={metaTitle} description={description} canonical={pageUrl} schema={schema}>
+<BaseLayout title={metaTitle} description={description} canonical={pageUrl} schema={schema} ogImage={ogImage}>
   <Header />
 
   <main class="max-w-5xl mx-auto px-6 pt-10 pb-16">

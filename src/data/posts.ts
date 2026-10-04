@@ -326,7 +326,7 @@ export const posts: Post[] = [
   {
     slug: "what-is-exif-data-and-why-strip-it",
     title: "What Is EXIF Data, and Why You Might Want to Strip It",
-    description: "Every photo your camera or phone takes carries hidden metadata — sometimes including your exact GPS location. Here's what's actually in there and when to remove it.",
+    description: "Every photo your phone takes carries hidden metadata — sometimes your exact GPS location. Here's what's in there and when to remove it.",
     date: "2026-08-14",
     readTime: 4,
     tags: ["Image", "Privacy"],
@@ -342,7 +342,7 @@ export const posts: Post[] = [
   {
     slug: "correct-image-sizes-for-social-media-2026",
     title: "The Correct Image Sizes for Every Social Platform in 2026",
-    description: "Reference dimensions for Instagram, X/Twitter, Facebook, LinkedIn, and YouTube — plus why uploading the wrong aspect ratio gets your image auto-cropped unpredictably.",
+    description: "Image dimensions for Instagram, X, Facebook, LinkedIn, and YouTube — and why the wrong aspect ratio gets your image cropped unpredictably.",
     date: "2026-08-21",
     readTime: 4,
     tags: ["Image"],
@@ -390,7 +390,7 @@ export const posts: Post[] = [
   {
     slug: "passport-photo-size-requirements-by-country",
     title: "Passport Photo Size Requirements by Country",
-    description: "Reference dimensions for US, India, UK, Schengen, Canada, and China passport and visa photos, plus why getting the size exactly right matters more than it seems.",
+    description: "Passport and visa photo sizes for the US, India, UK, Schengen, Canada, and China — and why getting the size exactly right matters.",
     date: "2026-09-12",
     readTime: 4,
     tags: ["Image"],
@@ -406,7 +406,7 @@ export const posts: Post[] = [
   {
     slug: "best-free-tools-for-real-estate-agents",
     title: "The Best Free Browser Tools for Real Estate Agents",
-    description: "Listing photos, disclosure forms, signed offers, floor plans — the everyday paperwork of real estate, handled free and without uploading client documents anywhere.",
+    description: "Listing photos, disclosures, signed offers, floor plans — everyday real estate paperwork, handled free without uploading client documents.",
     date: "2026-09-19",
     readTime: 6,
     tags: ["PDF", "Image"],
@@ -414,7 +414,7 @@ export const posts: Post[] = [
   {
     slug: "best-free-pdf-tools-for-teachers",
     title: "The Best Free PDF Tools for Teachers and Educators",
-    description: "Worksheets, permission slips, scanned assignments, and grading — the everyday file tasks of teaching, handled free without uploading student information anywhere.",
+    description: "Worksheets, permission slips, scanned assignments, grading — everyday teaching file tasks, handled free without uploading student information.",
     date: "2026-09-22",
     readTime: 6,
     tags: ["PDF", "Image"],

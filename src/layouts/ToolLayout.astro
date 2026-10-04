@@ -82,6 +82,8 @@ const alreadyFree = baseTitle.toLowerCase().includes("free");
 const shortTitle = `${baseTitle} | keptlocal`.length > 60 ? baseTitle : `${baseTitle} | keptlocal`;
 const title = alreadyFree || fullTitle.length > 60 ? shortTitle : fullTitle;
 const description = tool.longDescription || tool.description;
+// Per-tool social image, generated at build by src/pages/og/[...slug].png.ts
+const ogImage = `/og/tools/${tool.slug}.png`;
 
 // Schema: WebApplication + FAQPage + BreadcrumbList
 const schema: Record<string, unknown>[] = [
@@ -91,6 +93,7 @@ const schema: Record<string, unknown>[] = [
     name: tool.name,
     description,
     url: `https://keptlocal.com/tools/${tool.slug}/`,
+    image: `https://keptlocal.com${ogImage}`,
     applicationCategory: tool.category === "PDF" || tool.category === "Utility" ? "UtilitiesApplication" : "MultimediaApplication",
     operatingSystem: "Any (Web Browser)",
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -121,7 +124,7 @@ if (tool.faq.length > 0) {
 }
 ---
 
-<BaseLayout title={title} description={description} schema={schema}>
+<BaseLayout title={title} description={description} schema={schema} ogImage={ogImage}>
   <Header />
 
   <main class="max-w-5xl mx-auto px-6 pt-10 pb-16">

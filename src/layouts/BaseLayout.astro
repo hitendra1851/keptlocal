@@ -125,8 +125,10 @@ const schemaArray = Array.isArray(schema)
     />
 
     <!-- Google Analytics 4 -->
-    <!-- Loaded after the page's load event so the 174 KB gtag.js does not compete with
-         rendering (measured effect on mobile LCP). Events queued in dataLayer are still sent. -->
+    <!-- The 179 KB gtag.js is loaded ~2.5s after the load event, in idle time. Loading it
+         right at load (~0.5s) still landed before LCP: Lighthouse mobile measured homepage
+         LCP 4.3s with gtag vs 2.0s with it blocked. Events queued in dataLayer are still
+         sent once it loads; visits that leave within ~3s are not counted. -->
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
@@ -134,11 +136,15 @@ const schemaArray = Array.isArray(schema)
       gtag('config', 'G-YGS0FP9RG4', { anonymize_ip: true });
       window.addEventListener('load', function () {
         setTimeout(function () {
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-YGS0FP9RG4';
-          document.head.appendChild(s);
-        }, 0);
+          var inject = function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=G-YGS0FP9RG4';
+            document.head.appendChild(s);
+          };
+          if ('requestIdleCallback' in window) requestIdleCallback(inject, { timeout: 2000 });
+          else inject();
+        }, 2500);
       });
     </script>
 

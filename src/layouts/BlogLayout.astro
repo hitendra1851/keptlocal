@@ -3,9 +3,11 @@ import BaseLayout from "./BaseLayout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import FAQ from "../components/FAQ.astro";
+import { posts } from "../data/posts";
 
 export interface Props {
   title: string;
+  seoTitle?: string;      // <title> override when the headline is too long for search results (~60 chars)
   description: string;
   publishDate: string;    // ISO 8601 e.g. "2026-05-23"
   modifiedDate?: string;  // ISO 8601; set only when the post content was really updated
@@ -18,7 +20,7 @@ export interface Props {
   faqs?: { q: string; a: string }[]; // renders an FAQ section + FAQPage schema
 }
 
-const { title, description, publishDate, modifiedDate, readTime, tags = [], canonical, toolSlug, toolName, toolTagline, faqs = [] } = Astro.props;
+const { title, seoTitle, description, publishDate, modifiedDate, readTime, tags = [], canonical, toolSlug, toolName, toolTagline, faqs = [] } = Astro.props;
 const toolHref = toolSlug ? `/tools/${toolSlug}/` : "/tools/";
 
 const siteUrl = "https://keptlocal.com";
@@ -31,7 +33,26 @@ const modObj     = modifiedDate ? new Date(modifiedDate) : null;
 const modIso     = modObj ? modObj.toISOString() : dateIso;
 const modDisplay = modObj ? modObj.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : "";
 
-const metaTitle = `${title} | keptlocal`;
+// Drop the brand suffix when it would push the title past ~60 chars (SERP truncation).
+const metaTitle = seoTitle ?? (`${title} | keptlocal`.length > 60 ? title : `${title} | keptlocal`);
+
+// Related articles. All posts form one ring ordered by primary tag, then date; each post
+// links to its previous and next neighbour, plus one more post sharing a tag. The ring
+// guarantees every post at least two inbound links, mostly from the same topic.
+const topic = (p: { tags: string[] }) => (p.tags[0] ?? "").replace(/s$/, "");
+const ring = [...posts].sort((a, b) => topic(a).localeCompare(topic(b)) || a.date.localeCompare(b.date));
+const currentSlug = Astro.url.pathname.replace(/^\/blog\/|\/$/g, "");
+const i = ring.findIndex((p) => p.slug === currentSlug);
+const relatedPosts: typeof posts = [];
+if (i >= 0 && ring.length > 1) {
+  const n = ring.length;
+  relatedPosts.push(ring[(i - 1 + n) % n]);
+  if (n > 2) relatedPosts.push(ring[(i + 1) % n]);
+  const currentTags = ring[i].tags;
+  const extra = [...ring.slice(i + 2), ...ring.slice(0, Math.max(i - 1, 0))]
+    .find((p) => p.slug !== currentSlug && !relatedPosts.includes(p) && p.tags.some((t) => currentTags.includes(t)));
+  if (extra) relatedPosts.push(extra);
+}
 
 const schema = [
   {
@@ -161,6 +182,26 @@ const schema = [
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
           </div>
+        )}
+
+        <!-- Related articles -->
+        {relatedPosts.length > 0 && (
+          <nav class="mt-12 pt-8 border-t border-[var(--color-rule)]" aria-labelledby="related-heading">
+            <h2 id="related-heading" class="font-display text-2xl text-[var(--color-ink)] mb-5 tracking-tight">Related articles</h2>
+            <ul class="grid sm:grid-cols-3 gap-4">
+              {relatedPosts.map((p) => (
+                <li>
+                  <a
+                    href={`/blog/${p.slug}/`}
+                    class="group block h-full p-4 rounded-lg border border-[var(--color-rule)] hover:border-[var(--color-accent)] transition-colors"
+                  >
+                    <span class="block text-sm font-medium text-[var(--color-ink)] group-hover:text-[var(--color-accent)] leading-snug mb-1">{p.title}</span>
+                    <span class="block text-xs text-[var(--color-ink-muted)]">{p.readTime} min read</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
         )}
 
         <!-- Ad slot: in-content bottom -->

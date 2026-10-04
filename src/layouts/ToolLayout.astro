@@ -6,6 +6,8 @@ import PrivacyBadge from "../components/PrivacyBadge.astro";
 import FAQ from "../components/FAQ.astro";
 import { tools } from "../data/tools";
 import type { Tool } from "../data/tools";
+import { posts } from "../data/posts";
+import type { Post } from "../data/posts";
 
 export interface Props {
   tool: Tool;
@@ -13,140 +15,72 @@ export interface Props {
 
 const { tool } = Astro.props;
 
-const relatedTools = tools
-  .filter((t) => t.category === tool.category && t.slug !== tool.slug && t.status === "live")
-  .slice(0, 4);
+// Related tools: the next 5 live tools in the same category, wrapping around the
+// registry. Rotating (instead of always the first few) gives every tool inbound links.
+const sameCategory = tools.filter((t) => t.category === tool.category && t.status === "live");
+const ownIndex = sameCategory.findIndex((t) => t.slug === tool.slug);
+const relatedTools = [...sameCategory.slice(ownIndex + 1), ...sameCategory.slice(0, Math.max(ownIndex, 0))]
+  .slice(0, 5);
 
-const blogMap: Record<string, { slug: string; title: string }[]> = {
-  "merge-pdf": [
-    { slug: "merge-pdf-without-uploading", title: "When to Merge PDFs in Your Browser (and When You Shouldn't)" },
-    { slug: "why-pdf-tools-should-not-upload-your-files", title: "Why PDF Tools Shouldn't Upload Your Files" },
-  ],
-  "split-pdf": [
-    { slug: "how-to-split-a-pdf-without-uploading", title: "How to Split a PDF Without Uploading" },
-  ],
-  "pdf-to-jpg": [
-    { slug: "pdf-to-jpg-when-and-when-not-to-convert", title: "PDF to JPG: When (and When Not) to Convert" },
-  ],
-  "pdf-to-png": [
-    { slug: "pdf-to-jpg-when-and-when-not-to-convert", title: "PDF to JPG vs PNG: Which to Use" },
-  ],
-  "jpg-to-pdf": [
-    { slug: "how-to-convert-jpg-to-pdf", title: "How to Convert JPG to PDF for Free" },
-  ],
-  "compress-pdf": [
-    { slug: "compress-pdf-file-size-vs-quality", title: "File Size vs. Quality: PDF Compression Explained" },
-    { slug: "how-to-compress-pdf-for-email", title: "How to Compress a PDF for Email" },
-  ],
-  "delete-pages-pdf": [
-    { slug: "how-to-remove-pages-from-pdf", title: "How to Remove Pages from a PDF Without Uploading" },
-  ],
-  "add-page-numbers-pdf": [
-    { slug: "how-to-add-page-numbers-to-pdf", title: "How to Add Page Numbers to a PDF" },
-  ],
-  "pdf-to-text": [
-    { slug: "how-to-extract-text-from-pdf", title: "How to Extract Text from a PDF" },
-  ],
-  "unlock-pdf": [
-    { slug: "how-to-remove-pdf-password", title: "How to Remove a PDF Password" },
-  ],
-  "compress-image": [
-    { slug: "how-to-compress-image-to-specific-file-size", title: "Compress an Image to 100KB, 200KB, 500KB" },
-    { slug: "image-compression-formats-jpg-webp-avif-2026", title: "JPG vs WebP vs AVIF: Which Format to Use" },
-  ],
-  "convert-image": [
-    { slug: "heic-to-jpg-iphone-photo-problem", title: "HEIC to JPG: The iPhone Photo Problem" },
-    { slug: "image-compression-formats-jpg-webp-avif-2026", title: "JPG vs WebP vs AVIF Compared" },
-  ],
-  "qr-code-generator": [
-    { slug: "qr-code-guide-free-no-signup", title: "QR Codes Explained: What They Store and How to Make One Free" },
-  ],
-  "rotate-pdf": [
-    { slug: "how-to-rotate-pdf-pages", title: "How to Rotate PDF Pages Without Losing Quality" },
-  ],
-  "sign-pdf": [
-    { slug: "how-to-sign-a-pdf-online", title: "How to Sign a PDF Online for Free (No Account Needed)" },
-  ],
-  "protect-pdf": [
-    { slug: "how-to-password-protect-a-pdf", title: "How to Password Protect a PDF for Free" },
-  ],
-  "uuid-generator": [
-    { slug: "what-is-a-uuid", title: "What Is a UUID? A Practical Guide" },
-  ],
-  "json-formatter": [
-    { slug: "how-to-validate-json-online", title: "How to Format and Validate JSON Online for Free" },
-  ],
-  "watermark-pdf": [
-    { slug: "how-to-watermark-a-pdf", title: "How to Watermark a PDF for Free" },
-  ],
-  "fill-pdf-form": [
-    { slug: "how-to-fill-out-a-pdf-form", title: "How to Fill Out a PDF Form Without Printing It" },
-  ],
-  "word-counter": [
-    { slug: "how-word-count-actually-works", title: "How Word Count Actually Works (and Why Tools Disagree)" },
-  ],
-  "hash-generator": [
-    { slug: "md5-vs-sha256-which-hash-to-use", title: "MD5 vs. SHA-256: Which Hash Should You Use?" },
-  ],
-  "favicon-generator": [
-    { slug: "how-to-make-a-favicon", title: "How to Make a Favicon That Doesn't Look Blurry" },
-  ],
-  "reorder-pdf": [
-    { slug: "how-to-reorder-pdf-pages", title: "How to Reorder Pages in a PDF Without Retyping Anything" },
-  ],
-  "password-generator": [
-    { slug: "how-to-generate-a-strong-password", title: "How to Generate a Password That's Actually Strong" },
-  ],
-  "resize-image": [
-    { slug: "how-to-resize-an-image-without-losing-quality", title: "How to Resize an Image Without Losing Quality" },
-  ],
-  "unit-converter": [
-    { slug: "why-temperature-conversion-is-different", title: "Why Temperature Conversion Isn't Just Multiplication" },
-  ],
-  "case-converter": [
-    { slug: "camelcase-vs-snake-case-vs-kebab-case", title: "camelCase vs. snake_case vs. kebab-case: When to Use Each" },
-  ],
-  "rotate-image": [
-    { slug: "how-to-rotate-a-photo-without-losing-quality", title: "How to Rotate a Photo Without Losing Quality" },
-  ],
-  "flip-image": [
-    { slug: "when-to-flip-vs-rotate-an-image", title: "Flip vs. Rotate: What's the Actual Difference?" },
-  ],
-  "remove-image-exif": [
-    { slug: "what-is-exif-data-and-why-strip-it", title: "What Is EXIF Data, and Why You Might Want to Strip It" },
-  ],
-  "image-watermark": [
-    { slug: "how-to-watermark-a-photo", title: "How to Watermark a Photo for Free" },
-  ],
-  "social-image-resizer": [
-    { slug: "correct-image-sizes-for-social-media-2026", title: "The Correct Image Sizes for Every Social Platform in 2026" },
-  ],
-  "image-to-base64": [
-    { slug: "what-is-base64-encoding", title: "What Is Base64 Encoding, and When Should You Use It?" },
-  ],
-  "convert-image": [
-    { slug: "heic-jpg-png-webp-avif-which-format-to-use", title: "HEIC, JPG, PNG, WebP, AVIF: Which Image Format to Use" },
-  ],
-  "flatten-pdf": [
-    { slug: "what-does-flattening-a-pdf-actually-do", title: "What Does Flattening a PDF Actually Do?" },
-  ],
-  "crop-pdf": [
-    { slug: "how-to-remove-margins-from-a-pdf", title: "How to Remove Margins from a PDF" },
-  ],
-  "pdf-page-count": [
-    { slug: "how-to-check-a-pdfs-page-count-and-metadata", title: "How to Check a PDF's Page Count and Metadata" },
-  ],
-  "passport-photo-maker": [
-    { slug: "passport-photo-size-requirements-by-country", title: "Passport Photo Size Requirements by Country" },
-  ],
+// Blog posts to feature on each tool page (slugs; titles come from the post registry).
+const blogMap: Record<string, string[]> = {
+  "merge-pdf": ["merge-pdf-without-uploading", "why-pdf-tools-should-not-upload-your-files", "keptlocal-vs-ilovepdf-vs-smallpdf"],
+  "split-pdf": ["how-to-split-a-pdf-without-uploading", "smallpdf-alternatives-no-signup"],
+  "pdf-to-jpg": ["pdf-to-jpg-when-and-when-not-to-convert"],
+  "pdf-to-png": ["pdf-to-jpg-when-and-when-not-to-convert", "how-to-extract-text-from-pdf"],
+  "jpg-to-pdf": ["how-to-convert-jpg-to-pdf"],
+  "compress-pdf": ["compress-pdf-file-size-vs-quality", "how-to-compress-pdf-for-email", "smallpdf-alternatives-no-signup"],
+  "delete-pages-pdf": ["how-to-remove-pages-from-pdf"],
+  "add-page-numbers-pdf": ["how-to-add-page-numbers-to-pdf"],
+  "pdf-to-text": ["how-to-extract-text-from-pdf"],
+  "unlock-pdf": ["how-to-remove-pdf-password"],
+  "compress-image": ["how-to-compress-image-to-specific-file-size", "image-compression-formats-jpg-webp-avif-2026"],
+  "convert-image": ["heic-to-jpg-iphone-photo-problem", "image-compression-formats-jpg-webp-avif-2026", "heic-jpg-png-webp-avif-which-format-to-use"],
+  "qr-code-generator": ["qr-code-guide-free-no-signup"],
+  "rotate-pdf": ["how-to-rotate-pdf-pages"],
+  "sign-pdf": ["how-to-sign-a-pdf-online"],
+  "protect-pdf": ["how-to-password-protect-a-pdf"],
+  "uuid-generator": ["what-is-a-uuid"],
+  "json-formatter": ["how-to-validate-json-online"],
+  "watermark-pdf": ["how-to-watermark-a-pdf"],
+  "fill-pdf-form": ["how-to-fill-out-a-pdf-form"],
+  "word-counter": ["how-word-count-actually-works"],
+  "hash-generator": ["md5-vs-sha256-which-hash-to-use"],
+  "favicon-generator": ["how-to-make-a-favicon"],
+  "reorder-pdf": ["how-to-reorder-pdf-pages"],
+  "password-generator": ["how-to-generate-a-strong-password"],
+  "resize-image": ["how-to-resize-an-image-without-losing-quality"],
+  "unit-converter": ["why-temperature-conversion-is-different"],
+  "case-converter": ["camelcase-vs-snake-case-vs-kebab-case"],
+  "rotate-image": ["how-to-rotate-a-photo-without-losing-quality"],
+  "flip-image": ["when-to-flip-vs-rotate-an-image"],
+  "remove-image-exif": ["what-is-exif-data-and-why-strip-it"],
+  "image-watermark": ["how-to-watermark-a-photo"],
+  "social-image-resizer": ["correct-image-sizes-for-social-media-2026"],
+  "image-to-base64": ["what-is-base64-encoding"],
+  "flatten-pdf": ["what-does-flattening-a-pdf-actually-do"],
+  "crop-pdf": ["how-to-remove-margins-from-a-pdf"],
+  "pdf-page-count": ["how-to-check-a-pdfs-page-count-and-metadata"],
+  "passport-photo-maker": ["passport-photo-size-requirements-by-country"],
+  "add-image-to-pdf": ["how-to-convert-jpg-to-pdf"],
+  "crop-image": ["how-to-crop-an-image-online-free"],
+  "grayscale-image": ["heic-jpg-png-webp-avif-which-format-to-use"],
+  "heic-to-jpg": ["heic-to-jpg-iphone-photo-problem", "heic-jpg-png-webp-avif-which-format-to-use"],
+  "jpg-to-png": ["heic-jpg-png-webp-avif-which-format-to-use"],
+  "png-to-jpg": ["heic-jpg-png-webp-avif-which-format-to-use", "image-compression-formats-jpg-webp-avif-2026"],
+  "svg-to-png": ["how-to-make-a-favicon", "heic-jpg-png-webp-avif-which-format-to-use"],
+  "webp-to-jpg": ["image-compression-formats-jpg-webp-avif-2026"],
 };
-const relatedPosts = blogMap[tool.slug] ?? [];
+const relatedPosts = (blogMap[tool.slug] ?? [])
+  .map((slug) => posts.find((p) => p.slug === slug))
+  .filter((p): p is Post => p !== undefined);
 
 const baseTitle = tool.pageTitle || tool.name;
 // Skip the "Free & Private" suffix when the title already says "Free" or would pass ~60 chars.
 const fullTitle = `${baseTitle} — Free & Private | keptlocal`;
 const alreadyFree = baseTitle.toLowerCase().includes("free");
-const title = alreadyFree || fullTitle.length > 60 ? `${baseTitle} | keptlocal` : fullTitle;
+const shortTitle = `${baseTitle} | keptlocal`.length > 60 ? baseTitle : `${baseTitle} | keptlocal`;
+const title = alreadyFree || fullTitle.length > 60 ? shortTitle : fullTitle;
 const description = tool.longDescription || tool.description;
 
 // Schema: WebApplication + FAQPage + BreadcrumbList

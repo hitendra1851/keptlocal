@@ -435,6 +435,46 @@ export const posts: Post[] = [
     readTime: 5,
     tags: ["PDF"],
   },
+  {
+    slug: "best-free-tools-for-students",
+    title: "The Best Free Tools for Students",
+    description: "Research papers, group projects, scanned notes, and resumes — everyday student file tasks, handled free without uploading your work.",
+    date: "2026-10-26",
+    readTime: 6,
+    tags: ["PDF", "Image"],
+  },
+  {
+    slug: "ilovepdf-alternatives-no-hourly-limit",
+    title: "iLovePDF Alternatives Without Hourly Task Limits",
+    description: "iLovePDF's free tier rate-limits how many tasks you can run per hour. Here are alternatives, including a browser-based option with no rate limit at all.",
+    date: "2026-10-26",
+    readTime: 5,
+    tags: ["PDF"],
+  },
+  {
+    slug: "is-it-legal-to-upload-documents-to-free-tools",
+    title: "Is It Legal to Upload Documents to Free Online Tools? What GDPR Actually Says",
+    description: "Uploading a file to a free PDF tool isn't illegal, but it has real implications for personal data under GDPR and similar laws. Here's what applies.",
+    date: "2026-10-26",
+    readTime: 6,
+    tags: ["Privacy", "PDF"],
+  },
+  {
+    slug: "best-free-tools-for-nonprofits",
+    title: "The Best Free Tools for Nonprofits and Volunteer Organizations",
+    description: "Grant applications, donor records, volunteer forms, and event flyers — the recurring document work of nonprofits, handled free on a budget of zero.",
+    date: "2026-10-26",
+    readTime: 6,
+    tags: ["PDF", "Image"],
+  },
+  {
+    slug: "pdf24-alternatives-no-install",
+    title: "PDF24 Alternatives: Browser-Based Tools With No Install Required",
+    description: "PDF24 Creator is a solid free desktop app, but installing software isn't always an option. What to use when you need a PDF tool now, in the browser.",
+    date: "2026-10-26",
+    readTime: 5,
+    tags: ["PDF"],
+  },
 ];
 
 // Newest first, regardless of insertion order above.

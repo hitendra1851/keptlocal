@@ -74,11 +74,20 @@
 </div>
 
 <script>
-  import * as pdfjs from 'pdfjs-dist/build/pdf.min.mjs';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let pdfjs, JSZip;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdfjs-dist/build/pdf.min.mjs"), import("jszip")]).then(([m0, m1]) => {
+    pdfjs = m0;
+    ({ default: JSZip } = m1);
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
   import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-  import JSZip from 'jszip';
-
-  pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
   let pdfBytes = null;
   let pageCount = 0;
@@ -129,6 +138,7 @@
 
   // Load file
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
       setStatus('Only PDF files are accepted.', true);
       return;
@@ -202,6 +212,7 @@
 
   // Convert
   convertBtn.addEventListener('click', async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     processing = true;
     convertBtn.disabled = true;

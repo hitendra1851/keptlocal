@@ -40,7 +40,17 @@
 </div>
 
 <script>
-  import JSZip from "jszip";
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let JSZip;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("jszip")]).then(([m0]) => {
+    ({ default: JSZip } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   const $ = (id: string) => document.getElementById(id) as HTMLElement;
   const SIZES = [16, 32, 48, 64, 180, 192, 512];
@@ -162,6 +172,7 @@
   dz.addEventListener("click", (e) => { if (e.target === dz || e.target === $("empty-state")) ($("file-input") as HTMLInputElement).click(); });
 
   $("gen-btn").addEventListener("click", async () => {
+    await loadLibs();
     if (!srcImage) return;
     const btn = $("gen-btn") as HTMLButtonElement;
     btn.disabled = true;

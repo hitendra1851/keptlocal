@@ -48,8 +48,18 @@
 </div>
 
 <script>
-import heic2any from 'heic2any';
-import JSZip from 'jszip';
+import { onFirstInteraction } from "../../scripts/lazy-libs";
+// Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+let heic2any, JSZip;
+let libsPromise;
+const loadLibs = () => (libsPromise ??= Promise.all([import("heic2any"), import("jszip")]).then(([m0, m1]) => {
+  ({ default: heic2any } = m0);
+  ({ default: JSZip } = m1);
+}).catch((err) => {
+  libsPromise = undefined; // let the next attempt retry
+  throw err;
+}));
+onFirstInteraction(loadLibs);
 
 let files = [];
 let results = []; // { name, blob }
@@ -105,6 +115,7 @@ function renderList() {
 }
 
 convertBtn.addEventListener('click', async () => {
+  await loadLibs();
   const btn = convertBtn;
   const label = document.getElementById('btn-label');
   const spinner = document.getElementById('spinner');
@@ -142,6 +153,7 @@ convertBtn.addEventListener('click', async () => {
 });
 
 zipBtn.addEventListener('click', async () => {
+  await loadLibs();
   zipBtn.textContent = 'Zipping…'; zipBtn.disabled = true;
   const zip = new JSZip();
   results.forEach(r => zip.file(r.name, r.blob));

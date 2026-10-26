@@ -59,7 +59,17 @@
 </div>
 
 <script>
-  import { PDFDocument } from 'pdf-lib';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes = null;
   let pdfName = '';
@@ -119,6 +129,7 @@
   });
 
   async function loadPdf(file) {
+    await loadLibs();
     setStatus('Reading PDF...');
     try {
       pdfBytes = await file.arrayBuffer();
@@ -289,6 +300,7 @@
 
   // ---- Fill & download ----
   $('fill-btn').addEventListener('click', async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     processing = true;
     $('fill-btn').disabled = true;

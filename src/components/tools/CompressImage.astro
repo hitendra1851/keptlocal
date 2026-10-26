@@ -86,8 +86,18 @@
 </div>
 
 <script>
-  import imageCompression from 'browser-image-compression';
-  import JSZip from 'jszip';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let imageCompression, JSZip;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("browser-image-compression"), import("jszip")]).then(([m0, m1]) => {
+    ({ default: imageCompression } = m0);
+    ({ default: JSZip } = m1);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   const PRESETS = {
     light:      { initialQuality: 0.85, maxWidthOrHeight: 4096, useWebWorker: false },
@@ -218,6 +228,7 @@
   };
 
   const downloadZip = async () => {
+    await loadLibs();
     const done = files.filter((f) => f.status === 'done');
     if (done.length === 0) return;
     downloadZipBtn.textContent = 'Zipping…';
@@ -240,6 +251,7 @@
   };
 
   const compressAll = async () => {
+    await loadLibs();
     const pending = files.filter((f) => f.status === 'pending');
     if (processing || pending.length === 0) return;
     processing = true;

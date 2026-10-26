@@ -47,7 +47,17 @@
   // Plain pdf-lib's load() has no `password` option at all -- it can only
   // open PDFs that aren't really encrypted. @cantoo/pdf-lib is a maintained
   // fork that adds real decryption (used here for this one tool).
-  import { PDFDocument } from "@cantoo/pdf-lib";
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("@cantoo/pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes = null;
   let processing = false;
@@ -82,6 +92,7 @@
   });
 
   $("process-btn").addEventListener("click", async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     const password = $("password-input").value;
     if (!password) { setStatus("Enter the PDF password first.", true); return; }

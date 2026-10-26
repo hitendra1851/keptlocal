@@ -118,7 +118,17 @@
 </div>
 
 <script>
-  import { PDFDocument } from 'pdf-lib';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   const MM_TO_PT = 2.8346;
 
@@ -196,6 +206,7 @@
   });
 
   async function loadPdf(file) {
+    await loadLibs();
     setStatus('Reading PDF...');
     try {
       pdfBytes = await file.arrayBuffer();
@@ -221,6 +232,7 @@
 
   // ---- Crop & download ----
   $('crop-btn').addEventListener('click', async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
 
     const margins = getMargins();

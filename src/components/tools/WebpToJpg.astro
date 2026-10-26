@@ -47,7 +47,17 @@
 </div>
 
 <script>
-import JSZip from 'jszip';
+import { onFirstInteraction } from "../../scripts/lazy-libs";
+// Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+let JSZip;
+let libsPromise;
+const loadLibs = () => (libsPromise ??= Promise.all([import("jszip")]).then(([m0]) => {
+  ({ default: JSZip } = m0);
+}).catch((err) => {
+  libsPromise = undefined; // let the next attempt retry
+  throw err;
+}));
+onFirstInteraction(loadLibs);
 
 let files = [];
 let results = [];
@@ -153,6 +163,7 @@ convertBtn.addEventListener('click', async () => {
 });
 
 zipBtn.addEventListener('click', async () => {
+  await loadLibs();
   zipBtn.textContent = 'Zipping…'; zipBtn.disabled = true;
   const zip = new JSZip();
   results.forEach(r => zip.file(r.name, r.blob));

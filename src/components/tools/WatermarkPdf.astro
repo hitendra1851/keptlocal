@@ -99,7 +99,17 @@
 </div>
 
 <script>
-  import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument, StandardFonts, rgb, degrees;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument, StandardFonts, rgb, degrees } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes   = null;
   let fileName   = '';
@@ -109,11 +119,12 @@
   let opacity    = 0.25;
   let processing = false;
 
+  // RGB components; converted with pdf-lib's rgb() at watermark time, once the library has loaded.
   const COLORS = {
-    gray:  rgb(0.45, 0.45, 0.45),
-    red:   rgb(0.75, 0.10, 0.10),
-    blue:  rgb(0.10, 0.20, 0.70),
-    black: rgb(0.05, 0.05, 0.05),
+    gray:  [0.45, 0.45, 0.45],
+    red:   [0.75, 0.10, 0.10],
+    blue:  [0.10, 0.20, 0.70],
+    black: [0.05, 0.05, 0.05],
   };
 
   const $ = (id) => document.getElementById(id);
@@ -182,6 +193,7 @@
 
   // Load file
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
       setStatus('Only PDF files are accepted.', true);
       return;
@@ -234,6 +246,7 @@
 
   // Apply watermark & download
   watermarkBtn.addEventListener('click', async () => {
+    await loadLibs();
     const text = watermarkText.value.trim();
     if (!pdfBytes || !text || processing) return;
 
@@ -246,7 +259,7 @@
     try {
       const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
       const font   = await pdfDoc.embedFont(StandardFonts.Helvetica);
-      const color  = COLORS[chosenColor];
+      const color  = rgb(...COLORS[chosenColor]);
       const total  = pdfDoc.getPageCount();
 
       for (let i = 0; i < total; i++) {

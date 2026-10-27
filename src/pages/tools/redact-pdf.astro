@@ -1,0 +1,76 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import RedactPdf from "../../components/tools/RedactPdf.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "redact-pdf")!;
+---
+
+<ToolLayout tool={tool}>
+  <RedactPdf slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to redact a PDF</h2>
+    <ol>
+      <li><strong>Upload your PDF.</strong> Drop it onto the upload area or choose it from your device. Every page is rendered so you can see exactly what you're redacting.</li>
+      <li><strong>Mark what to remove.</strong> Drag across any part of a page to draw a black box over it. To catch a name, email address, or account number everywhere it appears, type it into the search box and choose <em>Mark every match</em>.</li>
+      <li><strong>Review every page.</strong> Remove a box with its × button. Search can't see text inside scanned images, so check those pages by eye and draw boxes where needed.</li>
+      <li>Click <strong>Redact & download PDF</strong>. The redacted file downloads with "-redacted" added to its name. Your original file is not changed.</li>
+    </ol>
+    <p>
+      All of this happens inside your browser. The PDF is never uploaded, which matters more for redaction than for almost any other tool: the whole reason you're redacting is that the document contains something that shouldn't be shared.
+    </p>
+
+    <h2>When to redact a PDF</h2>
+    <ul>
+      <li><strong>Sharing documents that contain personal data.</strong> Bank statements, payslips, and tax forms requested by a landlord or lender often only need the totals. Black out account numbers, addresses, and ID numbers first.</li>
+      <li><strong>Legal and HR work.</strong> Disclosure bundles, investigation reports, and contracts shared with a third party regularly need names or commercial terms removed.</li>
+      <li><strong>Healthcare and insurance paperwork.</strong> When a claim or support request needs one page of a medical record, redact patient identifiers and unrelated history before it leaves your hands.</li>
+      <li><strong>Freedom of information and public records.</strong> Releasing a document while withholding personal details of staff or third parties.</li>
+      <li><strong>Posting screenshots or examples online.</strong> Invoices, error reports, and forms used as examples often carry emails, phone numbers, and reference codes nobody meant to publish.</li>
+    </ul>
+
+    <h2>Covering text is not the same as removing it</h2>
+    <p>
+      The most common redaction mistake is drawing a black rectangle on top of text. The page <em>looks</em> redacted, but the text is still in the file underneath. Anyone can select it and copy it out, search for it, or delete the rectangle in a PDF editor. Court filings and government reports have leaked sensitive details exactly this way.
+    </p>
+    <p>
+      This tool doesn't draw shapes on top of your content. Each page you redact is rendered to an image at about 150 DPI, the boxes are painted into that image, and the page is rebuilt from the image alone. The original text, fonts, and vector drawing instructions for that page are not copied into the new file, so there is nothing underneath the black to recover.
+    </p>
+    <p>
+      Pages you don't touch are copied across unchanged, so their text stays sharp, selectable, and searchable. If you'd rather not keep any original page content at all, tick <em>Flatten every page</em> and every page is rebuilt as an image.
+    </p>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The PDF is opened with <strong>pdf.js</strong>, the same rendering engine Firefox uses to display PDFs. pdf.js draws each page onto a canvas for the preview, and its text layer gives the position of every run of text, which is how search finds matches and places boxes over them.
+    </p>
+    <p>
+      When you download, each redacted page is rendered again at a higher resolution, the boxes are filled in solid black, and the result is encoded as a JPEG. <strong>pdf-lib</strong> then builds a new PDF: redacted pages become image-only pages at their original size and orientation, and untouched pages are copied from the original. Document metadata such as the title, author, and creating software is not carried over.
+    </p>
+    <p>
+      Both libraries load only once you start using the tool, and everything runs on your device's processor and memory. Once you've opened a PDF here, you can disconnect from the internet and redaction still works.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>Search works within a line of text.</strong> A phrase split across two lines, or text drawn letter by letter by unusual software, may not be matched. Always review the result page by page.</li>
+      <li><strong>Search boxes are estimates.</strong> Boxes are sized from the text's position and font size, with a little padding. Check that each one fully covers what you want hidden, and draw a larger box if it doesn't.</li>
+      <li><strong>Scanned pages have no text to search.</strong> Draw boxes by hand on scanned documents and photos of paper.</li>
+      <li><strong>Redacted pages are images.</strong> Text on those pages can no longer be selected or searched, and those pages are usually larger than before. Compress the result with <a href="/tools/compress-pdf/">Compress PDF</a> if size matters.</li>
+      <li><strong>Password-protected PDFs</strong> need to be opened first. Use <a href="/tools/unlock-pdf/">Unlock PDF</a> with the password, then redact the unlocked copy.</li>
+      <li><strong>Very long documents</strong> are limited by your device's memory, because every page is rendered for review. Split a very large file with <a href="/tools/split-pdf/">Split PDF</a> and redact the parts you need.</li>
+    </ul>
+
+    <h2>Why redact in your browser instead of an online editor</h2>
+    <p>
+      Most free online redaction tools upload your document to their servers to process it. That means the unredacted version — the one with everything you're trying to protect — is copied to a third party, stored for some period, and handled under their privacy policy rather than yours. For personal data covered by GDPR or similar laws, that copy can itself be a compliance problem.
+    </p>
+    <p>
+      Here the unredacted file never leaves your device. That's easy to check: open your browser's developer tools, switch to the Network tab, and redact a file. You'll see no upload request. For the same reason it works for documents you're not allowed to share in the first place, which is often exactly the situation that calls for redaction.
+    </p>
+    <p>
+      If you also need to strip hidden data from photos before sharing them, <a href="/tools/remove-image-exif/">Remove Image Metadata</a> removes GPS location and camera details the same way, without uploading anything.
+    </p>
+  </Fragment>
+</ToolLayout>

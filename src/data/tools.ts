@@ -1022,6 +1022,56 @@ export const tools: Tool[] = [
       },
     ],
   },
+  {
+    slug: "redact-pdf",
+    name: "Redact PDF",
+    shortName: "Redact PDF",
+    pageTitle: "Redact PDF Without Uploading",
+    description: "Black out names, numbers, and signatures in a PDF — permanently, entirely in your browser.",
+    longDescription:
+      "Redact a PDF without uploading it. Draw boxes or search for text, and the hidden content is removed from the file, not just covered. Free, no signup.",
+    category: "PDF",
+    icon: "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z",
+    status: "live",
+    keywords: [
+      "redact pdf",
+      "redact pdf free",
+      "redact pdf without uploading",
+      "black out text in pdf",
+      "remove sensitive information from pdf",
+      "redact pdf online free no signup",
+    ],
+    faq: [
+      {
+        q: "Is the redacted text really gone, or just covered?",
+        a: "It's gone. Every page you redact is rebuilt as an image with the black boxes burned in, so the original text, fonts, and drawing commands for that page are not in the output file. Copying, searching, or removing the boxes in a PDF editor can't reveal what was underneath.",
+      },
+      {
+        q: "Are my files uploaded to a server?",
+        a: "No. The PDF is opened, rendered, and rebuilt inside your browser with pdf.js and pdf-lib. Nothing is sent anywhere; open DevTools → Network while you redact to confirm there are no upload requests.",
+      },
+      {
+        q: "Can I search for a word or number and redact every occurrence?",
+        a: "Yes. Type the text into the search box and choose Mark every match: a box is added over each occurrence on every page. Review them before downloading, because search only finds text within a single line and can't see text that is part of a scanned image.",
+      },
+      {
+        q: "Will the pages I don't redact stay searchable?",
+        a: "Yes. Pages without redaction boxes are copied into the output unchanged, so their text stays selectable. Tick Flatten every page if you'd rather turn every page into an image, which also removes any hidden text layers.",
+      },
+      {
+        q: "Does it remove the document's metadata?",
+        a: "Yes. The output doesn't carry over the original title, author, subject, keywords, or creating software. Comments and form fields on redacted pages are flattened into the image along with everything else.",
+      },
+      {
+        q: "Can I redact a scanned PDF?",
+        a: "Yes, by drawing boxes. Scanned pages are already images with no text layer, so search won't find anything on them, but a box you draw is burned into the page just the same.",
+      },
+      {
+        q: "Will the file get bigger?",
+        a: "Redacted pages are stored as roughly 150 DPI images, which is usually larger than the original text-based page. A few redacted pages make little difference; flattening a long document can increase its size noticeably. Use Compress PDF afterwards if needed.",
+      },
+    ],
+  },
   // --- Image: SVG to PNG ---
   {
     slug: "svg-to-png",

@@ -1,0 +1,484 @@
+---
+// Redact PDF — draw boxes (or search for text) over what to hide, then rebuild the redacted
+// pages as images so the hidden content is removed from the file, not just covered.
+// pdf.js renders and finds text; pdf-lib assembles the output. Nothing leaves the browser.
+---
+
+<div id="redact-pdf-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: Upload -->
+  <div id="step-upload">
+    <div id="drop-zone" class="drop-zone m-4">
+      <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+      <div id="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" />
+          <rect x="8" y="10.5" width="8" height="2.5" fill="currentColor" stroke="none" />
+        </svg>
+        <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+        <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+          choose a file from your device
+        </button>
+        <p class="text-xs text-[var(--color-ink-muted)] mt-4">
+          Black out names, numbers, and signatures. Files never leave your browser.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Mark redactions -->
+  <div id="step-edit" class="hidden">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-rule)]">
+      <div class="min-w-0">
+        <p id="filename-display" class="text-sm font-medium text-[var(--color-ink)] truncate max-w-xs"></p>
+        <p id="info-display" class="text-xs text-[var(--color-ink-muted)] mt-0.5"></p>
+      </div>
+      <button type="button" id="change-file-btn" class="ml-4 shrink-0 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] underline underline-offset-2">
+        Change file
+      </button>
+    </div>
+
+    <div class="px-4 py-4 space-y-3 border-b border-[var(--color-rule)]">
+      <form id="search-form" class="flex flex-col sm:flex-row gap-2">
+        <label for="search-input" class="sr-only">Text to redact</label>
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Find text to redact, e.g. a name or account number"
+          autocomplete="off"
+          class="flex-1 px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+        />
+        <button type="submit" id="search-btn" class="btn-secondary shrink-0">Mark every match</button>
+      </form>
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+        <label class="flex items-center gap-1.5 text-[var(--color-ink)] cursor-pointer">
+          <input type="checkbox" id="flatten-all" class="accent-[var(--color-accent)]" />
+          Flatten every page (safest; text on all pages becomes non-selectable)
+        </label>
+        <button type="button" id="clear-boxes-btn" class="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-warn)] underline underline-offset-2">
+          Remove all boxes
+        </button>
+      </div>
+      <p class="text-xs text-[var(--color-ink-muted)]">
+        Drag on a page to draw a box. Click × on a box to remove it. Search finds text within a line; check every page before downloading.
+      </p>
+    </div>
+
+    <div id="pages" class="px-4 py-5 space-y-6 bg-[var(--color-paper-dark)] max-h-[75vh] overflow-y-auto"></div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]" role="status">
+      Upload a PDF to mark what to redact.
+    </div>
+    <button type="button" id="redact-btn" class="btn-primary" disabled>
+      <span id="redact-btn-label">Redact & download PDF</span>
+      <svg id="redact-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Global because these elements are created by the script at runtime, so Astro's scoped
+     styles would never match them. Class names are prefixed to avoid collisions. -->
+<style is:global>
+  .redact-page { position: relative; margin: 0 auto; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); background: #fff; user-select: none; }
+  .redact-page canvas { display: block; width: 100%; height: auto; }
+  .redact-overlay { position: absolute; inset: 0; cursor: crosshair; touch-action: none; }
+  .redact-box { position: absolute; background: rgba(0, 0, 0, 0.82); outline: 1px solid #000; }
+  .redact-box.drawing { background: rgba(0, 0, 0, 0.45); }
+  .redact-box button {
+    position: absolute; top: -9px; right: -9px; width: 18px; height: 18px; border-radius: 9999px;
+    background: var(--color-paper); color: var(--color-ink); border: 1px solid var(--color-rule);
+    font-size: 12px; line-height: 16px; text-align: center; cursor: pointer;
+  }
+</style>
+
+<script>
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let pdfjs, PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdfjs-dist/build/pdf.min.mjs"), import("pdf-lib")]).then(([m0, m1]) => {
+    pdfjs = m0;
+    ({ PDFDocument } = m1);
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
+
+  const PREVIEW_MAX_WIDTH = 760; // CSS px for the on-screen page
+  const OUTPUT_SCALE = 2.08; // ~150 DPI for redacted pages (72 pt/in × 2.08)
+  const MIN_BOX_PX = 4;
+  const measureCtx = document.createElement("canvas").getContext("2d");
+
+  let pdfBytes = null;
+  let pdfName = "";
+  let viewDoc = null; // pdf.js document used for previews and search
+  let processing = false;
+  /** boxes[pageIndex] = [{ x, y, w, h }] as fractions of the page's rotated viewport */
+  let boxes = [];
+  /** per page: { overlay, baseViewport } */
+  let pageViews = [];
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $("drop-zone");
+  const fileInput = $("file-input");
+  const pagesEl = $("pages");
+
+  const setStatus = (msg, isError = false) => {
+    const el = $("status-msg");
+    el.textContent = msg;
+    el.style.color = isError ? "var(--color-warn)" : "";
+  };
+
+  const fmtSize = (b) => (b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`);
+  const boxCount = () => boxes.reduce((n, list) => n + list.length, 0);
+
+  const refreshAction = (keepStatus = false) => {
+    const n = boxCount();
+    const flattenAll = $("flatten-all").checked;
+    $("redact-btn").disabled = processing || !pdfBytes || (n === 0 && !flattenAll);
+    if (!pdfBytes || keepStatus) return;
+    const pagesMarked = boxes.filter((l) => l.length).length;
+    setStatus(
+      n === 0
+        ? flattenAll
+          ? "No boxes yet. Downloading now would only flatten the pages."
+          : "Draw boxes over anything you want removed, or search for text."
+        : `${n} box${n === 1 ? "" : "es"} on ${pagesMarked} page${pagesMarked === 1 ? "" : "s"}. Review every page, then download.`,
+    );
+  };
+
+  // ---- Boxes on the overlay ----
+  const drawBoxes = (pageIndex) => {
+    const { overlay } = pageViews[pageIndex];
+    overlay.querySelectorAll(".redact-box:not(.drawing)").forEach((el) => el.remove());
+    boxes[pageIndex].forEach((b, i) => {
+      const el = document.createElement("div");
+      el.className = "redact-box";
+      el.style.left = `${b.x * 100}%`;
+      el.style.top = `${b.y * 100}%`;
+      el.style.width = `${b.w * 100}%`;
+      el.style.height = `${b.h * 100}%`;
+      const del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "×";
+      del.setAttribute("aria-label", "Remove this redaction box");
+      del.addEventListener("pointerdown", (e) => e.stopPropagation());
+      del.addEventListener("click", (e) => {
+        e.stopPropagation();
+        boxes[pageIndex].splice(i, 1);
+        drawBoxes(pageIndex);
+        refreshAction();
+      });
+      el.appendChild(del);
+      overlay.appendChild(el);
+    });
+  };
+
+  const attachDrawing = (pageIndex) => {
+    const { overlay } = pageViews[pageIndex];
+    let start = null;
+    let ghost = null;
+    const frac = (e) => {
+      const r = overlay.getBoundingClientRect();
+      return {
+        x: Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1),
+        y: Math.min(Math.max((e.clientY - r.top) / r.height, 0), 1),
+        r,
+      };
+    };
+    overlay.addEventListener("pointerdown", (e) => {
+      if (processing || e.button !== 0) return;
+      start = frac(e);
+      ghost = document.createElement("div");
+      ghost.className = "redact-box drawing";
+      overlay.appendChild(ghost);
+      overlay.setPointerCapture(e.pointerId);
+    });
+    overlay.addEventListener("pointermove", (e) => {
+      if (!start) return;
+      const p = frac(e);
+      ghost.style.left = `${Math.min(start.x, p.x) * 100}%`;
+      ghost.style.top = `${Math.min(start.y, p.y) * 100}%`;
+      ghost.style.width = `${Math.abs(p.x - start.x) * 100}%`;
+      ghost.style.height = `${Math.abs(p.y - start.y) * 100}%`;
+    });
+    const finish = (e) => {
+      if (!start) return;
+      const p = frac(e);
+      ghost.remove();
+      const w = Math.abs(p.x - start.x);
+      const h = Math.abs(p.y - start.y);
+      if (w * p.r.width >= MIN_BOX_PX && h * p.r.height >= MIN_BOX_PX) {
+        boxes[pageIndex].push({ x: Math.min(start.x, p.x), y: Math.min(start.y, p.y), w, h });
+        drawBoxes(pageIndex);
+        refreshAction();
+      }
+      start = null;
+      ghost = null;
+    };
+    overlay.addEventListener("pointerup", finish);
+    overlay.addEventListener("pointercancel", () => {
+      ghost?.remove();
+      start = null;
+      ghost = null;
+    });
+  };
+
+  // ---- Load & render previews ----
+  const resetToUpload = () => {
+    pdfBytes = null;
+    pdfName = "";
+    viewDoc?.destroy();
+    viewDoc = null;
+    boxes = [];
+    pageViews = [];
+    pagesEl.innerHTML = "";
+    $("search-input").value = "";
+    $("flatten-all").checked = false;
+    $("step-edit").classList.add("hidden");
+    $("step-upload").classList.remove("hidden");
+    $("redact-btn").disabled = true;
+    setStatus("Upload a PDF to mark what to redact.");
+  };
+
+  async function loadPdf(file) {
+    await loadLibs();
+    if (!(file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) {
+      setStatus("Please choose a PDF file.", true);
+      return;
+    }
+    setStatus("Reading PDF...");
+    try {
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const doc = await pdfjs.getDocument({ data: bytes.slice(0) }).promise;
+      pdfBytes = bytes;
+      pdfName = file.name;
+      viewDoc = doc;
+      boxes = Array.from({ length: doc.numPages }, () => []);
+      pageViews = [];
+      pagesEl.innerHTML = "";
+
+      $("filename-display").textContent = pdfName;
+      $("info-display").textContent = `${doc.numPages} page${doc.numPages !== 1 ? "s" : ""} · ${fmtSize(file.size)}`;
+      $("step-upload").classList.add("hidden");
+      $("step-edit").classList.remove("hidden");
+
+      const width = Math.min(PREVIEW_MAX_WIDTH, pagesEl.clientWidth - 32 || PREVIEW_MAX_WIDTH);
+      for (let i = 0; i < doc.numPages; i++) {
+        setStatus(`Rendering page ${i + 1} of ${doc.numPages}...`);
+        const page = await doc.getPage(i + 1);
+        const baseViewport = page.getViewport({ scale: 1 });
+        const cssScale = width / baseViewport.width;
+        const viewport = page.getViewport({ scale: cssScale * (window.devicePixelRatio || 1) });
+
+        const wrap = document.createElement("div");
+        wrap.className = "redact-page";
+        wrap.style.maxWidth = `${Math.round(baseViewport.width * cssScale)}px`;
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        canvas.setAttribute("aria-label", `Page ${i + 1}`);
+        const overlay = document.createElement("div");
+        overlay.className = "redact-overlay";
+        const label = document.createElement("p");
+        label.className = "text-xs text-[var(--color-ink-muted)] text-center mt-1.5";
+        label.textContent = `Page ${i + 1}`;
+        wrap.append(canvas, overlay);
+        const outer = document.createElement("div");
+        outer.append(wrap, label);
+        pagesEl.appendChild(outer);
+
+        await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+        pageViews.push({ overlay, baseViewport });
+        attachDrawing(i);
+      }
+      refreshAction();
+    } catch (err) {
+      console.error(err);
+      const msg = err?.name === "PasswordException"
+        ? "This PDF is password-protected. Unlock it first with the Unlock PDF tool."
+        : `Could not read PDF: ${err?.message || "invalid file"}`;
+      resetToUpload();
+      setStatus(msg, true);
+    }
+  }
+
+  // ---- Search: mark every match ----
+  $("search-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await loadLibs();
+    const term = $("search-input").value.trim();
+    if (!viewDoc || !term) return;
+    const needle = term.toLowerCase();
+    let found = 0;
+    for (let i = 0; i < viewDoc.numPages; i++) {
+      const page = await viewDoc.getPage(i + 1);
+      const vp = pageViews[i].baseViewport;
+      const content = await page.getTextContent();
+      for (const item of content.items) {
+        const str = item.str || "";
+        if (!str) continue;
+        const hay = str.toLowerCase();
+        // Text-space box for the whole item, mapped into the rotated viewport.
+        const tx = pdfjs.Util.transform(vp.transform, item.transform);
+        const fontHeight = Math.hypot(tx[2], tx[3]);
+        const itemWidth = item.width * vp.scale;
+        // Proportional fonts: locate the match by measuring text widths in the item's font family,
+        // scaled to the item's real width, rather than assuming equal-width characters.
+        const family = content.styles[item.fontName]?.fontFamily || "sans-serif";
+        measureCtx.font = `100px ${family}`;
+        const fullW = measureCtx.measureText(str).width || 1;
+        let from = 0;
+        let at;
+        while ((at = hay.indexOf(needle, from)) !== -1) {
+          const preW = measureCtx.measureText(str.slice(0, at)).width;
+          const matchW = measureCtx.measureText(str.slice(at, at + needle.length)).width;
+          const x0 = tx[4] + (preW / fullW) * itemWidth;
+          const w = (matchW / fullW) * itemWidth;
+          // Generous padding: font metrics are approximate, and an exposed sliver defeats the point.
+          const padX = fontHeight * 0.35;
+          const padY = fontHeight * 0.15;
+          const box = {
+            x: (x0 - padX) / vp.width,
+            y: (tx[5] - fontHeight - padY) / vp.height,
+            w: (w + 2 * padX) / vp.width,
+            h: (fontHeight * 1.25 + 2 * padY) / vp.height,
+          };
+          box.x = Math.max(0, box.x);
+          box.y = Math.max(0, box.y);
+          boxes[i].push(box);
+          found++;
+          from = at + needle.length;
+        }
+      }
+      drawBoxes(i);
+    }
+    refreshAction(true);
+    if (found === 0) {
+      setStatus(`No text matching "${term}" found. Scanned pages have no text layer; draw boxes by hand.`, true);
+    } else {
+      setStatus(`Marked ${found} match${found === 1 ? "" : "es"} for "${term}". Check each box covers the text fully, then download.`);
+    }
+  });
+
+  $("clear-boxes-btn").addEventListener("click", () => {
+    boxes = boxes.map(() => []);
+    boxes.forEach((_, i) => drawBoxes(i));
+    refreshAction();
+  });
+  $("flatten-all").addEventListener("change", refreshAction);
+
+  // ---- Upload wiring ----
+  $("browse-btn").addEventListener("click", () => fileInput.click());
+  $("change-file-btn").addEventListener("click", resetToUpload);
+  dropZone.addEventListener("click", (e) => {
+    if (e.target === dropZone || e.target.closest("#empty-state")) fileInput.click();
+  });
+  dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragging");
+    const file = e.dataTransfer?.files?.[0];
+    if (file) loadPdf(file);
+  });
+  fileInput.addEventListener("change", (e) => {
+    const file = e.target.files?.[0];
+    if (file) loadPdf(file);
+    fileInput.value = "";
+  });
+
+  // ---- Redact & download ----
+  const renderRedacted = async (pageIndex) => {
+    const page = await viewDoc.getPage(pageIndex + 1);
+    const viewport = page.getViewport({ scale: OUTPUT_SCALE });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(viewport.width);
+    canvas.height = Math.round(viewport.height);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    ctx.fillStyle = "#000";
+    for (const b of boxes[pageIndex]) {
+      ctx.fillRect(
+        Math.floor(b.x * canvas.width),
+        Math.floor(b.y * canvas.height),
+        Math.ceil(b.w * canvas.width) + 1,
+        Math.ceil(b.h * canvas.height) + 1,
+      );
+    }
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    canvas.width = canvas.height = 0; // free memory early on long documents
+    return new Uint8Array(await blob.arrayBuffer());
+  };
+
+  $("redact-btn").addEventListener("click", async () => {
+    await loadLibs();
+    if (!pdfBytes || !viewDoc || processing) return;
+    const flattenAll = $("flatten-all").checked;
+    if (boxCount() === 0 && !flattenAll) return;
+
+    processing = true;
+    $("redact-btn").disabled = true;
+    $("redact-spinner").classList.remove("hidden");
+    $("redact-btn-label").textContent = "Redacting...";
+
+    try {
+      const src = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
+      const out = await PDFDocument.create();
+      let flattened = 0;
+      for (let i = 0; i < viewDoc.numPages; i++) {
+        if (flattenAll || boxes[i].length) {
+          setStatus(`Redacting page ${i + 1} of ${viewDoc.numPages}...`);
+          const vp = pageViews[i].baseViewport; // rotation applied: output page is upright
+          const jpg = await out.embedJpg(await renderRedacted(i));
+          const page = out.addPage([vp.width, vp.height]);
+          page.drawImage(jpg, { x: 0, y: 0, width: vp.width, height: vp.height });
+          flattened++;
+        } else {
+          const [copied] = await out.copyPages(src, [i]);
+          out.addPage(copied);
+        }
+      }
+      // Don't carry over document metadata (author, software, edit history) from the original.
+      out.setTitle("");
+      out.setAuthor("");
+      out.setSubject("");
+      out.setKeywords([]);
+      out.setCreator("keptlocal");
+      out.setProducer("keptlocal");
+
+      const bytes = await out.save();
+      const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${pdfName.replace(/\.pdf$/i, "")}-redacted.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus(`Done. ${flattened} page${flattened === 1 ? "" : "s"} redacted and flattened; your PDF has been downloaded.`);
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not redact PDF"}`, true);
+    } finally {
+      processing = false;
+      $("redact-spinner").classList.add("hidden");
+      $("redact-btn-label").textContent = "Redact & download PDF";
+      refreshAction(true);
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ""; }
+  });
+</script>

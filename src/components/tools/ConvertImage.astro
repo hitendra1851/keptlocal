@@ -71,8 +71,18 @@
 </div>
 
 <script>
-  import heic2any from 'heic2any';
-  import JSZip from 'jszip';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let heic2any, JSZip;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("heic2any"), import("jszip")]).then(([m0, m1]) => {
+    ({ default: heic2any } = m0);
+    ({ default: JSZip } = m1);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'image/avif']);
   const ACCEPTED_EXTS  = /\.(jpg|jpeg|png|webp|heic|heif|avif)$/i;
@@ -194,6 +204,7 @@
   };
 
   const downloadZip = async () => {
+    await loadLibs();
     const done = files.filter((f) => f.status === 'done');
     if (!done.length) return;
     downloadZipBtn.textContent = 'Zipping…';
@@ -214,6 +225,7 @@
 
   // Convert a single file to a Blob in the target format
   const convertFile = async (file) => {
+    await loadLibs();
     const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
       || /\.(heic|heif)$/i.test(file.name);
 

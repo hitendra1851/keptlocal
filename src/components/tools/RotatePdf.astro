@@ -96,7 +96,17 @@
 </div>
 
 <script>
-  import { PDFDocument, degrees } from 'pdf-lib';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument, degrees;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument, degrees } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes = null;
   let pageCount = 0;
@@ -207,6 +217,7 @@
 
   // Load file
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
       setStatus('Only PDF files are accepted.', true);
       return;
@@ -259,6 +270,7 @@
 
   // Rotate & download
   rotateBtn.addEventListener('click', async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     processing = true;
     rotateBtn.disabled = true;

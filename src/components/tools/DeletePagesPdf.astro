@@ -59,7 +59,17 @@
 </div>
 
 <script>
-  import { PDFDocument } from "pdf-lib";
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes = null;
   let pageCount = 0;
@@ -104,6 +114,7 @@
   };
 
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
       setStatus("Only PDF files are accepted.", true);
       return;
@@ -137,6 +148,7 @@
   });
 
   processBtn.addEventListener("click", async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     const raw = pagesInput.value.trim();
     if (!raw) { setStatus("Enter at least one page number to delete.", true); return; }

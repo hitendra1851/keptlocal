@@ -97,7 +97,17 @@
 </style>
 
 <script>
-  import { PDFDocument } from 'pdf-lib';
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   const $ = (id) => document.getElementById(id);
 
@@ -155,6 +165,7 @@
   let copyText = '';
 
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file || !(file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'))) {
       setStatus('Only PDF files are accepted.', true);
       return;

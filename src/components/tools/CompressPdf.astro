@@ -121,13 +121,17 @@
 </style>
 
 <script>
-  import {
-    PDFDocument,
-    PDFName,
-    PDFNumber,
-    PDFRawStream,
-    decodePDFRawStream,
-  } from "pdf-lib";
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument, PDFName, PDFNumber, PDFRawStream, decodePDFRawStream;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument, PDFName, PDFNumber, PDFRawStream, decodePDFRawStream } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   // Quality presets. quality: JPEG quality passed to canvas.toBlob.
   // maxDim: an embedded image wider or taller than this (in pixels) is downsampled.
@@ -155,6 +159,7 @@
     document.querySelector('input[name="img-level"]:checked')?.value || "recommended";
 
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file.name.toLowerCase().endsWith(".pdf") && file.type !== "application/pdf") {
       setStatus("Only PDF files are accepted.", true);
       return;
@@ -237,6 +242,7 @@
    * untouched — a bad image never aborts the whole file or corrupts other images.
    */
   const recompressImages = async (doc, level) => {
+    await loadLibs();
     const context = doc.context;
     const IMAGE = PDFName.of("Image");
     const DCT = PDFName.of("DCTDecode");
@@ -347,6 +353,7 @@
   };
 
   $("process-btn").addEventListener("click", async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     processing = true;
     $("process-btn").disabled = true;

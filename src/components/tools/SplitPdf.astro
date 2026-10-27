@@ -88,8 +88,18 @@
 </div>
 
 <script>
-  import { PDFDocument } from "pdf-lib";
-  import JSZip from "jszip";
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument, JSZip;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib"), import("jszip")]).then(([m0, m1]) => {
+    ({ PDFDocument } = m0);
+    ({ default: JSZip } = m1);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
 
   let pdfBytes = null;
   let pageCount = 0;
@@ -187,6 +197,7 @@
   };
 
   const loadFile = async (file) => {
+    await loadLibs();
     if (!file || !(file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf"))) {
       setStatus("Only PDF files are accepted.", true);
       return;
@@ -269,6 +280,7 @@
 
   // ---- Action ----
   actionBtn.addEventListener("click", async () => {
+    await loadLibs();
     if (!pdfBytes || processing) return;
     processing = true;
     actionBtn.disabled = true;

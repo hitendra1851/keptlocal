@@ -783,6 +783,52 @@ export const tools: Tool[] = [
       { q: "What formats are supported?", a: "JPG and PNG. HEIC files should be converted to JPG first using the Convert Image tool." },
     ],
   },
+  {
+    slug: "image-to-text",
+    name: "Image to Text (OCR)",
+    shortName: "Image → Text",
+    pageTitle: "Image to Text (OCR) Without Uploading",
+    description: "Extract text from photos, screenshots, and scanned PDFs with OCR — entirely in your browser.",
+    longDescription:
+      "Extract text from a photo, screenshot, or scanned PDF without uploading it. OCR runs on your device, so the file never leaves it. Free, no signup.",
+    category: "Image",
+    icon: "M4 7V5a1 1 0 011-1h2M17 4h2a1 1 0 011 1v2M20 17v2a1 1 0 01-1 1h-2M7 20H5a1 1 0 01-1-1v-2M8 9h8M8 12h8M8 15h5",
+    status: "live",
+    keywords: [
+      "image to text",
+      "ocr online free",
+      "extract text from image",
+      "scanned pdf to text",
+      "ocr without uploading",
+      "picture to text converter",
+    ],
+    faq: [
+      {
+        q: "Is my image or PDF uploaded to a server?",
+        a: "No. Text recognition runs in your browser using Tesseract, the open-source OCR engine, compiled to WebAssembly. The engine is downloaded from keptlocal once and cached; your file is never sent anywhere. Check DevTools → Network while it runs.",
+      },
+      {
+        q: "Which files can I use?",
+        a: "PNG, JPG, WebP, and BMP images, and PDFs. For a PDF, every page is rendered and read in turn, which makes it work for scanned documents that have no text layer.",
+      },
+      {
+        q: "Which languages are supported?",
+        a: "English. Other Latin-script text is often partly recognized, but accented characters may be read incorrectly.",
+      },
+      {
+        q: "How accurate is it?",
+        a: "On clear printed text, such as screenshots, documents, and good scans, accuracy is usually very high. Handwriting, low-resolution photos, unusual fonts, and text on busy backgrounds are much harder. Always check the result before relying on it.",
+      },
+      {
+        q: "Why does the first run take longer?",
+        a: "The first time, your browser downloads the recognition engine and English model (about 7 MB) from keptlocal. After that they are cached, so later runs start quickly and work without an internet connection.",
+      },
+      {
+        q: "My PDF already has selectable text. Should I use this?",
+        a: "Use PDF to Text instead. It reads the text that's already in the file, which is faster and exact. OCR is for scans and images, where the text is only pixels.",
+      },
+    ],
+  },
   // --- PDF: Sign ---
   {
     slug: "sign-pdf",
@@ -1069,6 +1115,52 @@ export const tools: Tool[] = [
       {
         q: "Will the file get bigger?",
         a: "Redacted pages are stored as roughly 150 DPI images, which is usually larger than the original text-based page. A few redacted pages make little difference; flattening a long document can increase its size noticeably. Use Compress PDF afterwards if needed.",
+      },
+    ],
+  },
+  {
+    slug: "remove-pdf-metadata",
+    name: "Remove PDF Metadata",
+    shortName: "PDF Metadata",
+    pageTitle: "Remove PDF Metadata Without Uploading",
+    description: "See and strip the author, software, edit history, and other hidden data in a PDF — in your browser.",
+    longDescription:
+      "See what a PDF reveals about you, then remove it: author, software, dates, edit history, comment names. Free, in your browser, nothing uploaded.",
+    category: "PDF",
+    icon: "M9 12h6m-6 4h3m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2zM15 3v5h5",
+    status: "live",
+    keywords: [
+      "remove pdf metadata",
+      "remove metadata from pdf free",
+      "pdf metadata remover",
+      "remove author from pdf",
+      "clean pdf metadata without uploading",
+      "strip pdf properties",
+    ],
+    faq: [
+      {
+        q: "What metadata does a PDF contain?",
+        a: "Most PDFs carry document properties (title, author, subject, keywords, the app that created the file and the one that produced the PDF, plus creation and modification dates). Many also have an XMP metadata block, which can include editing history and tool details, and some contain private application data from Illustrator, Photoshop, or Acrobat, comment author names, and attached files.",
+      },
+      {
+        q: "Are my files uploaded anywhere?",
+        a: "No. The PDF is read and rewritten in your browser with pdf-lib. Nothing is sent to a server; open DevTools → Network while the tool runs to confirm there are no upload requests.",
+      },
+      {
+        q: "Is the metadata really gone from the file?",
+        a: "Yes. After removing it, the tool drops every object in the file that nothing references any more, so the old metadata isn't left behind in the file bytes. It then re-reads the cleaned PDF to check nothing remains before you download it.",
+      },
+      {
+        q: "Will this change how my PDF looks?",
+        a: "No. Page content, fonts, images, form fields, links, and bookmarks are kept exactly as they were. Only hidden information is removed.",
+      },
+      {
+        q: "Does it remove names from comments?",
+        a: "Yes, by default. Comments and annotations store the author's name, which often reveals who reviewed a document. Untick the option if you want to keep them. The comments themselves are kept.",
+      },
+      {
+        q: "Does this remove text I've covered with a black box?",
+        a: "No. Metadata removal doesn't touch what's on the page. To permanently remove visible content such as names or account numbers, use Redact PDF, which rebuilds the redacted pages so the hidden text isn't in the file at all.",
       },
     ],
   },

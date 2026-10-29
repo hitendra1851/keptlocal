@@ -1,5 +1,7 @@
 # build output
 dist/
+# OCR engine copied from node_modules by scripts/copy-ocr-assets.mjs
+public/ocr/
 .output/
 
 # dependencies

@@ -12,7 +12,9 @@
     "url": "https://github.com/hitendra1851/keptlocal.git"
   },
   "scripts": {
+    "predev": "node scripts/copy-ocr-assets.mjs",
     "dev": "astro dev",
+    "prebuild": "node scripts/copy-ocr-assets.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -23,6 +25,7 @@
     "@fontsource-variable/dm-sans": "^5.3.0",
     "@fontsource-variable/fraunces": "^5.3.0",
     "@tailwindcss/vite": "^4.1.13",
+    "@tesseract.js-data/eng": "^1.0.0",
     "astro": "^5.14.0",
     "blueimp-md5": "^2.19.0",
     "browser-image-compression": "^2.0.2",
@@ -32,7 +35,8 @@
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.4.168",
     "qrcode": "^1.5.4",
-    "tailwindcss": "^4.1.13"
+    "tailwindcss": "^4.1.13",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
     "@fontsource/dm-sans": "^5.3.0",

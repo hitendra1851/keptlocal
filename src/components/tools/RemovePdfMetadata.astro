@@ -1,0 +1,364 @@
+---
+// Remove PDF Metadata — shows the hidden information in a PDF (document properties, XMP metadata,
+// app-private PieceInfo data, comment authors, attached files) and removes it. After editing, any
+// object no longer reachable from the document root is dropped, because pdf-lib otherwise writes
+// every parsed object back out and the "removed" metadata would still be in the file bytes.
+---
+
+<div id="pdf-meta-app" class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: Upload -->
+  <div id="step-upload">
+    <div id="drop-zone" class="drop-zone m-4">
+      <input type="file" id="file-input" accept="application/pdf,.pdf" class="hidden" />
+      <div id="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+          <path d="M9 12h6m-6 4h3m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2zM15 3v5h5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <p class="text-[var(--color-ink-soft)] mb-1">Drop a PDF here, or</p>
+        <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+          choose a file from your device
+        </button>
+        <p class="text-xs text-[var(--color-ink-muted)] mt-4">
+          See and strip author, software, edit history, and other hidden data. Files never leave your browser.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Report & options -->
+  <div id="step-report" class="hidden">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-rule)]">
+      <div class="min-w-0">
+        <p id="filename-display" class="text-sm font-medium text-[var(--color-ink)] truncate max-w-xs"></p>
+        <p id="info-display" class="text-xs text-[var(--color-ink-muted)] mt-0.5"></p>
+      </div>
+      <button type="button" id="change-file-btn" class="ml-4 shrink-0 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] underline underline-offset-2">
+        Change file
+      </button>
+    </div>
+
+    <div class="px-4 py-5 space-y-5">
+      <div>
+        <p class="text-sm font-medium text-[var(--color-ink)] mb-2">Hidden information found in this PDF</p>
+        <dl id="meta-list" class="text-sm grid grid-cols-[minmax(7rem,auto)_1fr] gap-x-4 gap-y-1.5"></dl>
+      </div>
+      <div class="space-y-2">
+        <label class="flex items-start gap-2 text-sm text-[var(--color-ink)] cursor-pointer">
+          <input type="checkbox" id="opt-authors" checked class="mt-0.5 accent-[var(--color-accent)]" />
+          <span>Remove names from comments and annotations <span id="opt-authors-note" class="text-[var(--color-ink-muted)]"></span></span>
+        </label>
+        <label class="flex items-start gap-2 text-sm text-[var(--color-ink)] cursor-pointer">
+          <input type="checkbox" id="opt-attachments" checked class="mt-0.5 accent-[var(--color-accent)]" />
+          <span>Remove attached files <span id="opt-attachments-note" class="text-[var(--color-ink-muted)]"></span></span>
+        </label>
+        <p class="text-xs text-[var(--color-ink-muted)]">
+          Document properties, XMP metadata, and application data (PieceInfo) are always removed. Page content, form fields, links, and bookmarks are kept.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]" role="status">
+      Upload a PDF to see its hidden metadata.
+    </div>
+    <button type="button" id="clean-btn" class="btn-primary" disabled>
+      <span id="clean-btn-label">Remove metadata & download</span>
+      <svg id="clean-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  // Heavy libraries load on first interaction, not at page load (keeps LCP fast).
+  let PDFDocument, PDFName, PDFDict, PDFArray, PDFRef, PDFStream;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("pdf-lib")]).then(([m0]) => {
+    ({ PDFDocument, PDFName, PDFDict, PDFArray, PDFRef, PDFStream } = m0);
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
+
+  const INFO_FIELDS = ["Title", "Author", "Subject", "Keywords", "Creator", "Producer", "CreationDate", "ModDate", "Trapped"];
+  const LABELS = { Creator: "Created with", Producer: "PDF producer", CreationDate: "Created", ModDate: "Last modified" };
+
+  let pdfBytes = null;
+  let pdfName = "";
+  let processing = false;
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $("drop-zone");
+  const fileInput = $("file-input");
+
+  const setStatus = (msg, isError = false) => {
+    const el = $("status-msg");
+    el.textContent = msg;
+    el.style.color = isError ? "var(--color-warn)" : "";
+  };
+  const fmtSize = (b) => (b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`);
+
+  // ---- PDF object helpers ----
+  const dictOf = (obj) => (obj instanceof PDFStream ? obj.dict : obj instanceof PDFDict ? obj : null);
+  const decodeText = (obj) => {
+    if (!obj) return "";
+    if (typeof obj.decodeText === "function") {
+      try { return obj.decodeText(); } catch { /* fall through */ }
+    }
+    return obj.toString().replace(/^\/|^\(|\)$/g, "");
+  };
+  const formatDate = (raw) => {
+    const m = /^D:(\d{4})(\d{2})?(\d{2})?(\d{2})?(\d{2})?/.exec(raw);
+    if (!m) return raw;
+    const [, y, mo = "01", d = "01", h, mi] = m;
+    return `${y}-${mo}-${d}${h ? ` ${h}:${mi || "00"}` : ""}`;
+  };
+
+  /** Inspect the document and return what hidden data it carries. */
+  const inspect = (doc) => {
+    const ctx = doc.context;
+    const report = { info: [], xmpBytes: 0, pieceInfo: 0, authors: new Set(), attachments: [] };
+
+    const info = ctx.lookup(ctx.trailerInfo.Info);
+    if (info instanceof PDFDict) {
+      for (const key of INFO_FIELDS) {
+        const v = info.get(PDFName.of(key));
+        if (!v) continue;
+        let text = decodeText(ctx.lookup(v));
+        if (key.endsWith("Date")) text = formatDate(text);
+        if (text) report.info.push([LABELS[key] || key, text]);
+      }
+      // Custom keys some apps add (e.g. company, source file path).
+      for (const [k, v] of info.entries()) {
+        const name = k.asString().slice(1);
+        if (INFO_FIELDS.includes(name)) continue;
+        const text = decodeText(ctx.lookup(v));
+        if (text) report.info.push([name, text]);
+      }
+    }
+
+    for (const [, obj] of ctx.enumerateIndirectObjects()) {
+      const d = dictOf(obj);
+      if (!d) continue;
+      if (d.get(PDFName.of("Type")) === PDFName.of("Metadata") && obj instanceof PDFStream) {
+        report.xmpBytes += obj.getContentsSize?.() ?? 0;
+      }
+      if (d.has(PDFName.of("PieceInfo"))) report.pieceInfo++;
+      const subtype = d.get(PDFName.of("Subtype"));
+      if (d.get(PDFName.of("Type")) === PDFName.of("Annot") || subtype) {
+        if (subtype && subtype !== PDFName.of("Widget") && subtype !== PDFName.of("Link") && d.has(PDFName.of("T"))) {
+          const who = decodeText(ctx.lookup(d.get(PDFName.of("T"))));
+          if (who) report.authors.add(who);
+        }
+        if (subtype === PDFName.of("FileAttachment")) report.attachments.push("(attached to a comment)");
+      }
+    }
+
+    // Document-level attachments: Catalog → Names → EmbeddedFiles (a name tree).
+    const names = doc.catalog.lookupMaybe(PDFName.of("Names"), PDFDict);
+    const ef = names?.lookupMaybe(PDFName.of("EmbeddedFiles"), PDFDict);
+    const walkTree = (node) => {
+      const arr = node?.lookupMaybe(PDFName.of("Names"), PDFArray);
+      if (arr) for (let i = 0; i < arr.size(); i += 2) report.attachments.push(decodeText(arr.lookup(i)));
+      const kids = node?.lookupMaybe(PDFName.of("Kids"), PDFArray);
+      if (kids) for (let i = 0; i < kids.size(); i++) walkTree(kids.lookup(i, PDFDict));
+    };
+    walkTree(ef);
+    return report;
+  };
+
+  /** Drop every indirect object that is no longer reachable from the trailer. */
+  const collectGarbage = (doc) => {
+    const ctx = doc.context;
+    const seen = new Set();
+    const visit = (obj) => {
+      if (obj instanceof PDFRef) {
+        const key = obj.toString();
+        if (seen.has(key)) return;
+        seen.add(key);
+        visit(ctx.lookup(obj));
+      } else if (obj instanceof PDFStream) {
+        visit(obj.dict);
+      } else if (obj instanceof PDFDict) {
+        for (const [, v] of obj.entries()) visit(v);
+      } else if (obj instanceof PDFArray) {
+        for (let i = 0; i < obj.size(); i++) visit(obj.get(i));
+      }
+    };
+    const t = ctx.trailerInfo;
+    [t.Root, t.Info, t.Encrypt].forEach((r) => r && visit(r));
+    let removed = 0;
+    for (const [ref] of ctx.enumerateIndirectObjects()) {
+      if (!seen.has(ref.toString())) {
+        ctx.delete(ref);
+        removed++;
+      }
+    }
+    return removed;
+  };
+
+  const clean = (doc, { authors, attachments }) => {
+    const ctx = doc.context;
+    // Document properties: replace the Info dictionary with an empty one.
+    ctx.trailerInfo.Info = ctx.register(ctx.obj({}));
+
+    const META = PDFName.of("Metadata");
+    const PIECE = PDFName.of("PieceInfo");
+    for (const [, obj] of ctx.enumerateIndirectObjects()) {
+      const d = dictOf(obj);
+      if (!d) continue;
+      d.delete(META);
+      d.delete(PIECE);
+      const subtype = d.get(PDFName.of("Subtype"));
+      if (authors && subtype && subtype !== PDFName.of("Widget") && subtype !== PDFName.of("Link")) {
+        d.delete(PDFName.of("T"));
+      }
+    }
+    doc.catalog.delete(META);
+    doc.catalog.delete(PIECE);
+
+    if (attachments) {
+      const names = doc.catalog.lookupMaybe(PDFName.of("Names"), PDFDict);
+      names?.delete(PDFName.of("EmbeddedFiles"));
+      doc.catalog.delete(PDFName.of("AF"));
+      for (const page of doc.getPages()) {
+        const annots = page.node.lookupMaybe(PDFName.of("Annots"), PDFArray);
+        if (!annots) continue;
+        for (let i = annots.size() - 1; i >= 0; i--) {
+          const a = annots.lookup(i, PDFDict);
+          if (a?.get(PDFName.of("Subtype")) === PDFName.of("FileAttachment")) annots.remove(i);
+        }
+      }
+    }
+    return collectGarbage(doc);
+  };
+
+  const renderReport = (r) => {
+    const list = $("meta-list");
+    list.innerHTML = "";
+    const row = (k, v, muted = false) => {
+      const dt = document.createElement("dt");
+      dt.className = "text-[var(--color-ink-muted)]";
+      dt.textContent = k;
+      const dd = document.createElement("dd");
+      dd.className = `${muted ? "text-[var(--color-ink-muted)]" : "text-[var(--color-ink)]"} break-words`;
+      dd.textContent = v;
+      list.append(dt, dd);
+    };
+    r.info.forEach(([k, v]) => row(k, v));
+    if (r.xmpBytes) row("XMP metadata", `${fmtSize(r.xmpBytes)} (often includes editing history and tool details)`);
+    if (r.pieceInfo) row("App data", `${r.pieceInfo} item${r.pieceInfo === 1 ? "" : "s"} of private Illustrator/Photoshop/Acrobat data`);
+    if (r.authors.size) row("Comment authors", [...r.authors].join(", "));
+    if (r.attachments.length) row("Attached files", r.attachments.join(", "));
+    const total = r.info.length + (r.xmpBytes ? 1 : 0) + (r.pieceInfo ? 1 : 0) + r.authors.size + r.attachments.length;
+    if (!total) row("Nothing found", "This PDF has no document properties or other hidden metadata that this tool removes.", true);
+
+    $("opt-authors-note").textContent = r.authors.size ? `(${r.authors.size} found)` : "(none found)";
+    $("opt-attachments-note").textContent = r.attachments.length ? `(${r.attachments.length} found)` : "(none found)";
+    return total;
+  };
+
+  async function loadPdf(f) {
+    await loadLibs();
+    if (!(f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf"))) {
+      setStatus("Please choose a PDF file.", true);
+      return;
+    }
+    setStatus("Reading PDF...");
+    try {
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      const doc = await PDFDocument.load(bytes, { updateMetadata: false, ignoreEncryption: true });
+      if (doc.isEncrypted) {
+        setStatus("This PDF is encrypted. Unlock it first with the Unlock PDF tool.", true);
+        return;
+      }
+      pdfBytes = bytes;
+      pdfName = f.name;
+      $("filename-display").textContent = pdfName;
+      $("info-display").textContent = `${doc.getPageCount()} page${doc.getPageCount() !== 1 ? "s" : ""} · ${fmtSize(f.size)}`;
+      const found = renderReport(inspect(doc));
+      $("step-upload").classList.add("hidden");
+      $("step-report").classList.remove("hidden");
+      $("clean-btn").disabled = false;
+      setStatus(found ? `Found ${found} item${found === 1 ? "" : "s"} of hidden information.` : "No hidden metadata found; you can still save a cleaned copy.");
+    } catch (err) {
+      console.error(err);
+      setStatus(`Could not read PDF: ${err?.message || "invalid file"}`, true);
+    }
+  }
+
+  $("browse-btn").addEventListener("click", () => fileInput.click());
+  $("change-file-btn").addEventListener("click", () => {
+    pdfBytes = null;
+    $("step-report").classList.add("hidden");
+    $("step-upload").classList.remove("hidden");
+    $("clean-btn").disabled = true;
+    setStatus("Upload a PDF to see its hidden metadata.");
+  });
+  dropZone.addEventListener("click", (e) => {
+    if (e.target === dropZone || e.target.closest("#empty-state")) fileInput.click();
+  });
+  dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragging");
+    const f = e.dataTransfer?.files?.[0];
+    if (f) loadPdf(f);
+  });
+  fileInput.addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    if (f) loadPdf(f);
+    fileInput.value = "";
+  });
+
+  $("clean-btn").addEventListener("click", async () => {
+    await loadLibs();
+    if (!pdfBytes || processing) return;
+    processing = true;
+    $("clean-btn").disabled = true;
+    $("clean-spinner").classList.remove("hidden");
+    $("clean-btn-label").textContent = "Cleaning...";
+    setStatus("Removing metadata in your browser...");
+    try {
+      const doc = await PDFDocument.load(pdfBytes, { updateMetadata: false, ignoreEncryption: true });
+      clean(doc, { authors: $("opt-authors").checked, attachments: $("opt-attachments").checked });
+      const out = await doc.save({ updateFieldAppearances: false });
+
+      // Verify by re-reading the output before handing it over.
+      const check = inspect(await PDFDocument.load(out, { updateMetadata: false }));
+      const leftover = check.info.length + (check.xmpBytes ? 1 : 0) + check.pieceInfo
+        + ($("opt-authors").checked ? check.authors.size : 0)
+        + ($("opt-attachments").checked ? check.attachments.length : 0);
+      if (leftover) throw new Error("some metadata could not be removed from this file");
+
+      const url = URL.createObjectURL(new Blob([out], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${pdfName.replace(/\.pdf$/i, "")}-clean.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus("Done. Metadata removed and verified; your cleaned PDF has been downloaded.");
+    } catch (err) {
+      console.error(err);
+      setStatus(`Error: ${err?.message || "could not clean this PDF"}`, true);
+    } finally {
+      processing = false;
+      $("clean-spinner").classList.add("hidden");
+      $("clean-btn-label").textContent = "Remove metadata & download";
+      $("clean-btn").disabled = !pdfBytes;
+    }
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ""; }
+  });
+</script>

@@ -1,0 +1,62 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import ImageToText from "../../components/tools/ImageToText.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "image-to-text")!;
+---
+
+<ToolLayout tool={tool}>
+  <ImageToText slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to extract text from an image</h2>
+    <ol>
+      <li><strong>Upload an image or PDF.</strong> A photo of a document, a screenshot, or a scanned PDF. PNG, JPG, WebP, BMP, and PDF are supported.</li>
+      <li>Click <strong>Extract text</strong>. The first time, your browser downloads the recognition engine (about 7 MB) from keptlocal; after that it's cached. Each PDF page is read in turn, with progress shown as it goes.</li>
+      <li><strong>Copy or download the text.</strong> The result appears in an editable box. Fix anything misread, then copy it or save it as a .txt file.</li>
+    </ol>
+    <p>
+      Recognition happens on your own device. The image or PDF is never uploaded, so it's safe to use on documents you wouldn't hand to a stranger: IDs, bank letters, medical paperwork.
+    </p>
+
+    <h2>When to use OCR</h2>
+    <ul>
+      <li><strong>Scanned documents.</strong> A scanner or phone app often produces a PDF that's just pictures of pages. OCR turns them into text you can search, copy, and edit.</li>
+      <li><strong>Screenshots.</strong> Grab the text from an error message, a slide, a chat, or a page that won't let you select it.</li>
+      <li><strong>Photos of printed text.</strong> Receipts, letters, book pages, whiteboards with typed or neatly printed text, and signs.</li>
+      <li><strong>Getting text into another tool.</strong> Paste the result into a translator, a document, a spreadsheet, or a search box.</li>
+      <li><strong>Before redacting a scan.</strong> OCR the scan to find where names and numbers appear, then black them out with <a href="/tools/redact-pdf/">Redact PDF</a>.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The text recognition is done by <strong>Tesseract</strong>, the open-source OCR engine originally developed at HP and later maintained by Google, compiled to WebAssembly by the tesseract.js project so it runs at near-native speed inside the browser. It uses an LSTM neural network trained on printed text: the image is split into lines, and each line is read as a sequence rather than letter by letter. That's why it copes well with ordinary fonts and spacing.
+    </p>
+    <p>
+      For a PDF, each page is first drawn to an image with <strong>pdf.js</strong> at about 180 DPI, a resolution that gives good accuracy without using too much memory, and then passed to Tesseract. The engine and the English model are served from keptlocal itself rather than a third-party CDN, and your browser keeps them, so later runs start quickly and work offline.
+    </p>
+
+    <h2>Getting the best results</h2>
+    <ul>
+      <li><strong>Use the sharpest image you have.</strong> Text should be at least 10–12 pixels tall. A full-resolution phone photo beats a compressed thumbnail.</li>
+      <li><strong>Keep it straight and evenly lit.</strong> Photograph pages flat, from directly above, without shadows or glare across the text.</li>
+      <li><strong>Crop to the text.</strong> Busy backgrounds, logos, and photos around the text can produce stray characters. <a href="/tools/crop-image/">Crop Image</a> helps.</li>
+      <li><strong>Prefer high-contrast originals.</strong> Dark text on a plain light background reads best. Faded or colored text can benefit from converting the image to grayscale first.</li>
+    </ul>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>English only for now.</strong> Other Latin-script languages are often partly recognized, but accented characters may be misread.</li>
+      <li><strong>Handwriting is unreliable.</strong> Neat block capitals may work; cursive mostly won't.</li>
+      <li><strong>Layout isn't preserved.</strong> You get the text in reading order, not the original columns, tables, or formatting.</li>
+      <li><strong>PDFs with real text don't need OCR.</strong> If you can already select text in the PDF, <a href="/tools/pdf-to-text/">PDF to Text</a> extracts it exactly and much faster.</li>
+      <li><strong>Long PDFs take time.</strong> Each page takes a few seconds on a typical laptop, longer on phones. Split very long documents with <a href="/tools/split-pdf/">Split PDF</a> to read only the pages you need.</li>
+    </ul>
+
+    <h2>Why OCR in your browser</h2>
+    <p>
+      Most free OCR sites upload your image to their servers to process it. For a screenshot of a meme that doesn't matter. For a scanned passport, a payslip, or a medical letter, it means a copy of that document now sits on someone else's server. Running the engine on your own device removes that copy from the equation entirely, at the cost of a one-time download of the engine.
+    </p>
+  </Fragment>
+</ToolLayout>

@@ -40,7 +40,10 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-const isHashedAsset = (url) => url.pathname.startsWith("/_astro/");
+// /ocr/<version>/ holds the OCR engine and model (several MB). The path is versioned, so its
+// contents never change either; treating it like a hashed asset avoids re-downloading it in the
+// background on every use, and keeps OCR working offline after the first run.
+const isHashedAsset = (url) => url.pathname.startsWith("/_astro/") || url.pathname.startsWith("/ocr/");
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;

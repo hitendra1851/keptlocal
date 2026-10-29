@@ -1,0 +1,70 @@
+---
+import ToolLayout from "../../layouts/ToolLayout.astro";
+import RemovePdfMetadata from "../../components/tools/RemovePdfMetadata.astro";
+import { tools } from "../../data/tools";
+
+const tool = tools.find((t) => t.slug === "remove-pdf-metadata")!;
+---
+
+<ToolLayout tool={tool}>
+  <RemovePdfMetadata slot="tool" />
+
+  <Fragment slot="content">
+    <h2>How to remove metadata from a PDF</h2>
+    <ol>
+      <li><strong>Upload your PDF.</strong> The tool reads it in your browser and lists the hidden information it found: author, the software that made it, creation and edit dates, and anything else stored alongside the pages.</li>
+      <li><strong>Choose what else to strip.</strong> Names on comments and attached files are removed by default. Untick either if you want to keep them.</li>
+      <li>Click <strong>Remove metadata & download</strong>. The cleaned copy downloads with "-clean" added to its name. Your original file is not changed.</li>
+    </ol>
+    <p>
+      Nothing is uploaded. The file is opened, cleaned, and saved entirely on your device, which you can confirm in your browser's Network tab while the tool runs.
+    </p>
+
+    <h2>What a PDF can reveal about you</h2>
+    <p>
+      Every PDF has room for information you never see on the page, and most apps fill it in automatically:
+    </p>
+    <ul>
+      <li><strong>Author.</strong> Usually your name or your computer's account name, taken from Word, Pages, or Acrobat settings.</li>
+      <li><strong>Creating software and versions.</strong> "Microsoft Word for Microsoft 365", "Adobe InDesign 19.2", a scanner model. It shows what you used, and sometimes which organisation's template.</li>
+      <li><strong>Creation and modification dates.</strong> When the document was really written and last edited, which can contradict the date printed on the page.</li>
+      <li><strong>XMP metadata.</strong> A block of XML that can include editing history, document IDs that link versions of a file, and the original file name.</li>
+      <li><strong>Application data.</strong> Illustrator, Photoshop, and Acrobat can store private data (PieceInfo) inside the PDF, sometimes enough to reconstruct earlier states of the artwork.</li>
+      <li><strong>Comment authors.</strong> Every note, highlight, or sticky comment records who made it, which shows who reviewed a document.</li>
+      <li><strong>Attached files.</strong> PDFs can carry other files, such as a source spreadsheet or an earlier draft, that are easy to miss.</li>
+    </ul>
+
+    <h2>When to strip PDF metadata</h2>
+    <ul>
+      <li><strong>Before publishing a document</strong> on a website, in a portfolio, or on a job board, where anyone can download it and look.</li>
+      <li><strong>Sending a CV or proposal</strong> made from a template that still carries a previous employer's or colleague's name.</li>
+      <li><strong>Anonymous submissions and reviews</strong>, such as peer review, whistleblowing, and blind applications, where the author field undoes the anonymity.</li>
+      <li><strong>Sharing legal or business documents</strong> where edit dates or reviewer names shouldn't be part of what you disclose.</li>
+      <li><strong>After redacting</strong>, as a final check that nothing about the original document's history is left in the file.</li>
+    </ul>
+
+    <h2>How it works under the hood</h2>
+    <p>
+      The PDF is parsed with <strong>pdf-lib</strong>. The document information dictionary is replaced with an empty one, and the XMP metadata stream and any PieceInfo entries are deleted wherever they appear, at the document level, on pages, and on images. Comment author names and attached files are removed if those options are ticked.
+    </p>
+    <p>
+      There's a subtlety that matters for privacy. A PDF is a collection of numbered objects, and deleting a reference to an object doesn't delete the object itself. A naive tool can "remove" metadata that's still sitting in the file bytes. This tool walks the document from its root, keeps every object that's still in use, and drops everything else before saving. It then re-reads the cleaned file and checks that no metadata remains before offering the download.
+    </p>
+
+    <h2>Limits and what to expect</h2>
+    <ul>
+      <li><strong>It doesn't change what's on the page.</strong> Names, logos, or dates printed in the document are content, not metadata. Use <a href="/tools/redact-pdf/">Redact PDF</a> to remove them.</li>
+      <li><strong>Images inside the PDF</strong> keep their pixels. Metadata embedded in an image's own file data, such as EXIF in a photo inserted as-is, may survive. For photos, clean them with <a href="/tools/remove-image-exif/">Remove Image Metadata</a> before putting them in a document.</li>
+      <li><strong>Encrypted PDFs</strong> need unlocking first with <a href="/tools/unlock-pdf/">Unlock PDF</a>.</li>
+      <li><strong>Digitally signed PDFs</strong> will no longer show a valid signature after cleaning, because any change to a signed file invalidates the signature.</li>
+    </ul>
+
+    <h2>Why do this in your browser</h2>
+    <p>
+      The documents people want to clean are usually the ones they're most careful about: CVs, contracts, reports before publication, anonymous submissions. Uploading them to an online metadata remover hands the full, uncleaned version to a third party. Here the file stays on your device the whole time.
+    </p>
+    <p>
+      To check what's in a PDF without changing it, <a href="/tools/pdf-page-count/">PDF Info Viewer</a> shows its page count and properties.
+    </p>
+  </Fragment>
+</ToolLayout>

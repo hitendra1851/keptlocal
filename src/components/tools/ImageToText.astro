@@ -1,0 +1,287 @@
+---
+// Image to Text (OCR) — reads text from a photo, screenshot, or scanned PDF using tesseract.js
+// (Tesseract compiled to WebAssembly). The engine and English model are served from
+// /ocr/<version>/ on this site (copied by scripts/copy-ocr-assets.mjs). Nothing is uploaded.
+import { readFileSync } from "node:fs";
+const ocrVersion = JSON.parse(readFileSync("node_modules/tesseract.js/package.json", "utf8")).version;
+const ocrBase = `/ocr/${ocrVersion}/`;
+---
+
+<div id="ocr-app" data-ocr-base={ocrBase} class="border border-[var(--color-rule)] rounded-xl overflow-hidden bg-[var(--color-paper)]">
+
+  <!-- Step 1: Upload -->
+  <div id="step-upload">
+    <div id="drop-zone" class="drop-zone m-4">
+      <input type="file" id="file-input" accept="image/png,image/jpeg,image/webp,image/bmp,application/pdf,.png,.jpg,.jpeg,.webp,.bmp,.pdf" class="hidden" />
+      <div id="empty-state">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mx-auto text-[var(--color-ink-muted)] mb-3">
+          <path d="M4 7V5a1 1 0 011-1h2M17 4h2a1 1 0 011 1v2M20 17v2a1 1 0 01-1 1h-2M7 20H5a1 1 0 01-1-1v-2M8 9h8M8 12h8M8 15h5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <p class="text-[var(--color-ink-soft)] mb-1">Drop an image or scanned PDF here, or</p>
+        <button type="button" id="browse-btn" class="text-[var(--color-accent)] underline underline-offset-4 font-medium hover:no-underline">
+          choose a file from your device
+        </button>
+        <p class="text-xs text-[var(--color-ink-muted)] mt-4">
+          PNG, JPG, WebP, BMP, or PDF. English text. Files never leave your browser.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: File chosen / results -->
+  <div id="step-file" class="hidden">
+    <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-[var(--color-rule)]">
+      <div class="min-w-0">
+        <p id="filename-display" class="text-sm font-medium text-[var(--color-ink)] truncate max-w-xs"></p>
+        <p id="info-display" class="text-xs text-[var(--color-ink-muted)] mt-0.5"></p>
+      </div>
+      <button type="button" id="change-file-btn" class="ml-4 shrink-0 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-accent)] underline underline-offset-2">
+        Change file
+      </button>
+    </div>
+
+    <div class="px-4 py-4 space-y-3">
+      <div id="progress-wrap" class="hidden">
+        <div class="h-1.5 rounded-full bg-[var(--color-paper-dark)] overflow-hidden">
+          <div id="progress-bar" class="h-full bg-[var(--color-accent)] transition-[width] duration-200" style="width: 0%"></div>
+        </div>
+      </div>
+      <p id="first-run-note" class="text-xs text-[var(--color-ink-muted)]">
+        The first time you run OCR, your browser downloads the text-recognition engine (about 7 MB) from keptlocal. After that it's cached, and your file is never sent anywhere.
+      </p>
+      <div id="result-wrap" class="hidden space-y-2">
+        <label for="text-output" class="text-sm font-medium text-[var(--color-ink)]">Recognized text</label>
+        <textarea
+          id="text-output"
+          rows="12"
+          class="w-full px-3 py-2 rounded-md border border-[var(--color-rule)] bg-[var(--color-paper-dark)] text-[var(--color-ink)] text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
+        ></textarea>
+        <div class="flex flex-wrap gap-3">
+          <button type="button" id="copy-btn" class="btn-secondary">Copy text</button>
+          <button type="button" id="download-txt-btn" class="btn-secondary">Download .txt</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="border-t border-[var(--color-rule)] px-4 py-3 bg-[var(--color-paper-dark)] flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <div id="status-msg" class="text-sm text-[var(--color-ink-muted)] min-h-[1.25rem]" role="status">
+      Upload an image or scanned PDF to extract its text.
+    </div>
+    <button type="button" id="ocr-btn" class="btn-primary" disabled>
+      <span id="ocr-btn-label">Extract text</span>
+      <svg id="ocr-spinner" class="hidden animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 11-6.219-8.56" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  import { onFirstInteraction } from "../../scripts/lazy-libs";
+  import pdfjsWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+  // tesseract.js's loader (~60 KB) and pdf.js load on first interaction; the OCR engine itself
+  // (~7 MB WASM + model) is only fetched when the visitor clicks Extract text.
+  let createWorker, pdfjs;
+  let libsPromise;
+  const loadLibs = () => (libsPromise ??= Promise.all([import("tesseract.js"), import("pdfjs-dist/build/pdf.min.mjs")]).then(([m0, m1]) => {
+    ({ createWorker } = m0);
+    pdfjs = m1;
+    pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
+  }).catch((err) => {
+    libsPromise = undefined; // let the next attempt retry
+    throw err;
+  }));
+  onFirstInteraction(loadLibs);
+
+  const PDF_SCALE = 2.5; // ~180 DPI: good OCR accuracy without huge canvases
+  const app = document.getElementById("ocr-app");
+  const ocrBase = new URL(app.dataset.ocrBase, location.origin).href;
+
+  let file = null;
+  let processing = false;
+  let resultText = "";
+
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $("drop-zone");
+  const fileInput = $("file-input");
+
+  const setStatus = (msg, isError = false) => {
+    const el = $("status-msg");
+    el.textContent = msg;
+    el.style.color = isError ? "var(--color-warn)" : "";
+  };
+  const setProgress = (fraction) => {
+    $("progress-wrap").classList.remove("hidden");
+    $("progress-bar").style.width = `${Math.round(Math.min(Math.max(fraction, 0), 1) * 100)}%`;
+  };
+  const fmtSize = (b) => (b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`);
+  const isPdf = (f) => f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf");
+  const isImage = (f) => /^image\/(png|jpe?g|webp|bmp)$/.test(f.type) || /\.(png|jpe?g|webp|bmp)$/i.test(f.name);
+
+  const reset = () => {
+    file = null;
+    resultText = "";
+    $("text-output").value = "";
+    $("result-wrap").classList.add("hidden");
+    $("progress-wrap").classList.add("hidden");
+    $("step-file").classList.add("hidden");
+    $("step-upload").classList.remove("hidden");
+    $("ocr-btn").disabled = true;
+    setStatus("Upload an image or scanned PDF to extract its text.");
+  };
+
+  const choose = (f) => {
+    if (!f || !(isPdf(f) || isImage(f))) {
+      setStatus("Please choose a PNG, JPG, WebP, BMP, or PDF file.", true);
+      return;
+    }
+    file = f;
+    resultText = "";
+    $("filename-display").textContent = f.name;
+    $("info-display").textContent = `${isPdf(f) ? "PDF" : "Image"} · ${fmtSize(f.size)}`;
+    $("text-output").value = "";
+    $("result-wrap").classList.add("hidden");
+    $("progress-wrap").classList.add("hidden");
+    $("step-upload").classList.add("hidden");
+    $("step-file").classList.remove("hidden");
+    $("ocr-btn").disabled = false;
+    setStatus('Click "Extract text" to read the text in this file.');
+  };
+
+  $("browse-btn").addEventListener("click", () => fileInput.click());
+  $("change-file-btn").addEventListener("click", () => { if (!processing) reset(); });
+  dropZone.addEventListener("click", (e) => {
+    if (e.target === dropZone || e.target.closest("#empty-state")) fileInput.click();
+  });
+  dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("dragging"); });
+  dropZone.addEventListener("dragleave", () => dropZone.classList.remove("dragging"));
+  dropZone.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropZone.classList.remove("dragging");
+    choose(e.dataTransfer?.files?.[0]);
+  });
+  fileInput.addEventListener("change", (e) => {
+    choose(e.target.files?.[0]);
+    fileInput.value = "";
+  });
+
+  // Render each PDF page to a canvas for OCR.
+  async function* pdfPages(bytes) {
+    const doc = await pdfjs.getDocument({ data: bytes }).promise;
+    try {
+      for (let i = 1; i <= doc.numPages; i++) {
+        const page = await doc.getPage(i);
+        const viewport = page.getViewport({ scale: PDF_SCALE });
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(viewport.width);
+        canvas.height = Math.round(viewport.height);
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        yield { canvas, index: i, total: doc.numPages };
+      }
+    } finally {
+      doc.destroy();
+    }
+  }
+
+  $("ocr-btn").addEventListener("click", async () => {
+    await loadLibs();
+    if (!file || processing) return;
+    processing = true;
+    $("ocr-btn").disabled = true;
+    $("ocr-spinner").classList.remove("hidden");
+    $("ocr-btn-label").textContent = "Reading...";
+    setProgress(0);
+
+    // Progress: engine loading counts for the first 10%, recognition for the rest.
+    let pageIdx = 0;
+    let pageTotal = 1;
+    let worker;
+    try {
+      setStatus("Loading the text-recognition engine...");
+      worker = await createWorker("eng", 1, {
+        workerPath: `${ocrBase}worker.min.js`,
+        corePath: `${ocrBase}core/`,
+        langPath: `${ocrBase}lang`,
+        workerBlobURL: false,
+        gzip: true,
+        logger: (m) => {
+          if (m.status === "recognizing text") {
+            setProgress(0.1 + 0.9 * ((pageIdx + m.progress) / pageTotal));
+          } else if (typeof m.progress === "number" && pageIdx === 0) {
+            setProgress(0.1 * m.progress);
+          }
+        },
+      });
+
+      const parts = [];
+      if (isPdf(file)) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        for await (const { canvas, index, total } of pdfPages(bytes)) {
+          pageIdx = index - 1;
+          pageTotal = total;
+          setStatus(`Reading page ${index} of ${total}...`);
+          const { data } = await worker.recognize(canvas);
+          parts.push(total > 1 ? `--- Page ${index} ---\n${data.text.trim()}` : data.text.trim());
+          canvas.width = canvas.height = 0;
+        }
+      } else {
+        setStatus("Reading text from the image...");
+        const { data } = await worker.recognize(file);
+        parts.push(data.text.trim());
+      }
+
+      resultText = parts.join("\n\n").trim();
+      setProgress(1);
+      $("text-output").value = resultText;
+      $("result-wrap").classList.remove("hidden");
+      $("first-run-note").classList.add("hidden");
+      const words = resultText ? resultText.split(/\s+/).length : 0;
+      setStatus(words
+        ? `Done. Found ${words} word${words === 1 ? "" : "s"}${pageTotal > 1 ? ` across ${pageTotal} pages` : ""}. Check the text before relying on it.`
+        : "Done, but no text was found. Try a sharper, higher-resolution image.");
+    } catch (err) {
+      console.error(err);
+      const msg = err?.name === "PasswordException"
+        ? "This PDF is password-protected. Unlock it first with the Unlock PDF tool."
+        : `Error: ${err?.message || err || "could not read this file"}`;
+      setStatus(msg, true);
+    } finally {
+      await worker?.terminate().catch(() => {});
+      processing = false;
+      $("ocr-spinner").classList.add("hidden");
+      $("ocr-btn-label").textContent = "Extract text";
+      $("ocr-btn").disabled = !file;
+    }
+  });
+
+  $("copy-btn").addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText($("text-output").value);
+      $("copy-btn").textContent = "Copied";
+      setTimeout(() => { $("copy-btn").textContent = "Copy text"; }, 1500);
+    } catch {
+      $("text-output").select();
+    }
+  });
+
+  $("download-txt-btn").addEventListener("click", () => {
+    const text = $("text-output").value;
+    const url = URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${(file?.name || "text").replace(/\.[^.]+$/, "")}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  window.addEventListener("beforeunload", (e) => {
+    if (processing) { e.preventDefault(); e.returnValue = ""; }
+  });
+</script>

@@ -2,6 +2,11 @@ name: Deploy to AWS Amplify
 
 on:
   workflow_dispatch:
+    inputs:
+      indexnow_all:
+        description: 'Submit every sitemap URL to IndexNow (not just recently changed ones)'
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -87,3 +92,9 @@ jobs:
 
           echo "Timed out — check Amplify console."
           exit 1
+
+      - name: Notify IndexNow (Bing and others) of changed pages
+        continue-on-error: true
+        env:
+          INDEXNOW_ALL: ${{ inputs.indexnow_all && '1' || '' }}
+        run: node scripts/indexnow.mjs

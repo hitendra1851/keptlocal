@@ -1,9 +1,15 @@
 # keptlocal
 
-**[keptlocal.com](https://keptlocal.com)** — 37 free PDF and image tools that run entirely in your browser. No uploads, no accounts, no signup. Files never leave your device.
+**[keptlocal.com](https://keptlocal.com)** — 49 free PDF, image, and utility tools that run entirely in your browser. No uploads, no accounts, no signup. Files never leave your device.
 
 [![Astro](https://img.shields.io/badge/Astro-5-orange)](https://astro.build)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+**Highlights**
+
+- **[Redact PDF](https://keptlocal.com/tools/redact-pdf/)** — real redaction, not a black box drawn over text that's still there. Each redacted page is rebuilt from an image with the boxes burned in, so the hidden text isn't in the output file at all. Search for a name or number to box every occurrence.
+- **[Remove PDF Metadata](https://keptlocal.com/tools/remove-pdf-metadata/)** — strips author, software, dates, XMP, app data, comment authors and attachments, then garbage-collects the orphaned objects most tools leave behind in the file, and re-reads the result to verify.
+- **[Image to Text (OCR)](https://keptlocal.com/tools/image-to-text/)** — Tesseract compiled to WebAssembly, with the engine and model served from keptlocal itself. Screenshots, photos and scanned PDFs, read on your device.
 
 ## Why this exists
 
@@ -15,11 +21,11 @@ The site also works **offline** once you've opened a tool page while online — 
 
 ## What's here
 
-**PDF (20 tools):** Merge, Split, Reorder Pages, Rotate, Watermark, Add Page Numbers, Remove Pages, Crop, Sign, Fill Form, Flatten, Add Image, Protect (AES‑256), Unlock, Compress (recompresses embedded photos, not just metadata), PDF to JPG/PNG/Text, JPG to PDF, PDF Info Viewer
+**PDF (22 tools):** Merge, Split, Reorder Pages, Rotate, Watermark, Add Page Numbers, Remove Pages, Crop, Sign, Fill Form, Flatten, Add Image, Protect (AES‑256), Unlock, Compress (recompresses embedded photos, not just metadata), Redact, Remove Metadata, PDF to JPG/PNG/Text, JPG to PDF, PDF Info Viewer
 
-**Image (14 tools):** Compress, Resize, Crop, Rotate, Flip, Grayscale, Convert (HEIC/JPG/PNG/WebP/SVG in any direction), Remove EXIF metadata, Image to Base64
+**Image (19 tools):** Compress, Resize, Crop, Rotate, Flip, Grayscale, Watermark, Convert (HEIC/JPG/PNG/WebP/SVG in any direction), Remove EXIF metadata, Image to Text (OCR), Image to Base64, Favicon Generator, Social Image Resizer, Passport Photo Maker
 
-**Utility (3 tools):** QR Code Generator, Password Generator, Word Counter
+**Utility (8 tools):** QR Code Generator, Password Generator, Word Counter, UUID Generator, JSON Formatter, Hash Generator, Unit Converter, Case Converter
 
 Every tool is a standalone Astro page plus a vanilla-JS component — see [`src/data/tools.ts`](src/data/tools.ts) for the registry and [`src/components/tools/`](src/components/tools) for the implementations.
 
@@ -27,7 +33,8 @@ Every tool is a standalone Astro page plus a vanilla-JS component — see [`src/
 
 - **[Astro 5](https://astro.build)** — static site generation, no client-side framework overhead
 - **[pdf-lib](https://github.com/Hopding/pdf-lib)** — pure-JS PDF read/write ([@cantoo/pdf-lib](https://github.com/cantoo-scribe/pdf-lib) fork for the two tools that need real AES‑256 encryption, which upstream pdf-lib doesn't support)
-- **[pdf.js](https://github.com/mozilla/pdf.js)** — Mozilla's PDF renderer, for PDF→image conversion and text extraction
+- **[pdf.js](https://github.com/mozilla/pdf.js)** — Mozilla's PDF renderer, for PDF→image conversion, text extraction, and redaction
+- **[tesseract.js](https://github.com/naptha/tesseract.js)** — Tesseract OCR compiled to WebAssembly; the engine and English model are self-hosted under `/ocr/` (copied from npm at build time)
 - **Canvas API**, **[heic2any](https://github.com/alexcorvi/heic2any)**, **[browser-image-compression](https://github.com/Donaldcwl/browser-image-compression)**, **[jszip](https://github.com/Stuk/jszip)**, **[qrcode](https://github.com/soldair/node-qrcode)**, **[exifr](https://github.com/MikeKovarik/exifr)** — image processing and utilities
 - **Tailwind CSS v4**
 - Every library above is bundled at build time from npm — nothing is fetched from a third-party CDN at runtime, so there's no external host to trust (or go down) while a tool is actually processing a file
